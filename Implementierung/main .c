@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <complex.h>
 
+#define SQUARED_DISTANCE 4
+
 unsigned escapeTime(const unsigned n, float complex start, const float complex c) {
     unsigned i = 0;
 
@@ -8,7 +10,7 @@ unsigned escapeTime(const unsigned n, float complex start, const float complex c
         const float complex conj_start = conj(start);
 
         const double distance2 = start * conj_start;
-        if (distance2 >= 4) {
+        if (distance2 >= SQUARED_DISTANCE) {
             return i;
         }
 
