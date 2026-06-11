@@ -5,7 +5,7 @@ unsigned escapeTime(const unsigned n, float complex start, const float complex c
     const double squaredEscapeDistance = 4;
     unsigned i = 0;
 
-    while (i < n && crealf(start * conj(start)) < squaredEscapeDistance) {
+    while (i < n && crealf(start) * crealf(start) + cimag(start) * cimag(start) < squaredEscapeDistance) {
         start = conj(start) * conj(start);
         start += c;
 
