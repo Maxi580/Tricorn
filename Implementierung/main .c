@@ -1,20 +1,12 @@
 #include <stdio.h>
 #include <complex.h>
 
-#define SQUARED_DISTANCE 4
-
 unsigned escapeTime(const unsigned n, float complex start, const float complex c) {
+    const double squaredEscapeDistance = 4;
     unsigned i = 0;
 
-    while (i < n) {
-        const float complex conj_start = conj(start);
-
-        const double distance2 = start * conj_start;
-        if (distance2 >= SQUARED_DISTANCE) {
-            return i;
-        }
-
-        start = conj_start * conj_start;
+    while (i < n && crealf(start * conj(start)) < squaredEscapeDistance) {
+        start = conj(start) * conj(start);
         start += c;
 
         i++;
