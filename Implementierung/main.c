@@ -3,6 +3,7 @@
 
 unsigned escapeTime(const unsigned n, float complex start, const float complex c) {
     const double squaredEscapeDistance = 4;
+    // ab |z_n|>2 gilt sicher: |z_n+1|>[z_n|
     unsigned i = 0;
 
     float realSquared = crealf(start) * crealf(start), imagSquared = cimagf(start) * cimagf(start);
@@ -26,8 +27,11 @@ int main() {
 
     const unsigned result = escapeTime(limit, exampleStart, exampleC);
     if (limit == result) {
+        // besser:? "Did not escape in %u iterations\n", limit
         printf("Did not converge :(");
     } else {
+        //warum kein %u?
         printf("Converged after %d (Limit: %d)", result, limit);
     }
+    
 }

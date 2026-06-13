@@ -77,21 +77,19 @@ void writeBmp(char *filename, size_t width, size_t height, unsigned char *img) {
 
 }
 
-int main(void) {
-    size_t width, height;
-    width = 500;
-    height = 300;
-
-    size_t row_size = ((width * 3+3)/4)*4;
-    size_t pixelArraySize = row_size * height;
-
-    unsigned char *img = malloc(pixelArraySize);
-    if (img == NULL) {return 1;} //Fehler
-
-    genImage(width, height, img);
-    writeBmp("test.bmp", width, height, img);
-    free(img);
-    return 0;
-
-
-}
+//int main(void) {
+//    size_t width, height;
+//    width = 500;
+//    height = 300;
+//
+//    size_t row_size = ((width * 3+3)/4)*4;
+//    size_t pixelArraySize = row_size * height;
+//
+//    unsigned char *img = malloc(pixelArraySize);
+//    if (img == NULL) {return 1;} //Fehler
+//
+//    genImage(width, height, img);
+//    writeBmp("test.bmp", width, height, img);
+//    free(img);
+//    return 0;
+//}
