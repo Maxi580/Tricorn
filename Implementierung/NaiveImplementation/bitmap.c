@@ -20,16 +20,53 @@
 
 
 void genImage(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
+    //Farbpalette
+    const unsigned farbpalletteSize = 5;
+    const unsigned farbpalette[5][3] = {
+        //Blau, Grün, Rot
+        {255,0,0},
+        {255,0,255},
+        {0,255,255},
+        {0,0,255},
+        {0,255,0},
+    };
+
     if (height < 0) { // TOP-DOWN
         height = height * (-1);
         size_t row_size = ((width * 3+3)/4)*4;    //größe einer Reihe würde auf 4 Byte aufgefüllt(Padding)
 
+
+
         for (size_t y = 0; y < height; y++) {
             unsigned char *row = img + y*row_size; // *row zeigt nun auf den Anfang von Zeile y (0-indexed)
             for (size_t x = 0; x < width; x++) {
-                row[x * 3]=0;
-                row[x *3+1]=255;
-                row[x *3+2]=0; //bspw. ganzes Bild rot
+
+                const float cx = ((float)x - (float)width/2) * res;
+                const float cy = ((float)y - (float)height/2) * res;
+                const float complex c = start + cx + cy * I;
+                const unsigned iterations = escapeTime(n, c);
+
+                if (n == iterations) { //did not converge
+                    //Schwarz (Innere Farbe)
+                    row[x * 3]=0; // Blau
+                    row[x *3+1]=0; // Grün
+                    row[x *3+2]=0; // Rot
+
+                } else {
+                    if (!color) {
+                        //Grauton
+                        unsigned colorPixel = 255 - 4 * ( iterations % 64 );
+                        row[x * 3]=colorPixel; // 255 ganzes Bild Blau
+                        row[x *3+1]=colorPixel; // Grün
+                        row[x *3+2]=colorPixel; // Rot
+                    } else {
+                        // Bunt
+                        unsigned farbIndex = iterations % 5;
+                        row[x * 3]= farbpalette[farbIndex][0]; // 255 ganzes Bild Blau
+                        row[x *3+1]= farbpalette[farbIndex][1]; // Grün
+                        row[x *3+2]= farbpalette[farbIndex][2]; // Rot
+                    }
+                }
             }
             for (size_t i=width*3; i<row_size; i++) {
                 row[i]=0; //restliche Padding Bits einer Zeile auffüllen
@@ -43,9 +80,34 @@ void genImage(float complex start, size_t width, ssize_t height, float res, unsi
         for (size_t y = 0; y < height; y++) {
             unsigned char *row = img + (height-1-y)*row_size; // *row zeigt nun auf den Anfang von Zeile height-1-y (0-indexed)
             for (size_t x = 0; x < width; x++) {
-                row[x * 3]=0;
-                row[x *3+1]=0;
-                row[x *3+2]=255; //bspw. ganzes Bild rot
+
+                const float cx = ((float)x - (float)width/2) * res;
+                const float cy = ((float)y - (float)height/2) * res;
+                const float complex c = start + cx + cy * I;
+                const unsigned iterations = escapeTime(n, c);
+
+                if (n == iterations) { //did not converge
+                    //Schwarz (Innere Farbe)
+                    row[x * 3]=0; // Blau
+                    row[x *3+1]=0; // Grün
+                    row[x *3+2]=0; // Rot
+
+                } else {
+                    if (!color) {
+                        //Grauton
+                        unsigned colorPixel = 255 - 4 * ( iterations % 64 );
+                        row[x * 3]=colorPixel; // 255 ganzes Bild Blau
+                        row[x *3+1]=colorPixel; // Grün
+                        row[x *3+2]=colorPixel; // Rot
+                    } else {
+                        // Bunt
+                        unsigned farbIndex = iterations % 5;
+                        row[x * 3]= farbpalette[farbIndex][0]; // 255 ganzes Bild Blau
+                        row[x *3+1]= farbpalette[farbIndex][1]; // Grün
+                        row[x *3+2]= farbpalette[farbIndex][2]; // Rot
+                    }
+                }
+
             }
             for (size_t i=width*3; i<row_size; i++) {
                 row[i]=0; //restliche Padding Bits einer Zeile auffüllen

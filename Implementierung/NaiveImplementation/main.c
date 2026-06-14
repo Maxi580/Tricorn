@@ -31,9 +31,14 @@ int main() {
 */
 
 int main(void) {
-    size_t width;
-    width = 500; //breite eingeben
-    ssize_t heightsigned = 700; //höhe eingeben
+    float complex start = 1 + 1*I; // start parameter
+    size_t width = 2000; //breite eingeben
+    ssize_t heightsigned = 2000; //höhe eingeben
+    float res = 4.0f/(float)width; // resolution (frei wählbar)
+    unsigned n = 500; // Iterartion limit
+    bool color = false; // false = Grauton in Formel // true = bunt
+
+
     size_t height;
     if (heightsigned < 0) {
         height = heightsigned * (-1);
@@ -48,8 +53,13 @@ int main(void) {
     unsigned char *img = malloc(pixelArraySize);
     if (img == NULL) {return 1;} //Fehler
 
-    genImage(width, heightsigned, img);
+    genImage(start, width, heightsigned, res, n, color, img);
     writeBmp("test.bmp", width, heightsigned, img);
     free(img);
     return 0;
 }
+
+/* Betriebsanleitung:
+ * gcc Implementierung/NaiveImplementation/main.c Implementierung/NaiveImplementation/bitmap.c Implementierung/NaiveImplementation/escapetime.c -o test
+ * ./test
+ */
