@@ -33,5 +33,4 @@ int main() {
         //warum kein %u?
         printf("Converged after %d (Limit: %d)", result, limit);
     }
-    
 }

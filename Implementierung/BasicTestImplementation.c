@@ -16,23 +16,49 @@
  */
 
 
-void genImage(size_t width, size_t height, unsigned char *img) {
-    size_t row_size = ((width * 3+3)/4)*4;    //größe einer Reihe würde auf 4 Byte aufgrfüllt(Padding)
+void genImage(size_t width, ssize_t height, unsigned char *img) {
+    if (height < 0) { // TOP-DOWN
+        height = height * (-1);
+        size_t row_size = ((width * 3+3)/4)*4;    //größe einer Reihe würde auf 4 Byte aufgrfüllt(Padding)
 
-    for (size_t y = 0; y < height; y++) {
-        unsigned char *row = img + y*row_size; // *row zeigt nun auf den Anfang von Zeile 0 (0-indexed)
-        for (size_t x = 0; x < width; x++) {
-            row[x * 3]=0;
-            row[x *3+1]=255;
-            row[x *3+2]=0; //bspw. ganzes Bild rot
+        for (size_t y = 0; y < height; y++) {
+            unsigned char *row = img + y*row_size; // *row zeigt nun auf den Anfang von Zeile 0 (0-indexed)
+            for (size_t x = 0; x < width; x++) {
+                row[x * 3]=0;
+                row[x *3+1]=255;
+                row[x *3+2]=0; //bspw. ganzes Bild rot
+            }
+            for (size_t i=width*3; i<row_size; i++) {
+                row[i]=0; //restliche Paddiung Bits einer Zeile auffüllen
+            }
         }
-        for (size_t i=width*3; i<row_size; i++) {
-            row[i]=0; //restliche Paddiung Bits einer Zeile auffüllen
+    }
+    else{ // BOTTOM-UP
+        size_t row_size = ((width * 3+3)/4)*4;    //größe einer Reihe würde auf 4 Byte aufgrfüllt(Padding)
+
+
+        for (size_t y = 0; y < height; y++) {
+            unsigned char *row = img + (height-1-y)*row_size; // *row zeigt nun auf den Anfang von Zeile 0 (0-indexed)
+            for (size_t x = 0; x < width; x++) {
+                row[x * 3]=0;
+                row[x *3+1]=0;
+                row[x *3+2]=255; //bspw. ganzes Bild rot
+            }
+            for (size_t i=width*3; i<row_size; i++) {
+                row[i]=0; //restliche Paddiung Bits einer Zeile auffüllen
+            }
         }
     }
 }
 
-void writeBmp(char *filename, size_t width, size_t height, unsigned char *img) {
+void writeBmp(char *filename, size_t width, ssize_t heightsigned, unsigned char *img) {
+    size_t height;
+    if (heightsigned < 0) {
+        height = heightsigned * (-1);
+    }
+    else {
+        height = heightsigned ;
+    }
     size_t row_size = ((width * 3+3)/4)*4;
     size_t pixelArraySize = row_size * height;
     size_t fileSize = 54 + pixelArraySize; //54 für header der bmp datei
@@ -76,20 +102,28 @@ void writeBmp(char *filename, size_t width, size_t height, unsigned char *img) {
     fclose(f);
 
 }
+/*
+int main(void) {
+    size_t width;
+    width = 500; //breite eingeben
+    ssize_t heightsigned = 700; //höhe eingeben
+    size_t height;
+    if (heightsigned < 0) {
+        height = heightsigned * (-1);
+    }
+    else {
+        height = heightsigned ;
+    }
 
-//int main(void) {
-//    size_t width, height;
-//    width = 500;
-//    height = 300;
-//
-//    size_t row_size = ((width * 3+3)/4)*4;
-//    size_t pixelArraySize = row_size * height;
-//
-//    unsigned char *img = malloc(pixelArraySize);
-//    if (img == NULL) {return 1;} //Fehler
-//
-//    genImage(width, height, img);
-//    writeBmp("test.bmp", width, height, img);
-//    free(img);
-//    return 0;
-//}
+    size_t row_size = ((width * 3+3)/4)*4;
+    size_t pixelArraySize = row_size * height;
+
+    unsigned char *img = malloc(pixelArraySize);
+    if (img == NULL) {return 1;} //Fehler
+
+    genImage(width, heightsigned, img);
+    writeBmp("test.bmp", width, heightsigned, img);
+    free(img);
+    return 0;
+}
+*/
