@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <complex.h>
-#include "Bitmap.h"
+#include "itmap.h"
 #include "Escapetime.h"
 #include <complex.h>
 #include <stddef.h>
