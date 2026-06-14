@@ -30,7 +30,6 @@ int main() {
         // besser:? "Did not escape in %u iterations\n", limit
         printf("Did not converge :(");
     } else {
-        //warum kein %u?
         printf("Converged after %d (Limit: %d)", result, limit);
     }
 

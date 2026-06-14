@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <complex.h>
-#include "BasicTestImplementationBitmap.h"
-#include "BasicTestImplementationEscapetime.h"
+#include "Bitmap.h"
+#include "Escapetime.h"
 #include <complex.h>
 #include <stddef.h>
 #include <stdint.h>
