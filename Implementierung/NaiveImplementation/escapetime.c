@@ -19,8 +19,8 @@ unsigned escapeTime(const unsigned n, const float complex c) {
     }
     return i;
 }
-
-/*int main() {
+/*
+int main() {
     const unsigned limit = 10;
     const float complex exampleC = 0.0 + 0.0 * I;
 

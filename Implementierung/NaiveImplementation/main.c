@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <complex.h>
-#include "itmap.h"
-#include "Escapetime.h"
+#include "bitmap.h"
+#include "escapetime.h"
 #include <complex.h>
 #include <stddef.h>
 #include <stdint.h>
