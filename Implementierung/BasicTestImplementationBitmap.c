@@ -59,6 +59,8 @@ void writeBmp(char *filename, size_t width, ssize_t heightsigned, unsigned char 
     else {
         height = heightsigned ;
     }
+
+    int32_t bmp_height = (int32_t) (heightsigned);
     size_t row_size = ((width * 3+3)/4)*4;
     size_t pixelArraySize = row_size * height;
     size_t fileSize = 54 + pixelArraySize; //54 für header der bmp datei
@@ -68,31 +70,31 @@ void writeBmp(char *filename, size_t width, ssize_t heightsigned, unsigned char 
     header[0] = 'B';
     header[1] = 'M';
 
-    header[2] = (unsigned char) fileSize;
-    header[3] = (unsigned char) fileSize>>8;
-    header[4] = (unsigned char) fileSize>>16;
-    header[5] = (unsigned char) fileSize>>24;
+    header[2] = (unsigned char) (fileSize);
+    header[3] = (unsigned char) (fileSize>>8);
+    header[4] = (unsigned char) (fileSize>>16);
+    header[5] = (unsigned char) (fileSize>>24);
 
     header[10] = 54; // 54 Bytes Header
 
     header[14] = 40;
 
-    header[18] = (unsigned char) width;
-    header[19] = (unsigned char) width >> 8;
-    header[20] = (unsigned char) width >> 16;
-    header[21] = (unsigned char) width >> 24;
-    header[22] = (unsigned char) height;
-    header[23] = (unsigned char) height >> 8;
-    header[24] = (unsigned char) height >> 16;
-    header[25] = (unsigned char) height >> 24;
+    header[18] = (unsigned char) (width);
+    header[19] = (unsigned char) (width >> 8);
+    header[20] = (unsigned char) (width >> 16);
+    header[21] = (unsigned char) (width >> 24);
+    header[22] = (unsigned char) (bmp_height);
+    header[23] = (unsigned char) (bmp_height >> 8);
+    header[24] = (unsigned char) (bmp_height >> 16);
+    header[25] = (unsigned char) (bmp_height >> 24);
 
     header[26] = 1; //Farbebened
     header[28] = 24; // Bit pro Pixel (3*8)
 
-    header[34] = (unsigned char) pixelArraySize;
-    header[35] = (unsigned char) pixelArraySize >> 8;
-    header[36] = (unsigned char) pixelArraySize >> 16;
-    header[37] = (unsigned char) pixelArraySize >> 24;
+    header[34] = (unsigned char) (pixelArraySize);
+    header[35] = (unsigned char) (pixelArraySize >> 8);
+    header[36] = (unsigned char) (pixelArraySize >> 16);
+    header[37] = (unsigned char) (pixelArraySize >> 24);
 
     FILE *f = fopen(filename, "wb");
     if (f == NULL) {return;}
