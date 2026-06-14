@@ -1,11 +1,14 @@
 
 #include <complex.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stddef.h>
+
+#include "escapetime.h"
 /*  betriebsanleitung für timon
  *  gcc Implementierung/BasicTestImplementation.c -o test
  *  ./test
@@ -16,10 +19,10 @@
  */
 
 
-void genImage(size_t width, ssize_t height, unsigned char *img) {
+void genImage(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
     if (height < 0) { // TOP-DOWN
         height = height * (-1);
-        size_t row_size = ((width * 3+3)/4)*4;    //größe einer Reihe würde auf 4 Byte aufgrfüllt(Padding)
+        size_t row_size = ((width * 3+3)/4)*4;    //größe einer Reihe würde auf 4 Byte aufgefüllt(Padding)
 
         for (size_t y = 0; y < height; y++) {
             unsigned char *row = img + y*row_size; // *row zeigt nun auf den Anfang von Zeile y (0-indexed)
@@ -29,12 +32,12 @@ void genImage(size_t width, ssize_t height, unsigned char *img) {
                 row[x *3+2]=0; //bspw. ganzes Bild rot
             }
             for (size_t i=width*3; i<row_size; i++) {
-                row[i]=0; //restliche Paddiung Bits einer Zeile auffüllen
+                row[i]=0; //restliche Padding Bits einer Zeile auffüllen
             }
         }
     }
     else{ // BOTTOM-UP
-        size_t row_size = ((width * 3+3)/4)*4;    //größe einer Reihe würde auf 4 Byte aufgrfüllt(Padding)
+        size_t row_size = ((width * 3+3)/4)*4;    //größe einer Reihe würde auf 4 Byte aufgefüllt(Padding)
 
 
         for (size_t y = 0; y < height; y++) {
@@ -45,7 +48,7 @@ void genImage(size_t width, ssize_t height, unsigned char *img) {
                 row[x *3+2]=255; //bspw. ganzes Bild rot
             }
             for (size_t i=width*3; i<row_size; i++) {
-                row[i]=0; //restliche Paddiung Bits einer Zeile auffüllen
+                row[i]=0; //restliche Padding Bits einer Zeile auffüllen
             }
         }
     }
