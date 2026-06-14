@@ -22,11 +22,10 @@ unsigned escapeTime(const unsigned n, const float complex c) {
 
 int main() {
     const unsigned limit = 10;
-    const float complex exampleStart = 0;
     const float complex exampleC = 0.0 + 0.0 * I;
 
 
-    const unsigned result = escapeTime(limit, exampleStart, exampleC);
+    const unsigned result = escapeTime(limit, exampleC);
     if (limit == result) {
         // besser:? "Did not escape in %u iterations\n", limit
         printf("Did not converge :(");
