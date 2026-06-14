@@ -22,7 +22,7 @@ void genImage(size_t width, ssize_t height, unsigned char *img) {
         size_t row_size = ((width * 3+3)/4)*4;    //größe einer Reihe würde auf 4 Byte aufgrfüllt(Padding)
 
         for (size_t y = 0; y < height; y++) {
-            unsigned char *row = img + y*row_size; // *row zeigt nun auf den Anfang von Zeile 0 (0-indexed)
+            unsigned char *row = img + y*row_size; // *row zeigt nun auf den Anfang von Zeile y (0-indexed)
             for (size_t x = 0; x < width; x++) {
                 row[x * 3]=0;
                 row[x *3+1]=255;
@@ -38,7 +38,7 @@ void genImage(size_t width, ssize_t height, unsigned char *img) {
 
 
         for (size_t y = 0; y < height; y++) {
-            unsigned char *row = img + (height-1-y)*row_size; // *row zeigt nun auf den Anfang von Zeile 0 (0-indexed)
+            unsigned char *row = img + (height-1-y)*row_size; // *row zeigt nun auf den Anfang von Zeile height-1-y (0-indexed)
             for (size_t x = 0; x < width; x++) {
                 row[x * 3]=0;
                 row[x *3+1]=0;
