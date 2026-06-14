@@ -31,12 +31,12 @@ int main() {
 */
 
 int main(void) {
-    float complex start = 1 + 1*I; // start parameter
+    float complex start = 1 + 1*I; //start parameter
     size_t width = 2000; //breite eingeben
     ssize_t heightsigned = 2000; //höhe eingeben
-    float res = 4.0f/(float)width; // resolution (frei wählbar)
-    unsigned n = 500; // Iterartion limit
-    bool color = false; // false = Grauton in Formel // true = bunt
+    float res = 4.0f/(float)width; //resolution (auch frei wählbar)
+    unsigned n = 500; //Iteration limit
+    bool color = false; //false = Grauton berechnen durch Formel / true = Farbpalette
 
 
     size_t height;
@@ -62,4 +62,5 @@ int main(void) {
 /* Betriebsanleitung:
  * gcc Implementierung/NaiveImplementation/main.c Implementierung/NaiveImplementation/bitmap.c Implementierung/NaiveImplementation/escapetime.c -o test
  * ./test
+ * explorer.exe test.bmp
  */

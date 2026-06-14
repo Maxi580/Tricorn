@@ -13,9 +13,6 @@
  *  gcc Implementierung/BasicTestImplementation.c -o test
  *  ./test
  *  explorer.exe test.bmp
- *
- *
- *
  */
 
 
@@ -35,8 +32,6 @@ void genImage(float complex start, size_t width, ssize_t height, float res, unsi
         height = height * (-1);
         size_t row_size = ((width * 3+3)/4)*4;    //größe einer Reihe würde auf 4 Byte aufgefüllt(Padding)
 
-
-
         for (size_t y = 0; y < height; y++) {
             unsigned char *row = img + y*row_size; // *row zeigt nun auf den Anfang von Zeile y (0-indexed)
             for (size_t x = 0; x < width; x++) {
@@ -51,18 +46,17 @@ void genImage(float complex start, size_t width, ssize_t height, float res, unsi
                     row[x * 3]=0; // Blau
                     row[x *3+1]=0; // Grün
                     row[x *3+2]=0; // Rot
-
                 } else {
                     if (!color) {
-                        //Grauton
+                        //Grauton (von Formel aus der Aufgabe)
                         unsigned colorPixel = 255 - 4 * ( iterations % 64 );
-                        row[x * 3]=colorPixel; // 255 ganzes Bild Blau
+                        row[x * 3]=colorPixel; // Blau
                         row[x *3+1]=colorPixel; // Grün
                         row[x *3+2]=colorPixel; // Rot
                     } else {
-                        // Bunt
-                        unsigned farbIndex = iterations % 5;
-                        row[x * 3]= farbpalette[farbIndex][0]; // 255 ganzes Bild Blau
+                        //Bunt
+                        unsigned farbIndex = iterations % farbpalletteSize;
+                        row[x * 3]= farbpalette[farbIndex][0]; // Blau
                         row[x *3+1]= farbpalette[farbIndex][1]; // Grün
                         row[x *3+2]= farbpalette[farbIndex][2]; // Rot
                     }
@@ -91,23 +85,21 @@ void genImage(float complex start, size_t width, ssize_t height, float res, unsi
                     row[x * 3]=0; // Blau
                     row[x *3+1]=0; // Grün
                     row[x *3+2]=0; // Rot
-
                 } else {
                     if (!color) {
-                        //Grauton
+                        //Grauton (von Formel aus der Aufgabe)
                         unsigned colorPixel = 255 - 4 * ( iterations % 64 );
                         row[x * 3]=colorPixel; // 255 ganzes Bild Blau
                         row[x *3+1]=colorPixel; // Grün
                         row[x *3+2]=colorPixel; // Rot
                     } else {
-                        // Bunt
-                        unsigned farbIndex = iterations % 5;
+                        //Bunt
+                        unsigned farbIndex = iterations % farbpalletteSize;
                         row[x * 3]= farbpalette[farbIndex][0]; // 255 ganzes Bild Blau
                         row[x *3+1]= farbpalette[farbIndex][1]; // Grün
                         row[x *3+2]= farbpalette[farbIndex][2]; // Rot
                     }
                 }
-
             }
             for (size_t i=width*3; i<row_size; i++) {
                 row[i]=0; //restliche Padding Bits einer Zeile auffüllen
