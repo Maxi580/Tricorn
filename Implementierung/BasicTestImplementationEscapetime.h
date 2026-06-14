@@ -1,0 +1,12 @@
+//
+// Created by Hendrik on 14.06.2026.
+//
+
+#ifndef GRA26CAPSPROJECT_T105_BASICTESTIMPLEMENTATIONESCAPETIME_H
+#define GRA26CAPSPROJECT_T105_BASICTESTIMPLEMENTATIONESCAPETIME_H
+
+#include <complex.h>
+
+unsigned escapeTime(const unsigned n, float complex start, const float complex c);
+
+#endif //GRA26CAPSPROJECT_T105_BASICTESTIMPLEMENTATIONESCAPETIME_H

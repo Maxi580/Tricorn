@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <complex.h>
+#include "BasicTestImplementationBitmap.h"
 
 unsigned escapeTime(const unsigned n, float complex start, const float complex c) {
     const double squaredEscapeDistance = 4;
@@ -18,7 +19,7 @@ unsigned escapeTime(const unsigned n, float complex start, const float complex c
     }
     return i;
 }
-
+/*
 int main() {
     const unsigned limit = 10;
     const float complex exampleStart = 0;
@@ -32,5 +33,7 @@ int main() {
     } else {
         //warum kein %u?
         printf("Converged after %d (Limit: %d)", result, limit);
+
     }
 }
+*/
