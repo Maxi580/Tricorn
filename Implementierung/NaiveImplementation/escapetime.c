@@ -18,7 +18,7 @@ unsigned escapeTime(const unsigned n, const float complex c) {
     while (i < n) {
         float realSquared = crealf(z) * crealf(z), imagSquared = cimagf(z) * cimagf(z);
 
-        if (realSquared + imagSquared < squaredEscapeDistance) {
+        if (realSquared + imagSquared > squaredEscapeDistance) {
             break;
         }
 
