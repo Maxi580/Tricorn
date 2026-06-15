@@ -38,7 +38,8 @@ void genImage(float complex start, size_t width, ssize_t height, float res, unsi
 
                 const float cx = ((float)x - (float)width/2) * res;
                 const float cy = ((float)y - (float)height/2) * res;
-                const float complex c = start + cx + cy * I;
+               // const float complex c = start + cx + cy * I;
+                const float complex c = start + (((float)x)*res) - (((float)y)*res) * I;
                 const unsigned iterations = escapeTime(n, c);
 
                 if (n == iterations) { //did not converge
@@ -77,7 +78,8 @@ void genImage(float complex start, size_t width, ssize_t height, float res, unsi
 
                 const float cx = ((float)x - (float)width/2) * res;
                 const float cy = ((float)y - (float)height/2) * res;
-                const float complex c = start + cx + cy * I;
+               // const float complex c = start + cx + cy * I;
+                const float complex c = start + (((float)x)*res) + (((float)y)*res) * I;
                 const unsigned iterations = escapeTime(n, c);
 
                 if (n == iterations) { //did not converge
