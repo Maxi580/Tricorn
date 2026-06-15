@@ -31,9 +31,9 @@ int main() {
 */
 
 int main(void) {
-    float complex start = -0 - 0*I; //start parameter
-    size_t width = 2000; //breite eingeben
-    ssize_t heightsigned = 2000; //höhe eingeben
+    float complex start = -2 - 2*I; //start parameter
+    size_t width = 256; //breite eingeben
+    ssize_t heightsigned = 256; //höhe eingeben
     float res = 4.0f/(float)width; //resolution (auch frei wählbar)
     unsigned n = 500; //Iteration limit
     bool color = false; //false = Grauton berechnen durch Formel / true = Farbpalette
