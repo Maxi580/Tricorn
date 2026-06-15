@@ -71,8 +71,8 @@ void genImage(float complex start, size_t width, ssize_t height, float res, unsi
         size_t row_size = ((width * 3+3)/4)*4;    //größe einer Reihe würde auf 4 Byte aufgefüllt(Padding)
 
 
-        for (size_t y = 0; y < height; y++) {
-            unsigned char *row = img + (height-1-y)*row_size; // *row zeigt nun auf den Anfang von Zeile height-1-y (0-indexed)
+        for (ssize_t y = height-1; y >= 0; y--) {
+            unsigned char *row = img + y*row_size; // *row zeigt nun auf den Anfang von Zeile height-1-y (0-indexed)
             for (size_t x = 0; x < width; x++) {
 
                 const float cx = ((float)x - (float)width/2) * res;
