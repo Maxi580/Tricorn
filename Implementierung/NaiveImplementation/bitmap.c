@@ -17,9 +17,8 @@
 
 
 void genImage(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
-    //Farbpalette
     const unsigned farbpalletteSize = 5;
-    const unsigned farbpalette[5][3] = {
+    const unsigned farbpallette[5][3] = {
         //Blau, Grün, Rot
         {255,0,0},
         {255,0,255},
@@ -56,9 +55,9 @@ void genImage(float complex start, size_t width, ssize_t height, float res, unsi
                     } else {
                         //Bunt
                         unsigned farbIndex = iterations % farbpalletteSize;
-                        row[x * 3]= farbpalette[farbIndex][0]; // Blau
-                        row[x *3+1]= farbpalette[farbIndex][1]; // Grün
-                        row[x *3+2]= farbpalette[farbIndex][2]; // Rot
+                        row[x * 3]= farbpallette[farbIndex][0]; // Blau
+                        row[x *3+1]= farbpallette[farbIndex][1]; // Grün
+                        row[x *3+2]= farbpallette[farbIndex][2]; // Rot
                     }
                 }
             }
@@ -95,9 +94,9 @@ void genImage(float complex start, size_t width, ssize_t height, float res, unsi
                     } else {
                         //Bunt
                         unsigned farbIndex = iterations % farbpalletteSize;
-                        row[x * 3]= farbpalette[farbIndex][0]; // 255 ganzes Bild Blau
-                        row[x *3+1]= farbpalette[farbIndex][1]; // Grün
-                        row[x *3+2]= farbpalette[farbIndex][2]; // Rot
+                        row[x * 3]= farbpallette[farbIndex][0]; // 255 ganzes Bild Blau
+                        row[x *3+1]= farbpallette[farbIndex][1]; // Grün
+                        row[x *3+2]= farbpallette[farbIndex][2]; // Rot
                     }
                 }
             }
