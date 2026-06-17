@@ -31,12 +31,12 @@ int main() {
 */
 
 int main(void) {
-    float complex start = -2 - 2*I; //start parameter
-    size_t width = 256; //breite eingeben
-    ssize_t heightsigned = 256; //höhe eingeben
+    float complex start = -2 + 2*I; //start parameter
+    size_t width = 4000; //breite eingeben
+    ssize_t heightsigned = -4000; //höhe eingeben
     float res = 4.0f/(float)width; //resolution (auch frei wählbar)
-    unsigned n = 500; //Iteration limit
-    bool color = false; //false = Grauton berechnen durch Formel / true = Farbpalette
+    unsigned n = 256; //Iteration limit
+    bool color = true; //false = Grauton berechnen durch Formel / true = Farbpalette
 
 
     size_t height;
@@ -51,7 +51,10 @@ int main(void) {
     size_t pixelArraySize = row_size * height;
 
     unsigned char *img = malloc(pixelArraySize);
-    if (img == NULL) {return 1;} //Fehler
+    if (img == NULL) { //Fehler
+        printf("Error allocating memory\n");
+        return 1;
+    }
 
     genImage(start, width, heightsigned, res, n, color, img);
     writeBmp("test.bmp", width, heightsigned, img);

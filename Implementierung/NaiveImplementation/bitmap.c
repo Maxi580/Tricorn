@@ -20,11 +20,11 @@ void genImage(float complex start, size_t width, ssize_t height, float res, unsi
     const unsigned farbpalletteSize = 5;
     const unsigned farbpallette[5][3] = {
         //Blau, Grün, Rot
-        {67,0,0},
-        {0,67,0},
-        {0,0,67},
-        {76,128,67},
-        {67,0,128},
+        {255,0,0},
+        {0,255,255},
+        {255,0,0},
+        {0,255,255},
+        {255,0,0},
     };
 
     if (height < 0) { // TOP-DOWN
