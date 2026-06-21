@@ -127,7 +127,7 @@ int main(int argc, char *argv[]) {
     }
 
     //Dateiname angeben, falls gegeben
-    char *dateiname = "test.bmp";
+    char *dateiname = "test";
     for (int i=0; i<argc; i++) {
         if (strcmp(argv[i], "-o") == 0) {
             if (i+1>=argc) {
