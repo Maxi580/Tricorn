@@ -46,24 +46,25 @@ void genImage(float complex start, size_t width, ssize_t height, float res, unsi
                 _mm_storeu_si128((__m128i*) iterations, simdEscapeTime(n, c1, c2, c3, c4));
 
                 for (int i = 0; i < 4; i++){
+                    int offset = (x + i) * 3;
                     if (n == iterations[i]) { //did not converge
                         //Schwarz (Innere Farbe)
-                        row[(x + i) * 3]=0; // Blau
-                        row[(x + i) * 3 + 1]=0; // Grün
-                        row[(x + i) * 3 + 2]=0; // Rot
+                        row[offset]=0; // Blau
+                        row[offset + 1]=0; // Grün
+                        row[offset + 2]=0; // Rot
                     } else {
                         if (!color) {
                             //Grauton (von Formel aus der Aufgabe)
                             unsigned colorPixel = 255 - 4 * ( iterations[i] % 64 );
-                            row[(x + i) * 3]=colorPixel; // Blau
-                            row[(x + i) *3+1]=colorPixel; // Grün
-                            row[(x + i) *3+2]=colorPixel; // Rot
+                            row[offset]=colorPixel; // Blau
+                            row[offset + 1]=colorPixel; // Grün
+                            row[offset + 2]=colorPixel; // Rot
                         } else {
                             //Bunt
                             unsigned farbIndex = iterations[i] % farbpalletteSize;
-                            row[(x + i) * 3]= farbpallette[farbIndex][0]; // Blau
-                            row[(x + i) *3+1]= farbpallette[farbIndex][1]; // Grün
-                            row[(x + i) *3+2]= farbpallette[farbIndex][2]; // Rot
+                            row[offset]= farbpallette[farbIndex][0]; // Blau
+                            row[offset + 1]= farbpallette[farbIndex][1]; // Grün
+                            row[offset + 2]= farbpallette[farbIndex][2]; // Rot
                         }
                     }
                 }
@@ -93,24 +94,25 @@ void genImage(float complex start, size_t width, ssize_t height, float res, unsi
                 _mm_storeu_si128((__m128i*) iterations, simdEscapeTime(n, c1, c2, c3, c4));
 
                 for (int i = 0; i < 4; i++){
+                    int offset = (x + i) * 3;
                     if (n == iterations[i]) { //did not converge
                         //Schwarz (Innere Farbe)
-                        row[(x + i) * 3]=0; // Blau
-                        row[(x + i) * 3 + 1]=0; // Grün
-                        row[(x + i) * 3 + 2]=0; // Rot
+                        row[offset]=0; // Blau
+                        row[offset + 1]=0; // Grün
+                        row[offset + 2]=0; // Rot
                     } else {
                         if (!color) {
                             //Grauton (von Formel aus der Aufgabe)
                             unsigned colorPixel = 255 - 4 * ( iterations[i] % 64 );
-                            row[(x + i) * 3]=colorPixel; // Blau
-                            row[(x + i) *3+1]=colorPixel; // Grün
-                            row[(x + i) *3+2]=colorPixel; // Rot
+                            row[offset]=colorPixel; // Blau
+                            row[offset + 1]=colorPixel; // Grün
+                            row[offset + 2]=colorPixel; // Rot
                         } else {
                             //Bunt
                             unsigned farbIndex = iterations[i] % farbpalletteSize;
-                            row[(x + i) * 3]= farbpallette[farbIndex][0]; // Blau
-                            row[(x + i) *3+1]= farbpallette[farbIndex][1]; // Grün
-                            row[(x + i) *3+2]= farbpallette[farbIndex][2]; // Rot
+                            row[offset]= farbpallette[farbIndex][0]; // Blau
+                            row[offset + 1]= farbpallette[farbIndex][1]; // Grün
+                            row[offset + 2]= farbpallette[farbIndex][2]; // Rot
                         }
                     }
                 }
