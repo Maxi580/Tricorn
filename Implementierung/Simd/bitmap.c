@@ -17,7 +17,7 @@
  */
 
 
-void genImage(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
+void genImageSIMD(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
     const unsigned farbpalletteSize = 5;
     const unsigned farbpallette[5][3] = {
         {0,   0,   0},
@@ -122,7 +122,7 @@ void genImage(float complex start, size_t width, ssize_t height, float res, unsi
     }
 }
 
-void writeBmp(char *filename, size_t width, ssize_t heightsigned, unsigned char *img) {
+void writeBmpSIMD(char *filename, size_t width, ssize_t heightsigned, unsigned char *img) {
     size_t height;
     if (heightsigned < 0) {
         height = heightsigned * (-1);

@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <complex.h>
-#include "bitmap.h"
-#include "escapetime.h"
+#include "NaiveImplementation/bitmap.h"
+#include "NaiveImplementation/escapetime.h"
+#include "Simd/bitmap.h"
+#include "Simd/escapetime.h"
 #include <complex.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -9,6 +11,26 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stddef.h>
+
+/*
+int main() {
+    const unsigned limit = 10;
+    const float complex exampleStart = 0;
+    const float complex exampleC = 0.0 + 0.0 * I;
+
+
+    const unsigned result = escapeTime(limit, exampleStart, exampleC);
+    if (limit == result) {
+        // besser:? "Did not escape in %u iterations\n", limit
+        printf("Did not converge :(");
+    } else {
+        //warum kein %u?
+        printf("Converged after %d (Limit: %d)", result, limit);
+
+    }
+    return 0;
+}
+*/
 
 int main(int argc, char *argv[]) {
     char *end;
@@ -23,14 +45,30 @@ int main(int argc, char *argv[]) {
      */
 
 
+    //v
+    unsigned v = 0;
+    for (int i=0; i<argc; i++) {
+        if (strcmp(argv[i], "-V") == 0) {
+            if (i+1>=argc) {
+                printf("Error: Fehlendes Argument\n");
+                return 1;
+            }
+            v = strtol(argv[i+1], &end, 10);
+            if (*end != '\0') {
+                printf("Error: nach -V ist kein gültiger Int für den realteil\n");
+                return 1;
+            }
+        }
+    }
+
     //start parameter; bestimmen dur -s <REALTEIL> <IMAGINAERTEIL>; beide müssen hierbei gültige floats sein
-    float complex start = 0 + 0*I; //start parameter
+    float complex start = -0 + 0*I; //start parameter
     float realteil;
     float imaginaerteil;
     for (int i=0; i<argc; i++) {
         if (strcmp(argv[i], "-s") == 0) {
             if (i+2>=argc) {
-                printf("Error: Fehlendes Argument");
+                printf("Error: Fehlendes Argument\n");
                 return 1;
             }
             realteil = strtof(argv[i+1], &end);
@@ -56,7 +94,7 @@ int main(int argc, char *argv[]) {
     for (int i=0; i<argc; i++) {
         if (strcmp(argv[i], "-d") == 0) {
             if (i+2>=argc) {
-                printf("Error: Fehlendes Argument");
+                printf("Error: Fehlendes Argument\n");
                 return 1;
             }
             widthsigned = strtol(argv[i+1], &end, 10);
@@ -72,7 +110,7 @@ int main(int argc, char *argv[]) {
         }
     }
     if (widthsigned < 0) {
-        printf("Error: width negativ");
+        printf("Error: width negativ\n");
         return 1;
     }
     width = widthsigned ;
@@ -83,7 +121,7 @@ int main(int argc, char *argv[]) {
     for (int i=0; i<argc; i++) {
         if (strcmp(argv[i], "-r") == 0) {
             if (i+1>=argc) {
-                printf("Error: Fehlendes Argument");
+                printf("Error: Fehlendes Argument\n");
                 return 1;
             }
             res = strtof(argv[i+1], &end);
@@ -105,7 +143,7 @@ int main(int argc, char *argv[]) {
     for (int i=0; i<argc; i++) {
         if (strcmp(argv[i], "-n") == 0) {
             if (i+1>=argc) {
-                printf("Error: Fehlendes Argument");
+                printf("Error: Fehlendes Argument\n");
                 return 1;
             }
             n1 = strtol(argv[i+1], &end, 10);
@@ -116,7 +154,7 @@ int main(int argc, char *argv[]) {
         }
     }
     if (n1<0) {
-        printf("Error: n negativ");
+        printf("Error: n negativ\n");
         return 1;
     }
     unsigned n = n1;
@@ -137,7 +175,7 @@ int main(int argc, char *argv[]) {
     for (int i=0; i<argc; i++) {
         if (strcmp(argv[i], "-o") == 0) {
             if (i+1>=argc) {
-                printf("Error: Fehlendes Argument");
+                printf("Error: Fehlendes Argument\n");
                 return 1;
             }
             dateiname = argv[i+1];
@@ -162,9 +200,22 @@ int main(int argc, char *argv[]) {
         printf("Error allocating memory\n");
         return 1;
     }
+    if (v == 0) {
+        genImage(start, width, heightsigned, res, n, color, img);
+        writeBmp(neuerDateiname, width, heightsigned, img);
+    }
+    else if (v == 1) {
+        genImageSIMD(start, width, heightsigned, res, n, color, img);
+        writeBmpSIMD(neuerDateiname, width, heightsigned, img);
+    }
+    else {
+        printf("Error: v muss in [0;1] sein\n");
+        free(img);
+        return 1;
 
-    genImage(start, width, heightsigned, res, n, color, img);
-    writeBmp(neuerDateiname, width, heightsigned, img);
+
+    }
+
     free(img);
     return 0;
 }
