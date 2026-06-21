@@ -18,8 +18,8 @@ __m128i simdEscapeTime(const unsigned n, const float complex c1, const float com
     __m128 c_imagine = _mm_set_ps(cimagf(c1), cimagf(c2), cimagf(c3), cimagf(c4));
 
     __m128 realSquared = _mm_setzero_ps(), imagSquared = _mm_setzero_ps();
-    while (i < n) {
-        // Inkrementiert rounds, bei den Lanes, in denen Zi noch nicht divergiert ist
+    while (i++ < n) {
+        // Rounds inkrementieren, falls z noch nicht divergiert (also Betrag <= 4 ist)
         __m128 distance = _mm_add_ps(realSquared, imagSquared);
         __m128 mask = _mm_cmple_ps(distance, squaredEscapeDistance); // FFFFFFFF wo distance < 4, 0 sonst
         if (_mm_movemask_ps(mask) == 0) break; // Wenn die Maske 0 ist schon alles escaped und man kann aufhören.
@@ -33,8 +33,6 @@ __m128i simdEscapeTime(const unsigned n, const float complex c1, const float com
 
         // a², b² für Betrag von Zi+1 und Zi+2
         realSquared = _mm_mul_ps(z_real, z_real), imagSquared = _mm_mul_ps(z_imagine, z_imagine);
-
-        i++;
     }
     return rounds;
 }
