@@ -34,6 +34,15 @@ int main(int argc, char *argv[]) {
     char *end;
     char *end2;
 
+    /* -s <REALTEIL> <IMAGINÄRTEIL> ; beide in float
+     * -d <WIDTH> <HEIGHT>; width positiver Integer; height auch negativ
+     * -n <MAXITERATIONS> muss Integer sein und positiv
+     * -r <SCHRITTWEITE PRO PIXEL> muss positive float sein
+     * -o <NAME> name ohne .bmp angeben
+     * -C || --color einfach setzen, dann wird bild mit Eintracht Braunschweig Farben ausgegeben
+     */
+
+
     //start parameter; bestimmen dur -s <REALTEIL> <IMAGINAERTEIL>; beide müssen hierbei gültige floats sein
     float complex start = -0 + 0*I; //start parameter
     float realteil;
@@ -61,7 +70,8 @@ int main(int argc, char *argv[]) {
 
 
     //breite+höhe mit -d <BREITE> <HÖHE>, breite muss hierbei ssize_t folgen und höhe ssize_t
-    size_t width = 4000;
+    size_t width;
+    ssize_t widthsigned = 4000;
     ssize_t heightsigned = -4000;
     for (int i=0; i<argc; i++) {
         if (strcmp(argv[i], "-d") == 0) {
@@ -69,7 +79,7 @@ int main(int argc, char *argv[]) {
                 printf("Error: Fehlendes Argument");
                 return 1;
             }
-            width = strtol(argv[i+1], &end, 10);
+            widthsigned = strtol(argv[i+1], &end, 10);
             if (*end != '\0') {
                 printf("Error: nach -d ist keine gültige Zahl f+r <WIDTH>\n");
                 return 1;
@@ -81,6 +91,12 @@ int main(int argc, char *argv[]) {
             }
         }
     }
+    if (widthsigned < 0) {
+        printf("Error: width negativ");
+        return 1;
+    }
+    width = widthsigned ;
+
 
     //resolution (auch frei wählbar) mit -r <FLOAT>; <FLOAT> muss hierbei ein FLoat sein
     float res = 4.0f/(float)width;
@@ -95,12 +111,16 @@ int main(int argc, char *argv[]) {
                 printf("Error: nach -r ist keine gültige Zahl für <RESOLUTION>\n");
                 return 1;
             }
+            if (res<0) {
+                printf("Error: res negativ\n");
+                return 1;
+            }
             res = res / (float)width;
         }
     }
 
     //n bestimmen durch -n <ZAHL> Flag; <ZAHL> muss hierbei gültige, nicht negative Zahl sein
-    unsigned n = 256;
+    ssize_t n1 = 256;
 
     for (int i=0; i<argc; i++) {
         if (strcmp(argv[i], "-n") == 0) {
@@ -108,13 +128,19 @@ int main(int argc, char *argv[]) {
                 printf("Error: Fehlendes Argument");
                 return 1;
             }
-            n = strtol(argv[i+1], &end, 10);
+            n1 = strtol(argv[i+1], &end, 10);
             if (*end != '\0') {
                 printf("Error: nach -n ist keine gültige Zahl\n");
                 return 1;
             }
         }
     }
+    if (n1<0) {
+        printf("Error: n negativ");
+        return 1;
+    }
+    unsigned n = n1;
+
 
 
     //color setzen per -C oder --color flag
