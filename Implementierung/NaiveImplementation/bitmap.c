@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stddef.h>
+#include <sys/types.h>
 
 #include "escapetime.h"
 /*  betriebsanleitung für timon
@@ -31,12 +32,12 @@ void genImage(float complex start, size_t width, ssize_t height, float res, unsi
         height = height * (-1);
         size_t row_size = ((width * 3+3)/4)*4;    //größe einer Reihe würde auf 4 Byte aufgefüllt(Padding)
 
-        for (size_t y = 0; y < height; y++) {
+        for (ssize_t y = 0; y < height; y++) {
             unsigned char *row = img + y*row_size; // *row zeigt nun auf den Anfang von Zeile y (0-indexed)
             for (size_t x = 0; x < width; x++) {
 
-                const float cx = ((float)x - (float)width/2) * res;
-                const float cy = ((float)y - (float)height/2) * res;
+               // const float cx = ((float)x - (float)width/2) * res;
+                //const float cy = ((float)y - (float)height/2) * res;
                // const float complex c = start + cx + cy * I;
                 const float complex c = start + (((float)x)*res) - (((float)y)*res) * I;
                 const unsigned iterations = escapeTime(n, c);
@@ -75,8 +76,8 @@ void genImage(float complex start, size_t width, ssize_t height, float res, unsi
             unsigned char *row = img + y*row_size; // *row zeigt nun auf den Anfang von Zeile height-1-y (0-indexed)
             for (size_t x = 0; x < width; x++) {
 
-                const float cx = ((float)x - (float)width/2) * res;
-                const float cy = ((float)y - (float)height/2) * res;
+                //const float cx = ((float)x - (float)width/2) * res;
+                //const float cy = ((float)y - (float)height/2) * res;
                // const float complex c = start + cx + cy * I;
                 const float complex c = start + (((float)x)*res) + (((float)y)*res) * I;
                 const unsigned iterations = escapeTime(n, c);
