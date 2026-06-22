@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <sys/types.h>
+#include <complex.h>
 
 void genImage(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img);
 void writeBmp(char *filename, size_t width, ssize_t heightsigned, unsigned char *img);
