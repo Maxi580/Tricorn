@@ -6,6 +6,9 @@ __attribute__((hot))
 __m128i simdEscapeTime(const unsigned n, const float complex c1, const float complex c2, const float complex c3,
                         const float complex c4) {
     // Gibt 4 integer lanes mit den Runden, nachdem das entsprechende c konvergiert ist zurück
+    // Dieser If check is notwendig, weil sonst für jede Round 1 ausgegeben wird, weil nach der while noch inc wird
+    // Es kostet also einen If check the eigentlich immer branch auf false predicted werden müsste
+    // und spart 1mal zimage, zreal, realsquared und imasquared berechnen was sich lohnen sollte
     if(n == 0){
     	return _mm_setzero_si128();
     }
