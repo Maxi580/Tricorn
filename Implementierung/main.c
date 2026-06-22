@@ -133,6 +133,11 @@ int main(int argc, char *argv[]) {
                 printf("Error: res negativ\n");
                 return 1;
             }
+            if (res == 0) {
+                printf("Error: res zero\n");
+                return 1;
+
+            }
             res = res / (float)width;
         }
     }

@@ -150,7 +150,7 @@ void writeBmpSIMD(char *filename, size_t width, ssize_t heightsigned, unsigned c
 
     header[10] = 54; // 54 Bytes Header
 
-    header[14] = 40;
+    header[14] = 40; //40-Bit Informationsblock
 
     header[18] = (unsigned char) (width);
     header[19] = (unsigned char) (width >> 8);
