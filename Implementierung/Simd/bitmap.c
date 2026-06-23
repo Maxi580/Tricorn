@@ -87,10 +87,10 @@ void genImageSIMD(float complex start, size_t width, ssize_t height, float res, 
                 //const float cy = ((float)y - (float)height/2) * res;
                // const float complex c = start + cx + cy * I;
                 unsigned iterations[4];
-                const float complex c1 = start + (((float)x)*res) - (((float)y)*res) * I;
-                const float complex c2 = start + (((float)x+1)*res) - (((float)y)*res) * I;
-                const float complex c3 = start + (((float)x+2)*res) - (((float)y)*res) * I;
-                const float complex c4 = start + (((float)x+3)*res) - (((float)y)*res) * I;
+                const float complex c1 = start + (((float)x)*res) + (((float)y)*res) * I;
+                const float complex c2 = start + (((float)x+1)*res) + (((float)y)*res) * I;
+                const float complex c3 = start + (((float)x+2)*res) + (((float)y)*res) * I;
+                const float complex c4 = start + (((float)x+3)*res) + (((float)y)*res) * I;
                 _mm_storeu_si128((__m128i*) iterations, simdEscapeTime(n, c1, c2, c3, c4));
 
                 for (int i = 0; i < 4; i++){
