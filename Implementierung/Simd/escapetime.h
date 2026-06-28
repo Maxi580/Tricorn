@@ -8,7 +8,7 @@
 #include <complex.h>
 #include <immintrin.h>
 
-__m128i simdEscapeTime(const unsigned n, const float complex c1, const float complex c2, const float complex c3,
-                        const float complex c4);
+__m128i simdEscapeTime(unsigned n, float complex c1, float complex c2, float complex c3, float complex c4);
+unsigned singleEscapeTime(unsigned n, float complex c);
 
 #endif //GRA26CAPSPROJECT_T105_BASICTESTIMPLEMENTATIONESCAPETIME_H

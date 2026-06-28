@@ -8,118 +8,89 @@
 #include <string.h>
 #include <stddef.h>
 #include <sys/types.h>
-
 #include "escapetime.h"
-/*  betriebsanleitung für timon
- *  gcc Implementierung/BasicTestImplementation.c -o test
- *  ./test
- *  explorer.exe test.bmp
- */
-
 
 void genImageSIMD(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
-    const unsigned farbpalletteSize = 5;
-    const unsigned farbpallette[5][3] = {
+    const unsigned colorPallete[5][3] = {
         {0,   0,   0},
         {100, 0,   0},
         {255, 50,  0},
         {255, 255, 0},
         {255, 255, 255},
     };
+    const unsigned colorPalleteSize = sizeof(colorPallete) / sizeof(colorPallete[0]);
+    size_t row_size = ((width * 3+3)/4)*4; // Größe einer Reihe würde auf 4 Byte aufgefüllt(Padding)
 
-    if (height < 0) { // TOP-DOWN
-        height = height * (-1);
-        size_t row_size = ((width * 3+3)/4)*4;    //größe einer Reihe würde auf 4 Byte aufgefüllt(Padding)
+    /* Wenn heigt kleiner 0 ist, startet man unten links und geht nach oben also addiert man +y und sonst
+     * startet man oben links un zieht y ab, das vorzeichen wird über factor kontrolliert*/
+    float factor = height < 0 ? -1.0f : 1.0f;
+    ssize_t top = height < 0 ? -height : height;
 
-        for (ssize_t y = 0; y < height; y++) {
-            unsigned char *row = img + y*row_size; // *row zeigt nun auf den Anfang von Zeile y (0-indexed)
-            for (size_t x = 0; x < width; x += 4) {
+    /* Width muss nicht durch 4 teilbar sein. Deswegen machen wir 4 koordinaten in parallel so lange das geht und
+     * dann am Ende den Rest (also 0 - 3 Elemente) sequenziell*/
+    size_t endIndex = width - (width % 4);
+    for (ssize_t y = 0; y < top; y++) {
+        unsigned char *row = img + y*row_size; // *row zeigt nun auf den Anfang von Zeile y (0-indexed)
+        for (size_t x = 0; x < endIndex; x += 4) {
+            unsigned iterations[4];
+            const float complex c1 = start + (float) x * res + factor * (float) y * res * I;
+            const float complex c2 = start + ((float) x + 1) * res + factor * (float) y * res * I;
+            const float complex c3 = start + ((float) x + 2) * res + factor * (float) y * res * I;
+            const float complex c4 = start + ((float) x + 3) * res + factor * (float) y * res * I;
+            _mm_storeu_si128((__m128i*) iterations, simdEscapeTime(n, c1, c2, c3, c4));
 
-               // const float cx = ((float)x - (float)width/2) * res;
-                //const float cy = ((float)y - (float)height/2) * res;
-               // const float complex c = start + cx + cy * I;
-                unsigned iterations[4];
-                const float complex c1 = start + (((float)x)*res) - (((float)y)*res) * I;
-                const float complex c2 = start + (((float)x+1)*res) - (((float)y)*res) * I;
-                const float complex c3 = start + (((float)x+2)*res) - (((float)y)*res) * I;
-                const float complex c4 = start + (((float)x+3)*res) - (((float)y)*res) * I;
-                _mm_storeu_si128((__m128i*) iterations, simdEscapeTime(n, c1, c2, c3, c4));
-
-                for (int i = 0; i < 4; i++){
-                    int offset = (x + i) * 3;
-                    if (n == iterations[i]) { //did not converge
-                        //Schwarz (Innere Farbe)
-                        row[offset]=0; // Blau
-                        row[offset + 1]=0; // Grün
-                        row[offset + 2]=0; // Rot
+            for (int i = 0; i < 4; i++){
+                int offset = (x + i) * 3;
+                if (n == iterations[i]) { //did not converge
+                    //Schwarz (Innere Farbe)
+                    row[offset]=0; // Blau
+                    row[offset + 1]=0; // Grün
+                    row[offset + 2]=0; // Rot
+                } else {
+                    if (!color) {
+                        //Grauton (von Formel aus der Aufgabe)
+                        unsigned colorPixel = 255 - 4 * ( iterations[i] % 64 );
+                        row[offset]=colorPixel; // Blau
+                        row[offset + 1]=colorPixel; // Grün
+                        row[offset + 2]=colorPixel; // Rot
                     } else {
-                        if (!color) {
-                            //Grauton (von Formel aus der Aufgabe)
-                            unsigned colorPixel = 255 - 4 * ( iterations[i] % 64 );
-                            row[offset]=colorPixel; // Blau
-                            row[offset + 1]=colorPixel; // Grün
-                            row[offset + 2]=colorPixel; // Rot
-                        } else {
-                            //Bunt
-                            unsigned farbIndex = iterations[i] % farbpalletteSize;
-                            row[offset]= farbpallette[farbIndex][0]; // Blau
-                            row[offset + 1]= farbpallette[farbIndex][1]; // Grün
-                            row[offset + 2]= farbpallette[farbIndex][2]; // Rot
-                        }
+                        //Bunt
+                        unsigned colorIndex = iterations[i] % colorPalleteSize;
+                        row[offset]= colorPallete[colorIndex][0]; // Blau
+                        row[offset + 1]= colorPallete[colorIndex][1]; // Grün
+                        row[offset + 2]= colorPallete[colorIndex][2]; // Rot
                     }
                 }
-            }
-
-            for (size_t i=width*3; i<row_size; i++) {
-                row[i]=0; //restliche Padding Bits einer Zeile auffüllen
             }
         }
-    }
-    else{ // BOTTOM-UP
-        size_t row_size = ((width * 3+3)/4)*4;    //größe einer Reihe würde auf 4 Byte aufgefüllt(Padding)
+        // Den Rest von width auch noch fillen (bis zu 3 elemente)
+        // const float complex c = start + (((float)x)*res) + (((float)y)*res) * I;
+        for (size_t x = endIndex; x < width; x++) {
+            const float complex c = start + (((float)x)*res) + factor * (((float)y)*res) * I;
+            const unsigned iterations = singleEscapeTime(n, c);
 
-
-        for (ssize_t y = height-1; y >= 0; y--) {
-            unsigned char *row = img + y*row_size; // *row zeigt nun auf den Anfang von Zeile height-1-y (0-indexed)
-            for (size_t x = 0; x < width; x += 4) {
-
-                //const float cx = ((float)x - (float)width/2) * res;
-                //const float cy = ((float)y - (float)height/2) * res;
-               // const float complex c = start + cx + cy * I;
-                unsigned iterations[4];
-                const float complex c1 = start + (((float)x)*res) + (((float)y)*res) * I;
-                const float complex c2 = start + (((float)x+1)*res) + (((float)y)*res) * I;
-                const float complex c3 = start + (((float)x+2)*res) + (((float)y)*res) * I;
-                const float complex c4 = start + (((float)x+3)*res) + (((float)y)*res) * I;
-                _mm_storeu_si128((__m128i*) iterations, simdEscapeTime(n, c1, c2, c3, c4));
-
-                for (int i = 0; i < 4; i++){
-                    int offset = (x + i) * 3;
-                    if (n == iterations[i]) { //did not converge
-                        //Schwarz (Innere Farbe)
-                        row[offset]=0; // Blau
-                        row[offset + 1]=0; // Grün
-                        row[offset + 2]=0; // Rot
-                    } else {
-                        if (!color) {
-                            //Grauton (von Formel aus der Aufgabe)
-                            unsigned colorPixel = 255 - 4 * ( iterations[i] % 64 );
-                            row[offset]=colorPixel; // Blau
-                            row[offset + 1]=colorPixel; // Grün
-                            row[offset + 2]=colorPixel; // Rot
-                        } else {
-                            //Bunt
-                            unsigned farbIndex = iterations[i] % farbpalletteSize;
-                            row[offset]= farbpallette[farbIndex][0]; // Blau
-                            row[offset + 1]= farbpallette[farbIndex][1]; // Grün
-                            row[offset + 2]= farbpallette[farbIndex][2]; // Rot
-                        }
-                    }
+            int offset = x * 3;
+            if (n == iterations) {
+                row[offset]=0; // Blau
+                row[offset+1]=0; // Grün
+                row[offset+2]=0; // Rot
+            } else {
+                if (!color) {
+                    unsigned colorPixel = 255 - 4 * ( iterations % 64 );
+                    row[offset]=colorPixel; // 255 ganzes Bild Blau
+                    row[offset+1]=colorPixel; // Grün
+                    row[offset+2]=colorPixel; // Rot
+                } else {
+                    unsigned farbIndex = iterations % colorPalleteSize;
+                    row[offset]= colorPallete[farbIndex][0]; // 255 ganzes Bild Blau
+                    row[offset+1]= colorPallete[farbIndex][1]; // Grün
+                    row[offset+2]= colorPallete[farbIndex][2]; // Rot
                 }
             }
-            for (size_t i=width*3; i<row_size; i++) {
-                row[i]=0; //restliche Padding Bits einer Zeile auffüllen
-            }
+        }
+
+        for (size_t i= width*3; i<row_size; i++) {
+            row[i]=0; //restliche Padding Bits einer Zeile auffüllen
         }
     }
 }

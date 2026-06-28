@@ -5,10 +5,13 @@
 __attribute__((hot))
 __m128i simdEscapeTime(const unsigned n, const float complex c1, const float complex c2, const float complex c3,
                         const float complex c4) {
-    // Gibt 4 integer lanes mit den Runden, nachdem das entsprechende c konvergiert ist zurück
-    // Dieser If check is notwendig, weil sonst für jede Round 1 ausgegeben wird, weil nach der while noch inc wird
-    // Es kostet also einen If check the eigentlich immer branch auf false predicted werden müsste
-    // und spart 1mal zimage, zreal, realsquared und imasquared berechnen was sich lohnen sollte
+    /* Returns 4 Integer Lanes, mit den Anzahl der Runden nach dem die Koordinate divergiert oder
+        falls der Punkt nie divergiert das Limit */
+
+    /* Da wir zn nie berechnen, wurde die Distanzberechnung und Inkrementierung aus der Schleife gezogen,
+     * dass bedeutet aber, dass wir das auch für z0 machen, da bei z0 die Distanz 0 ist und der Punkt damit
+     * noch nicht divergiert ist, würde allerdings jede lane inkrementiert werden, was allerdings falsch ist.
+     * (Man könnte auch n = 1 abfangen, und dann gleich 1er lanes zurückgeben, dass ist aber unclean)*/
     if(n == 0){
     	return _mm_setzero_si128();
     }
@@ -25,9 +28,10 @@ __m128i simdEscapeTime(const unsigned n, const float complex c1, const float com
     __m128 c_imagine = _mm_set_ps(cimagf(c1), cimagf(c2), cimagf(c3), cimagf(c4));
 
     __m128 realSquared = _mm_setzero_ps(), imagSquared = _mm_setzero_ps();
-	/* Schleife läuft n - 1 mal (i=1), weil es egal ist, ob z in der letzten Runde konvergiert oder divergiert
-     Es wird so oder so n zurückgegeben. Deswegen müssen wir Zn, a², b² nicht mehr berechenn und
-	 inkrementieren wir im letzten schritt alles, waas für Zn-1 noch nicht divergiert ist. */
+	/* Zn muss nie berechnet werden, da z(n-1) entweder divergiert dann (n - 1) und sonst immer n zurückgegeben wird
+	 * egal ob zn divergiert oder nicht. Deswegen läuft die schleife nur n -1 mal bis zur berechnung von zn-1 (oder
+	 * bis alles divergiert), da i = 1 ist.
+	 */
     while (i++ < n) {
         // Rounds inkrementieren, falls z noch nicht divergiert (also Betrag <= 4 ist)
         __m128 distance = _mm_add_ps(realSquared, imagSquared);
@@ -41,7 +45,7 @@ __m128i simdEscapeTime(const unsigned n, const float complex c1, const float com
         z_imagine = _mm_add_ps(c_imagine, _mm_mul_ps(minus_two, _mm_mul_ps(z_real, z_imagine)));
         z_real = _mm_add_ps(c_real, _mm_sub_ps(realSquared, imagSquared));
 
-        // a², b² für Betrag von Zi+1 und Zi+2
+        // a², b² für Betrag von Zi+1 und zur Berechnung von Zi+2
         realSquared = _mm_mul_ps(z_real, z_real), imagSquared = _mm_mul_ps(z_imagine, z_imagine);
     }
 
@@ -52,4 +56,32 @@ __m128i simdEscapeTime(const unsigned n, const float complex c1, const float com
     rounds  = _mm_add_epi32(rounds, inc);
 
     return rounds;
+}
+
+unsigned singleEscapeTime(const unsigned n, const float complex c) {
+	/* Gibt die Anzahl der Iterationen zurück, nach denen der Betrag von Zi größer als 2 ist.
+	 * Wenn die Zahl erst in der nten Iteration oder nicht konvergiert wird n zurückgegeben
+	 */
+	const double squaredEscapeDistance = 4;
+	// ab |z_n|>2 gilt sicher: |z_n+1|>[z_n|
+	unsigned i = 0;
+	float complex z = 0;
+
+	float realSquared = 0, imagSquared = 0;
+	do {
+		// Es muss immer überprüft werden, ob das Limit erreicht ist (n=0 etc).
+		if (i >= n) {
+			return i;
+		}
+
+		z = realSquared - imagSquared - 2 * crealf(z) * cimagf(z) * I;
+		z += c;
+		i++;
+
+		// Der Betrag von Z0 ist 0 und muss damit nicht überprüft werden, wir überprüfen erst Z1
+		// a² und b² wird später auch für zn+1 wieder benötigt und deswegen gespeichert.
+		realSquared = crealf(z) * crealf(z), imagSquared = cimagf(z) * cimagf(z);
+	} while (realSquared + imagSquared <= squaredEscapeDistance);
+
+	return i;
 }

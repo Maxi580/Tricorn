@@ -7,6 +7,6 @@
 
 #include <complex.h>
 
-unsigned escapeTime(const unsigned n, const float complex c);
+unsigned escapeTime(unsigned n, float complex c);
 
 #endif //GRA26CAPSPROJECT_T105_BASICTESTIMPLEMENTATIONESCAPETIME_H
