@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stddef.h>
+#include <time.h>
 
 /*
 int main() {
@@ -42,7 +43,18 @@ int main(int argc, char *argv[]) {
      * -r <SCHRITTWEITE PRO PIXEL> muss positive float sein
      * -o <NAME> name ohne .bmp angeben
      * -C || --color einfach setzen, dann wird bild mit Eintracht Braunschweig Farben ausgegeben
+     *
+     * -time ; Printed Durchschnittslaufzeit der Berechnung auf der Console. Kann mit anderen Parametern übergeben werden
      */
+
+
+    //time parameter
+    bool time_parameter = false;
+    for (int i = 0; i < argc; i++) {
+        if (strcmp(argv[i], "-time") == 0) {
+            time_parameter = true;
+        }
+    }
 
 
     //v
@@ -205,20 +217,71 @@ int main(int argc, char *argv[]) {
         printf("Error allocating memory\n");
         return 1;
     }
-    if (v == 0) {
-        genImage(start, width, heightsigned, res, n, color, img);
-        writeBmp(neuerDateiname, width, heightsigned, img);
-    }
-    else if (v == 1) {
-        genImageSIMD(start, width, heightsigned, res, n, color, img);
-        writeBmpSIMD(neuerDateiname, width, heightsigned, img);
-    }
-    else {
-        printf("Error: v muss in [0;1] sein\n");
-        free(img);
-        return 1;
+
+    if (time_parameter) {
+
+        //Naive Implementierung
+        const unsigned iterations_naive = 25;
+
+        struct timespec time_start_naive; // Zeitmessung start (siehe Folien Benchmarking)
+        clock_gettime(CLOCK_MONOTONIC, &time_start_naive);
+
+        for (unsigned i=0; i < iterations_naive; i++) {
+            genImage(start, width, heightsigned, res, n, color, img);
+        }
+
+        struct timespec time_end_naive; // Zeitmessung ende (siehe Folien Benchmarking)
+        clock_gettime(CLOCK_MONOTONIC, &time_end_naive);
+        double time_naive = time_end_naive.tv_sec - time_start_naive.tv_sec + 1e-9 * (time_end_naive.tv_nsec - time_start_naive.tv_nsec);
+        if (time_naive < 1) { //unter 1 Sekunde getestet
+            printf("Error: SIMD Implementierung hat zu wenig Iterationen (Gesamtlaufzeit war unter 1 Sekunde)\n");
+            return 1;
+        }
+        double avg_time_naive = time_naive / iterations_naive;
+        printf("Naive Implementierung: %f sec pro Iteration (%u Iterationen)\n", avg_time_naive, iterations_naive);
+
+        char Dateiname_naive[256] = "Naive.bmp";
+        writeBmp(Dateiname_naive, width, heightsigned, img);
 
 
+
+        //SIMD Implementierung
+        const unsigned iterations_simd = 75;
+
+        struct timespec time_start_simd; // Zeitmessung start (siehe Folien Benchmarking)
+        clock_gettime(CLOCK_MONOTONIC, &time_start_simd);
+
+        for (unsigned i=0; i < iterations_simd; i++) {
+            genImageSIMD(start, width, heightsigned, res, n, color, img);
+        }
+
+        struct timespec time_end_simd; // Zeitmessung ende (siehe Folien Benchmarking)
+        clock_gettime(CLOCK_MONOTONIC, &time_end_simd);
+        double time_simd = time_end_simd.tv_sec - time_start_simd.tv_sec + 1e-9 * (time_end_simd.tv_nsec - time_start_simd.tv_nsec);
+        if (time_simd < 1) { //unter 1 Sekunde getestet
+            printf("Error: SIMD Implementierung hat zu wenig Iterationen (Gesamtlaufzeit war unter 1 Sekunde)\n");
+            return 1;
+        }
+        double avg_time_simd = time_simd / iterations_simd;
+        printf("SIMD Implementierung: %f sec pro Iteration (%u Iterationen)\n", avg_time_simd, iterations_simd);
+
+        char Dateiname_simd[256] = "SIMD.bmp";
+        writeBmpSIMD(Dateiname_simd, width, heightsigned, img);
+
+    } else {
+        if (v == 0) {
+            genImage(start, width, heightsigned, res, n, color, img);
+            writeBmp(neuerDateiname, width, heightsigned, img);
+        }
+        else if (v == 1) {
+            genImageSIMD(start, width, heightsigned, res, n, color, img);
+            writeBmpSIMD(neuerDateiname, width, heightsigned, img);
+        }
+        else {
+            printf("Error: v muss in [0;1] sein\n");
+            free(img);
+            return 1;
+        }
     }
 
     free(img);
