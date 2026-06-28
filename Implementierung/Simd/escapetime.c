@@ -24,8 +24,8 @@ __m128i simdEscapeTime(const unsigned n, const float complex c1, const float com
 
     __m128 z_real = _mm_setzero_ps();;
     __m128 z_imagine = _mm_setzero_ps();
-    __m128 c_real = _mm_set_ps(crealf(c1), crealf(c2), crealf(c3), crealf(c4));
-    __m128 c_imagine = _mm_set_ps(cimagf(c1), cimagf(c2), cimagf(c3), cimagf(c4));
+    __m128 c_real = _mm_setr_ps(crealf(c1), crealf(c2), crealf(c3), crealf(c4));
+    __m128 c_imagine = _mm_setr_ps(cimagf(c1), cimagf(c2), cimagf(c3), cimagf(c4));
 
     __m128 realSquared = _mm_setzero_ps(), imagSquared = _mm_setzero_ps();
 	/* Zn muss nie berechnet werden, da z(n-1) entweder divergiert dann (n - 1) und sonst immer n zurückgegeben wird
