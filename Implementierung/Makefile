@@ -2,7 +2,7 @@
 CC = gcc
 
 #FLAGS
-CFLAGS = -g -Wall -Wextra -std=c11 -INaiveImplementation
+CFLAGS = -g -Wall -Wextra -std=c11 -INaiveImplementation -D_POSIX_C_SOURCE=200809L
 
 all: main
 
