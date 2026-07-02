@@ -7,11 +7,10 @@
 #include <complex.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stddef.h>
 #include <time.h>
+#include "Sym/bitmap.h"
 
 /*
 int main() {
@@ -268,16 +267,40 @@ int main(int argc, char *argv[]) {
         char Dateiname_simd[256] = "SIMD.bmp";
         writeBmpSIMD(Dateiname_simd, width, heightsigned, img);
 
+        // Sym Implementierung
+        const unsigned iterations_sym = 75;
+
+        struct timespec time_start_sym; // Zeitmessung start (siehe Folien Benchmarking)
+        clock_gettime(CLOCK_MONOTONIC, &time_start_sym);
+
+        for (unsigned i = 0; i < iterations_sym; i++) {
+            symGenImage(start, width, heightsigned, res, n, color, img);
+        }
+
+        struct timespec time_end_sym; // Zeitmessung ende (siehe Folien Benchmarking)
+        clock_gettime(CLOCK_MONOTONIC, &time_end_sym);
+        double time_sym = time_end_sym.tv_sec - time_start_sym.tv_sec + 1e-9 * (time_end_sym.tv_nsec - time_start_sym.tv_nsec);
+        if (time_sym < 1) { // unter 1 Sekunde getestet
+            printf("Error: Sym Implementierung hat zu wenig Iterationen (Gesamtlaufzeit war unter 1 Sekunde)\n");
+            return 1;
+        }
+        double avg_time_sym = time_sym / iterations_sym;
+        printf("Sym Implementierung: %f sec pro Iteration (%u Iterationen)\n", avg_time_sym, iterations_sym);
+
+        char Dateiname_sym[256] = "Sym.bmp";
+        symWriteBmp(Dateiname_sym, width, heightsigned, img);
+
     } else {
         if (v == 0) {
             genImage(start, width, heightsigned, res, n, color, img);
             writeBmp(neuerDateiname, width, heightsigned, img);
-        }
-        else if (v == 1) {
+        } else if (v == 1) {
             genImageSIMD(start, width, heightsigned, res, n, color, img);
             writeBmpSIMD(neuerDateiname, width, heightsigned, img);
-        }
-        else {
+        } else if (v == 2) {
+            symGenImage(start, width, heightsigned, res, n, color, img);
+            symWriteBmp(neuerDateiname, width, heightsigned, img);
+        } else {
             printf("Error: v muss in [0;1] sein\n");
             free(img);
             return 1;
