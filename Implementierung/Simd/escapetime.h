@@ -9,6 +9,5 @@
 #include <immintrin.h>
 
 __m128i simdEscapeTime(unsigned n, float complex c1, float complex c2, float complex c3, float complex c4);
-unsigned singleEscapeTime(unsigned n, float complex c);
 
 #endif //GRA26CAPSPROJECT_T105_BASICTESTIMPLEMENTATIONESCAPETIME_H
