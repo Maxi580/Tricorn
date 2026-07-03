@@ -13,4 +13,4 @@ void symGenImage(float complex start, size_t width, ssize_t height, float res, u
 void symWriteBmp(char *filename, size_t width, ssize_t heightsigned, unsigned char *img);
 
 
-#endif //GRA26CAPSPROJECT_T105_BASICTESTIMPLEMENTATION_H
+#endif //GRA26CAPSPROJECT_T105_SYM_H
