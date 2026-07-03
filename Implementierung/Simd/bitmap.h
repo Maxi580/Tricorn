@@ -13,4 +13,4 @@ void genImageSIMD(float complex start, size_t width, ssize_t height, float res, 
 void writeBmpSIMD(char *filename, size_t width, ssize_t heightsigned, unsigned char *img);
 
 
-#endif //GRA26CAPSPROJECT_T105_BASICTESTIMPLEMENTATION_H
+#endif //GRA26CAPSPROJECT_T105_SIMD_H

@@ -1,0 +1,9 @@
+#ifndef GRA26CAPSPROJECT_T105_CIR_H
+#define GRA26CAPSPROJECT_T105_CIR_H
+
+#include <complex.h>
+#include <immintrin.h>
+
+__m128i escapeTimeCircle(unsigned n, float complex c1, float complex c2, float complex c3, float complex c4);
+
+#endif

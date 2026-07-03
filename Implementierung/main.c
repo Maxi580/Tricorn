@@ -11,6 +11,7 @@
 #include <string.h>
 #include <time.h>
 #include "Sym/bitmap.h"
+#include "Circle/bitmap.h"
 
 /*
 int main() {
@@ -290,6 +291,29 @@ int main(int argc, char *argv[]) {
         char Dateiname_sym[256] = "Sym.bmp";
         symWriteBmp(Dateiname_sym, width, heightsigned, img);
 
+        // Circle Implementierung
+        const unsigned iterations_circle = 75;
+
+        struct timespec time_start_circle; // Zeitmessung start (siehe Folien Benchmarking)
+        clock_gettime(CLOCK_MONOTONIC, &time_start_circle);
+
+        for (unsigned i = 0; i < iterations_circle; i++) {
+            genImageCircle(start, width, heightsigned, res, n, color, img);
+        }
+
+        struct timespec time_end_circle; // Zeitmessung ende (siehe Folien Benchmarking)
+        clock_gettime(CLOCK_MONOTONIC, &time_end_circle);
+        double time_circle = time_end_circle.tv_sec - time_start_circle.tv_sec + 1e-9 * (time_end_circle.tv_nsec - time_start_circle.tv_nsec);
+        if (time_circle < 1) { // unter 1 Sekunde getestet
+            printf("Error: Circle Implementierung hat zu wenig Iterationen (Gesamtlaufzeit war unter 1 Sekunde)\n");
+            return 1;
+        }
+        double avg_time_circle = time_circle / iterations_circle;
+        printf("Circle Implementierung: %f sec pro Iteration (%u Iterationen)\n", avg_time_circle, iterations_circle);
+
+        char Dateiname_circle[256] = "Circle.bmp";
+        writeBmpCircle(Dateiname_circle, width, heightsigned, img);
+
     } else {
         if (v == 0) {
             genImage(start, width, heightsigned, res, n, color, img);
@@ -300,8 +324,11 @@ int main(int argc, char *argv[]) {
         } else if (v == 2) {
             symGenImage(start, width, heightsigned, res, n, color, img);
             symWriteBmp(neuerDateiname, width, heightsigned, img);
+        }  else if (v == 3) {
+            genImageCircle(start, width, heightsigned, res, n, color, img);
+            writeBmpCircle(neuerDateiname, width, heightsigned, img);
         } else {
-            printf("Error: v muss in [0;1] sein\n");
+            printf("Error: v muss in [0;3] sein\n");
             free(img);
             return 1;
         }

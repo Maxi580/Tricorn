@@ -70,7 +70,7 @@ void symGenImage(float complex start, size_t width, ssize_t height, float res, u
        Now we calculate the same stuff as before, however if we find a partner, that is smaller than the current y
        this must mean that it already was computed, as we go from 0 to top i guess. The only issue is now that
        if the center is out of bounds. When it is below the image with our formula this would mean that we already
-        have calculated everything. So we only skip if the partner is larger than 0. If it is above the image, we dont
+       have calculated everything. So we only skip if the partner is larger than 0. If it is above the image, we dont
        skip anything, but we obviously cant save anyhting either. We must consider that we can only draw pixels in bound
        so we check both later.
 
