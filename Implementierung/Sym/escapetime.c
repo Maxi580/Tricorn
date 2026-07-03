@@ -11,13 +11,16 @@ __m128i symEscapeTime(const unsigned n, const float complex c1, const float comp
     /* Da wir zn nie berechnen, wurde die Distanzberechnung und Inkrementierung aus der Schleife gezogen,
      * dass bedeutet aber, dass wir das auch für z0 machen, da bei z0 die Distanz 0 ist und der Punkt damit
      * noch nicht divergiert ist, würde allerdings jede lane inkrementiert werden, was allerdings falsch ist.
-     * (Man könnte auch n = 1 abfangen, und dann gleich 1er lanes zurückgeben, dass ist aber unclean)*/
-    if(n == 0){
+     * (Bei n = 1 ist es immer eine 4er Lanes von einsen weil z0 nie divergiert)*/
+    if(n <= 1){
+    	if (n == 1 ) {
+    		return _mm_set1_epi32(1);
+    	}
     	return _mm_setzero_si128();
     }
 
-    unsigned i = 1;
-    __m128i rounds = _mm_setzero_si128();
+    unsigned i = 2; // i ist 2, weill wir erstens nicht bis n berechnen sonder n - 1 und die erste berechnung außerhalb machen
+    __m128i rounds = _mm_set1_epi32(1); // Starten bei 1, weil alle 0 cases abgefangen worden sind
     __m128i one = _mm_set1_epi32(1);
     __m128 minus_two = _mm_set1_ps(-2.0f);
     __m128 squaredEscapeDistance = _mm_set1_ps(4.0f);
@@ -31,7 +34,13 @@ __m128i symEscapeTime(const unsigned n, const float complex c1, const float comp
 	/* Zn muss nie berechnet werden, da z(n-1) entweder divergiert dann (n - 1) und sonst immer n zurückgegeben wird
 	 * egal ob zn divergiert oder nicht. Deswegen läuft die schleife nur n -1 mal bis zur berechnung von zn-1 (oder
 	 * bis alles divergiert), da i = 1 ist.
+	 * Außerdem müssen wir nicht checken ob z0 divergiert, weil das nie so ist, deswegen berechnen wir außerhalb
+	 * z1, sodass der erste distance check auf z1 ist und nicht z0, deswegen fangen wir die round lanes bei 1 an
+	 *  und inkrementieren i noch mal auf 2, sodass man eine schleife weniger hat
 	 */
+	z_imagine = _mm_add_ps(c_imagine, _mm_mul_ps(minus_two, _mm_mul_ps(z_real, z_imagine)));
+	z_real = _mm_add_ps(c_real, _mm_sub_ps(realSquared, imagSquared));
+	realSquared = _mm_mul_ps(z_real, z_real), imagSquared = _mm_mul_ps(z_imagine, z_imagine);
     while (i++ < n) {
         // Rounds inkrementieren, falls z noch nicht divergiert (also Betrag <= 4 ist)
         __m128 distance = _mm_add_ps(realSquared, imagSquared);

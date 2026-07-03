@@ -1,0 +1,3 @@
+1. Naiv: z10 nicht berechnen, z0 nicht checken (für n = 0,1 nicht berechnen)
+2. SIMD
+3. Symmetrie
