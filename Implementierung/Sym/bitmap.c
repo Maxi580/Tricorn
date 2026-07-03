@@ -128,7 +128,8 @@ void symGenImage(float complex start, size_t width, ssize_t height, float res, u
             const float complex c4 = start + ((float) endIndex + 3) * res + factor * (float) y * res * I;
             _mm_storeu_si128((__m128i*) restIterations, symEscapeTime(n, c1, c2, c3, c4));
 
-            for (int i = 0; i < (width - endIndex); i++){
+            size_t range = width - endIndex;
+            for (size_t i = 0; i < range; i++){
                 size_t x_offset = (endIndex + i) * 3;
                 unsigned char *bottomOffset = bottomRow + x_offset;
                 RGB_Color rgb = colorMap[restIterations[i]];
