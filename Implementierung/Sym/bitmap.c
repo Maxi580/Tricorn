@@ -10,41 +10,50 @@
 
 #define rgbSize 3
 
+typedef struct {
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
+} RGB_Color;
 
-static const unsigned colorPallete[4][rgbSize] = {
+
+static const RGB_Color colorPallete[4] = {
     // We call modulo with the size of this pallete, quite a few times, it would be nicer if this is a multiple of 2 ig
-    // Blue, Green, Red
-    {128, 0, 0},
-    {255, 0, 0},
-    {255, 100, 0},
-    {255, 255, 0},
+    // Red, Green, Blue
+    {0, 0, 128},
+    {0, 0, 255},
+    {0, 100, 255},
+    {0, 255, 255},
 };
 static const unsigned colorPalleteSize = sizeof(colorPallete) / sizeof(colorPallete[0]);
 
+static RGB_Color* createColorMap(unsigned limit, bool color) {
+    RGB_Color* mapping = malloc((limit + 1) * sizeof(RGB_Color));
+    if (mapping == NULL) {
+        return NULL;
+    }
 
-__attribute__((hot))
-static inline void colorizeBitmap(unsigned limit, unsigned iterations, unsigned char* row, bool color)  {
-    /* Colors one Pixel in the Bitmap */
-    if (limit == iterations) {
-        // Black (Did Not converge)
-        row[0] = row[1] = row[2] = 0;
-    } else {
-        // Branch Prediction should be correct almost always, so i assume that this doesnt cost anything really
-        if (!color) {
-            // Grey
-            unsigned colorPixel = 255 - 4 * ( iterations % 64 );
-            row[0] = row[1] = row[2] = colorPixel;
+    for (unsigned i = 0; i < limit; i++) {
+        if (color) {
+            unsigned colorIndex = i % colorPalleteSize;
+            mapping[i] = colorPallete[colorIndex];
         } else {
-            // Colorized
-            unsigned colorIndex = iterations % colorPalleteSize;
-            row[0]= colorPallete[colorIndex][0];
-            row[1]= colorPallete[colorIndex][1];
-            row[2]= colorPallete[colorIndex][2];
+            unsigned greyColor = 255 - 4 * (i % 64 );
+            mapping[i] = (RGB_Color) {greyColor, greyColor, greyColor};
         }
     }
+    mapping[limit] = (RGB_Color) {0, 0, 0};
+    return mapping;
 }
 
 void symGenImage(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
+    RGB_Color* colorMap = createColorMap(n, color);
+    if (colorMap == NULL) {
+        printf("Error allocating memory\n");
+        free(colorMap);
+        return;
+    }
+
     size_t row_size = ((width * 3+3)/4)*4; // Größe einer Reihe würde auf 4 Byte aufgefüllt(Padding)
 
     /* Wenn heigt kleiner 0 ist, startet man unten links und geht nach oben also addiert man +y und sonst
@@ -95,9 +104,17 @@ void symGenImage(float complex start, size_t width, ssize_t height, float res, u
 
             for (int i = 0; i < 4; i++){
                 size_t x_offset = (x + i) * 3;
-                colorizeBitmap(n, iterations[i], bottomRow + x_offset, color);
-                if(useSym && symPixelCord >= 0 && symPixelCord < top && symPixelCord != y){
-                    colorizeBitmap(n, iterations[i], topRow + x_offset, color);
+                unsigned char *bottomOffset = bottomRow + x_offset;
+                RGB_Color rgb = colorMap[iterations[i]];
+                // rgb is reversed on bitmap
+                bottomOffset[0] =  rgb.b;
+                bottomOffset[1] =  rgb.g;
+                bottomOffset[2] =  rgb.r;
+                if(useSym && topRow != NULL && symPixelCord >= 0 && symPixelCord < top && symPixelCord != y){
+                    unsigned char *topOffset = topRow + x_offset;
+                    topOffset[0] =  rgb.b;
+                    topOffset[1] =  rgb.g;
+                    topOffset[2] =  rgb.r;
                 }
             }
         }
@@ -111,11 +128,19 @@ void symGenImage(float complex start, size_t width, ssize_t height, float res, u
             const float complex c4 = start + ((float) endIndex + 3) * res + factor * (float) y * res * I;
             _mm_storeu_si128((__m128i*) restIterations, symEscapeTime(n, c1, c2, c3, c4));
 
-            for (size_t i = 0; i < (width - endIndex); i++) {
+            for (int i = 0; i < (width - endIndex); i++){
                 size_t x_offset = (endIndex + i) * 3;
-                colorizeBitmap(n, restIterations[i], bottomRow + x_offset, color);
-                if(useSym && symPixelCord >= 0 && symPixelCord < top && symPixelCord != y){
-                    colorizeBitmap(n, restIterations[i], topRow + x_offset, color);
+                unsigned char *bottomOffset = bottomRow + x_offset;
+                RGB_Color rgb = colorMap[restIterations[i]];
+                // rgb is reversed on bitmap
+                bottomOffset[0] =  rgb.b;
+                bottomOffset[1] =  rgb.g;
+                bottomOffset[2] =  rgb.r;
+                if(useSym && topRow != NULL && symPixelCord >= 0 && symPixelCord < top && symPixelCord != y){
+                    unsigned char *topOffset = topRow + x_offset;
+                    topOffset[0] =  rgb.b;
+                    topOffset[1] =  rgb.g;
+                    topOffset[2] =  rgb.r;
                 }
             }
         }
@@ -127,6 +152,7 @@ void symGenImage(float complex start, size_t width, ssize_t height, float res, u
             }
         }
     }
+    free(colorMap);
 }
 
 void symWriteBmp(char *filename, size_t width, ssize_t heightsigned, unsigned char *img) {
