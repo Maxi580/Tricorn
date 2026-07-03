@@ -301,7 +301,7 @@ int main(int argc, char *argv[]) {
             symGenImage(start, width, heightsigned, res, n, color, img);
             symWriteBmp(neuerDateiname, width, heightsigned, img);
         } else {
-            printf("Error: v muss in [0;1] sein\n");
+            printf("Error: v muss in [0;2] sein\n");
             free(img);
             return 1;
         }

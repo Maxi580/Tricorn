@@ -56,7 +56,7 @@ void symGenImage(float complex start, size_t width, ssize_t height, float res, u
 
     size_t row_size = ((width * 3+3)/4)*4; // Größe einer Reihe würde auf 4 Byte aufgefüllt(Padding)
 
-    /* Wenn heigt kleiner 0 ist, startet man unten links und geht nach oben also addiert man +y und sonst
+    /* Wenn heigt größer 0 ist, startet man unten links und geht nach oben also addiert man +y und sonst
      * startet man oben links un zieht y ab, das vorzeichen wird über factor kontrolliert*/
     float factor = height < 0 ? -1.0f : 1.0f;
     ssize_t top = height < 0 ? -height : height;
