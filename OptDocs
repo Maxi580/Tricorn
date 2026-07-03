@@ -1,3 +1,3 @@
-1. Naiv: z10 nicht berechnen, z0 nicht checken (für n = 0,1 nicht berechnen)
+1. Naiv: z10 nicht berechnen, z0 nicht checken (für n = 0,1 nicht berechnen), COlorMap nur einmal berechnen
 2. SIMD
 3. Symmetrie
