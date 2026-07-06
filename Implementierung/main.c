@@ -1,37 +1,17 @@
 #include <stdio.h>
 #include <complex.h>
-#include "NaiveImplementation/bitmap.h"
-#include "NaiveImplementation/escapetime.h"
-#include "Simd/bitmap.h"
-#include "Simd/escapetime.h"
-#include <complex.h>
-#include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include "Sym/bitmap.h"
-#include "Circle/bitmap.h"
 
-/*
-int main() {
-    const unsigned limit = 10;
-    const float complex exampleStart = 0;
-    const float complex exampleC = 0.0 + 0.0 * I;
-
-
-    const unsigned result = escapeTime(limit, exampleStart, exampleC);
-    if (limit == result) {
-        // besser:? "Did not escape in %u iterations\n", limit
-        printf("Did not converge :(");
-    } else {
-        //warum kein %u?
-        printf("Converged after %d (Limit: %d)", result, limit);
-
-    }
-    return 0;
-}
-*/
+#include "bitmap.h"
+#include "NaiveImplementation/image.h"
+#include "Simd/image.h"
+#include "Simd/escapetime.h"
+#include "Sym/image.h"
+#include "Circle/image.h"
+#include "LatencyThroughput/image.h"
 
 int main(int argc, char *argv[]) {
     char *end;
@@ -49,7 +29,7 @@ int main(int argc, char *argv[]) {
      */
 
 
-    //B
+    // B
     bool isBenchmark = false;
     ssize_t benchmarkIterations = 1;
     for (int i=0; i<argc; i++) {
@@ -67,7 +47,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    //v
+    // v
     unsigned v = 0;
     for (int i=0; i<argc; i++) {
         if (strcmp(argv[i], "-V") == 0) {
@@ -83,7 +63,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    //start parameter; bestimmen dur -s <REALTEIL> <IMAGINAERTEIL>; beide müssen hierbei gültige floats sein
+    //start parameter; bestimmen durch -s <REALTEIL> <IMAGINAERTEIL>; beide müssen hierbei gültige floats sein
     float complex start = -0 + 0*I; //start parameter
     float realteil;
     float imaginaerteil;
@@ -233,7 +213,6 @@ int main(int argc, char *argv[]) {
         clock_gettime(CLOCK_MONOTONIC, &time_start);
     }
 
-
     if (v == 0) {
         for (ssize_t i=0; i < benchmarkIterations; i++) { // Ohne Benchmarking nur eine Iteration
             genImage(start, width, heightsigned, res, n, color, img);
@@ -249,6 +228,10 @@ int main(int argc, char *argv[]) {
     } else if (v == 3) {
         for (ssize_t i=0; i < benchmarkIterations; i++) {
             genImageCircle(start, width, heightsigned, res, n, color, img);
+        }
+    } else if (v == 4) {
+        for (ssize_t i=0; i < benchmarkIterations; i++) {
+            genImageLatencyThroughput(start, width, heightsigned, res, n, color, img);
         }
     } else {
         printf("Error: V muss in [0;3] sein\n");
@@ -269,22 +252,14 @@ int main(int argc, char *argv[]) {
         printf("Dauer pro Iteration: %f s\n", avg_time);
     }
 
-    if (v == 0) {
-        writeBmp(neuerDateiname, width, heightsigned, img);
-    } else if (v == 1) {
-        writeBmpSIMD(neuerDateiname, width, heightsigned, img);
-    } else if (v == 2) {
-        symWriteBmp(neuerDateiname, width, heightsigned, img);
-    } else if (v == 3) {
-        writeBmpCircle(neuerDateiname, width, heightsigned, img);
-    }
+    writeBmp(neuerDateiname, width, heightsigned, img);
 
     free(img);
     return 0;
 }
 
 /* Betriebsanleitung:
- * gcc Implementierung/NaiveImplementation/main.c Implementierung/NaiveImplementation/bitmap.c Implementierung/NaiveImplementation/escapetime.c -o test
+ * gcc Implementierung/NaiveImplementation/main.c Implementierung/NaiveImplementation/image.c Implementierung/NaiveImplementation/escapetime.c -o test
  * ./test
  * explorer.exe test.bmp
  */

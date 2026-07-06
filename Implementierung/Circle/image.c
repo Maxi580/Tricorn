@@ -79,7 +79,8 @@ void genImageCircle(float complex start, size_t width, ssize_t height, float res
      */
     double center = 2.0 * (-cimag(start) / (factor * res));
     long centerRounded = lround(center);
-    int useSym = fabs(center - (double)centerRounded) < 1e-3; // If the middle is not at a clean y then dont use it
+    // If the middle is not at a clean y (or .5) then dont use it
+    int useSym = fabs(center - (double)centerRounded) < 1e-3;
 
     for (ssize_t y = 0; y < top; y++) {
         unsigned char *bottomRow = img + y * row_size; // *row zeigt nun auf den Anfang von Zeile y (0-indexed)
@@ -156,59 +157,6 @@ void genImageCircle(float complex start, size_t width, ssize_t height, float res
     free(colorMap);
 }
 
-void writeBmpCircle(char *filename, size_t width, ssize_t heightsigned, unsigned char *img) {
-    size_t height;
-    if (heightsigned < 0) {
-        height = heightsigned * (-1);
-    }
-    else {
-        height = heightsigned ;
-    }
-
-    int32_t bmp_height = (int32_t) (heightsigned);
-    size_t row_size = ((width * 3+3)/4)*4;
-    size_t pixelArraySize = row_size * height;
-    size_t fileSize = 54 + pixelArraySize; //54 für header der bmp datei
-    unsigned char header[54] = {0}; //header deklarieren; initialisieren
-
-    //header schreiben
-    header[0] = 'B';
-    header[1] = 'M';
-
-    header[2] = (unsigned char) (fileSize);
-    header[3] = (unsigned char) (fileSize>>8);
-    header[4] = (unsigned char) (fileSize>>16);
-    header[5] = (unsigned char) (fileSize>>24);
-
-    header[10] = 54; // 54 Bytes Header
-
-    header[14] = 40; //40-Bit Informationsblock
-
-    header[18] = (unsigned char) (width);
-    header[19] = (unsigned char) (width >> 8);
-    header[20] = (unsigned char) (width >> 16);
-    header[21] = (unsigned char) (width >> 24);
-    header[22] = (unsigned char) (bmp_height);
-    header[23] = (unsigned char) (bmp_height >> 8);
-    header[24] = (unsigned char) (bmp_height >> 16);
-    header[25] = (unsigned char) (bmp_height >> 24);
-
-    header[26] = 1; //Farbebened
-    header[28] = 24; // Bit pro Pixel (3*8)
-
-    header[34] = (unsigned char) (pixelArraySize);
-    header[35] = (unsigned char) (pixelArraySize >> 8);
-    header[36] = (unsigned char) (pixelArraySize >> 16);
-    header[37] = (unsigned char) (pixelArraySize >> 24);
-
-    FILE *f = fopen(filename, "wb");
-    if (f == NULL) {return;}
-    fwrite(header, 1, 54, f);
-    fwrite(img, pixelArraySize, 1, f );
-
-    fclose(f);
-
-}
 /*
 int main(void) {
     size_t width;

@@ -6,7 +6,9 @@ CFLAGS = -g -Wall -Wextra -std=c11 -INaiveImplementation -D_POSIX_C_SOURCE=20080
 
 all: main
 
-main: main.c NaiveImplementation/escapetime.c NaiveImplementation/bitmap.c Simd/escapetime.c Simd/bitmap.c Sym/escapetime.c Sym/bitmap.c Circle/bitmap.c Circle/escapetime.c
+main: main.c NaiveImplementation/escapetime.c NaiveImplementation/image.c Simd/escapetime.c Simd/image.c \
+	Sym/escapetime.c Sym/image.c Circle/image.c Circle/escapetime.c LatencyThroughput/escapetime.c \
+	LatencyThroughput/image.c bitmap.c bitmap.h
 	$(CC) $(CFLAGS) -o $@ $^ -lm
 
 
