@@ -136,7 +136,11 @@ void debug(void) {
     result = symEscapeTime(n, c, c, c, c);
     _mm_storeu_si128((__m128i*)values, result);
     printf("sym: %u\n", values[0]);
+    printf("\n");
+    printf("\n");
 
+    printf("upper: %u\n", escapeTime(100, -1.32f + 0.035f * I));
+    printf("lower: %u\n", escapeTime(100, -1.32f - 0.035f * I));
 
 }
 

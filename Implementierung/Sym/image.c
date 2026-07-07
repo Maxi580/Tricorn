@@ -76,14 +76,15 @@ void symGenImage(float complex start, size_t width, ssize_t height, float res, u
         HOWEVER. If due to weird resolutions etc the center is not at a clean y but at like 2.4 or something
         i see no way of using that optimization.
      */
-    double center = 2.0 * (-cimag(start) / (factor * res));
+    double center =  (-cimag(start) /(double) (factor * res));
     long centerRounded = lround(center);
-    int useSym = fabs(center - (double)centerRounded) < 1e-3; // If the middle is not at a clean y then dont use it
+    int useSym = fabs(center - (double)centerRounded) < 1e-6; // If the middle is not at a clean y then dont use it
+
 
     for (ssize_t y = 0; y < top; y++) {
         unsigned char *bottomRow = img + y * row_size; // *row zeigt nun auf den Anfang von Zeile y (0-indexed)
 
-        ssize_t symPixelCord = centerRounded - y;
+        ssize_t symPixelCord =(ssize_t)2 * centerRounded - y;
         unsigned char *topRow = NULL;
         if(useSym && symPixelCord >= 0 && symPixelCord < y) {
           continue; // Koordinate schon berechnet und eingetragen
@@ -97,9 +98,7 @@ void symGenImage(float complex start, size_t width, ssize_t height, float res, u
 
             unsigned iterations[4];
             const float complex c1 = start + (float) x * res + factor * (float) y * res * I;
-            if (x == 136 && y == 307) {
-                printf("DEBUG(REMOVE LATER!!!) x=%zu y=%zd c=%f %+.9fi\n", x,y,crealf(c1), cimagf(c1));
-            }
+
             const float complex c2 = start + ((float) x + 1) * res + factor * (float) y * res * I;
             const float complex c3 = start + ((float) x + 2) * res + factor * (float) y * res * I;
             const float complex c4 = start + ((float) x + 3) * res + factor * (float) y * res * I;

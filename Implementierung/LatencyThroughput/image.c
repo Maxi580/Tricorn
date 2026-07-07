@@ -76,17 +76,17 @@ void genImageLatencyThroughput(float complex start, size_t width, ssize_t height
         HOWEVER. If due to weird resolutions etc the center is not at a clean y but at like 2.4 or something
         i see no way of using that optimization.
      */
-    double center = 2.0 * (-cimag(start) / (factor * res));
+    double center =  (-cimag(start) /(double) (factor * res));
     long centerRounded = lround(center);
-    int useSym = fabs(center - (double)centerRounded) < 1e-3; // If the middle is not at a clean y then dont use it
+    int useSym = fabs(center - (double)centerRounded) < 1e-6; // If the middle is not at a clean y then dont use it
 
     for (ssize_t y = 0; y < top; y++) {
         unsigned char *bottomRow = img + y * row_size; // *row zeigt nun auf den Anfang von Zeile y (0-indexed)
 
-        ssize_t symPixelCord = centerRounded - y;
+        ssize_t symPixelCord =(ssize_t)2 * centerRounded - y;
         unsigned char *topRow = NULL;
         if(useSym && symPixelCord >= 0 && symPixelCord < y) {
-          continue; // Koordinate schon berechnet und eingetragen
+            continue; // Koordinate schon berechnet und eingetragen
         }
 
         if(useSym && symPixelCord >= 0 && symPixelCord < top && symPixelCord != y) {
