@@ -2,8 +2,8 @@
 // Created by Hendrik on 14.06.2026.
 //
 
-#ifndef GRA26CAPSPROJECT_T105_SYM_H
-#define GRA26CAPSPROJECT_T105_SYM_H
+#ifndef GRA26CAPSPROJECT_T105_SYMI_H
+#define GRA26CAPSPROJECT_T105_SYMI_H
 #include <stdbool.h>
 #include <stddef.h>
 #include <sys/types.h>

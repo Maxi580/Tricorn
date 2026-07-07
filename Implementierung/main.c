@@ -13,6 +13,7 @@
 #include "Circle/image.h"
 #include "LatencyThroughput/image.h"
 #include "testSuite.h"
+#include "GleichheittestsKomplex.h"
 
 int main(int argc, char *argv[]) {
     char *end;
@@ -27,8 +28,23 @@ int main(int argc, char *argv[]) {
      * -o <NAME> name ohne .bmp angeben
      * -C || --color einfach setzen, dann wird bild mit Eintracht Braunschweig Farben ausgegeben
      * -t || --test ; run Testsuite
-     *
+     * -MOIN FLAG ZUM TESTEN VON MEINER IMPLEMENTIERUNG; ÜBERSCHREIBT SÄMTLICHE ANDERE FLAGS
      */
+
+    for (int i = 0; i < argc; i++) {
+        if (strcmp(argv[i], "-MOIN") == 0) {
+            if (BitmapVergleichTests()) {
+                printf("Alle Bitmaps gleich\n");
+
+            }
+            else {
+                printf("FehlerImCode\n");
+            }
+            return 0;
+        }
+
+    }
+
 
     // Testsuite
     for (int i = 0; i < argc; i++) {
