@@ -4,7 +4,5 @@
 #include <complex.h>
 
 void genImageCircle(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img);
-void writeBmpCircle(char *filename, size_t width, ssize_t heightsigned, unsigned char *img);
-
 
 #endif //GRA26CAPSPROJECT_T105_CIR_H

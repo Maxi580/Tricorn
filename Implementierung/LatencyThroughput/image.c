@@ -46,11 +46,10 @@ static RGB_Color* createColorMap(unsigned limit, bool color) {
     return mapping;
 }
 
-void genImageCircle(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
+void genImageLatencyThroughput(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
     RGB_Color* colorMap = createColorMap(n, color);
     if (colorMap == NULL) {
         printf("Error allocating memory\n");
-        free(colorMap);
         return;
     }
 
@@ -61,16 +60,16 @@ void genImageCircle(float complex start, size_t width, ssize_t height, float res
     float factor = height < 0 ? -1.0f : 1.0f;
     ssize_t top = height < 0 ? -height : height;
 
-    /* Width muss nicht durch 4 teilbar sein. Deswegen machen wir 4 koordinaten in parallel so lange das geht und
-     * dann am Ende den Rest (also 0 - 3 Elemente) sequenziell*/
-    size_t endIndex = width - (width % 4);
+    /* Width muss nicht durch die Anzahl der gleichzeitig berechnet Elemente teilbar sein. Deswegen machen wir
+       x koordinaten in parallel so lange das geht und dann am Ende den Rest*/
+    size_t endIndex = width - (width % 8);
 
     /* For Symmetre we first find the center which is the y where imag is 0, then knowing that,
        we for every y can calculate the corresponding mirrored y which is 2 * center - y (makes sense)
        Now we calculate the same stuff as before, however if we find a partner, that is smaller than the current y
        this must mean that it already was computed, as we go from 0 to top i guess. The only issue is now that
        if the center is out of bounds. When it is below the image with our formula this would mean that we already
-        have calculated everything. So we only skip if the partner is larger than 0. If it is above the image, we dont
+       have calculated everything. So we only skip if the partner is larger than 0. If it is above the image, we dont
        skip anything, but we obviously cant save anyhting either. We must consider that we can only draw pixels in bound
        so we check both later.
 
@@ -94,15 +93,22 @@ void genImageCircle(float complex start, size_t width, ssize_t height, float res
             topRow = img + symPixelCord * row_size; // Top Row nur berechnen wenn man es bracuht
         }
 
-        for (size_t x = 0; x < endIndex; x += 4) {
-            unsigned iterations[4];
-            const float complex c1 = start + (float) x * res + factor * (float) y * res * I;
-            const float complex c2 = start + ((float) x + 1) * res + factor * (float) y * res * I;
-            const float complex c3 = start + ((float) x + 2) * res + factor * (float) y * res * I;
-            const float complex c4 = start + ((float) x + 3) * res + factor * (float) y * res * I;
-            _mm_storeu_si128((__m128i*) iterations, escapeTimeCircle(n, c1, c2, c3, c4));
+        for (size_t x = 0; x < endIndex; x += 8) {
+            unsigned iterations[8];
+            const float complex a1 = start + (float) x * res + factor * (float) y * res * I;
+            const float complex a2 = start + ((float) x + 1) * res + factor * (float) y * res * I;
+            const float complex a3 = start + ((float) x + 2) * res + factor * (float) y * res * I;
+            const float complex a4 = start + ((float) x + 3) * res + factor * (float) y * res * I;
+            const float complex b1 = start + ((float) x + 4) * res + factor * (float) y * res * I;
+            const float complex b2 = start + ((float) x + 5) * res + factor * (float) y * res * I;
+            const float complex b3 = start + ((float) x + 6) * res + factor * (float) y * res * I;
+            const float complex b4 = start + ((float) x + 7) * res + factor * (float) y * res * I;
 
-            for (int i = 0; i < 4; i++){
+            twoIntegerLanes bothIterations = escapeTimeLatencyThroughput(n, a1, a2, a3, a4, b1, b2, b3, b4);
+            _mm_storeu_si128((__m128i*)iterations,       bothIterations.a);
+            _mm_storeu_si128((__m128i*)(iterations + 4), bothIterations.b);
+
+            for (int i = 0; i < 8; i++){
                 size_t x_offset = (x + i) * 3;
                 unsigned char *bottomOffset = bottomRow + x_offset;
                 RGB_Color rgb = colorMap[iterations[i]];
@@ -118,16 +124,24 @@ void genImageCircle(float complex start, size_t width, ssize_t height, float res
                 }
             }
         }
-        // Den Rest von width auch noch fillen (bis zu 3 elemente)
+        // Den Rest von width auch noch fillen (bis zu (ParallelElemente - 1) elemente)
         // Es werden 4 werte in parallel berechnet, aber nur die benötigten eingetragen
         if(endIndex < width) {
-            unsigned restIterations[4];
-            const float complex c1 = start + (float) endIndex * res + factor * (float) y * res * I;
-            const float complex c2 = start + ((float) endIndex + 1) * res + factor * (float) y * res * I;
-            const float complex c3 = start + ((float) endIndex + 2) * res + factor * (float) y * res * I;
-            const float complex c4 = start + ((float) endIndex + 3) * res + factor * (float) y * res * I;
-            _mm_storeu_si128((__m128i*) restIterations, escapeTimeCircle(n, c1, c2, c3, c4));
+            unsigned restIterations[8];
+            const float complex a1 = start + (float) endIndex * res + factor * (float) y * res * I;
+            const float complex a2 = start + ((float) endIndex + 1) * res + factor * (float) y * res * I;
+            const float complex a3 = start + ((float) endIndex + 2) * res + factor * (float) y * res * I;
+            const float complex a4 = start + ((float) endIndex + 3) * res + factor * (float) y * res * I;
+            const float complex b1 = start + ((float) endIndex + 4) * res + factor * (float) y * res * I;
+            const float complex b2 = start + ((float) endIndex + 5) * res + factor * (float) y * res * I;
+            const float complex b3 = start + ((float) endIndex + 6) * res + factor * (float) y * res * I;
+            const float complex b4 = start + ((float) endIndex + 7) * res + factor * (float) y * res * I;
 
+            twoIntegerLanes bothIterations = escapeTimeLatencyThroughput(n, a1, a2, a3, a4, b1, b2, b3, b4);
+            _mm_storeu_si128((__m128i*)restIterations,       bothIterations.a);
+            _mm_storeu_si128((__m128i*)(restIterations + 4), bothIterations.b);
+
+            // Nur die Werte eintragen, die tatsächlich noch benötigt werden, Overflow wird ignoiert.
             size_t range = width - endIndex;
             for (size_t i = 0; i < range; i++){
                 size_t x_offset = (endIndex + i) * 3;
@@ -147,7 +161,7 @@ void genImageCircle(float complex start, size_t width, ssize_t height, float res
         }
 
         for (size_t i= width*3; i<row_size; i++) {
-            bottomRow[i]=0; //restliche Padding Bits einer Zeile auffüllen
+            bottomRow[i]=0; // restliche Padding Bits einer Zeile auffüllen
             if (useSym && symPixelCord >= 0 && symPixelCord < top && symPixelCord != y) {
                 topRow[i]=0;
             }
@@ -155,82 +169,3 @@ void genImageCircle(float complex start, size_t width, ssize_t height, float res
     }
     free(colorMap);
 }
-
-void writeBmpCircle(char *filename, size_t width, ssize_t heightsigned, unsigned char *img) {
-    size_t height;
-    if (heightsigned < 0) {
-        height = heightsigned * (-1);
-    }
-    else {
-        height = heightsigned ;
-    }
-
-    int32_t bmp_height = (int32_t) (heightsigned);
-    size_t row_size = ((width * 3+3)/4)*4;
-    size_t pixelArraySize = row_size * height;
-    size_t fileSize = 54 + pixelArraySize; //54 für header der bmp datei
-    unsigned char header[54] = {0}; //header deklarieren; initialisieren
-
-    //header schreiben
-    header[0] = 'B';
-    header[1] = 'M';
-
-    header[2] = (unsigned char) (fileSize);
-    header[3] = (unsigned char) (fileSize>>8);
-    header[4] = (unsigned char) (fileSize>>16);
-    header[5] = (unsigned char) (fileSize>>24);
-
-    header[10] = 54; // 54 Bytes Header
-
-    header[14] = 40; //40-Bit Informationsblock
-
-    header[18] = (unsigned char) (width);
-    header[19] = (unsigned char) (width >> 8);
-    header[20] = (unsigned char) (width >> 16);
-    header[21] = (unsigned char) (width >> 24);
-    header[22] = (unsigned char) (bmp_height);
-    header[23] = (unsigned char) (bmp_height >> 8);
-    header[24] = (unsigned char) (bmp_height >> 16);
-    header[25] = (unsigned char) (bmp_height >> 24);
-
-    header[26] = 1; //Farbebened
-    header[28] = 24; // Bit pro Pixel (3*8)
-
-    header[34] = (unsigned char) (pixelArraySize);
-    header[35] = (unsigned char) (pixelArraySize >> 8);
-    header[36] = (unsigned char) (pixelArraySize >> 16);
-    header[37] = (unsigned char) (pixelArraySize >> 24);
-
-    FILE *f = fopen(filename, "wb");
-    if (f == NULL) {return;}
-    fwrite(header, 1, 54, f);
-    fwrite(img, pixelArraySize, 1, f );
-
-    fclose(f);
-
-}
-/*
-int main(void) {
-    size_t width;
-    width = 500; //breite eingeben
-    ssize_t heightsigned = 700; //höhe eingeben
-    size_t height;
-    if (heightsigned < 0) {
-        height = heightsigned * (-1);
-    }
-    else {
-        height = heightsigned ;
-    }
-
-    size_t row_size = ((width * 3+3)/4)*4;
-    size_t pixelArraySize = row_size * height;
-
-    unsigned char *img = malloc(pixelArraySize);
-    if (img == NULL) {return 1;} //Fehler
-
-    genImage(width, heightsigned, img);
-    writeBmp("test.bmp", width, heightsigned, img);
-    free(img);
-    return 0;
-}
-*/

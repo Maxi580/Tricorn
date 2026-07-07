@@ -10,7 +10,5 @@
 #include <complex.h>
 
 void genImageSIMD(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img);
-void writeBmpSIMD(char *filename, size_t width, ssize_t heightsigned, unsigned char *img);
-
 
 #endif //GRA26CAPSPROJECT_T105_SIMD_H
