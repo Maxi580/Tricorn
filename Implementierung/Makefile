@@ -8,7 +8,7 @@ all: main
 
 main: main.c NaiveImplementation/escapetime.c NaiveImplementation/image.c Simd/escapetime.c Simd/image.c \
 	Sym/escapetime.c Sym/image.c Circle/image.c Circle/escapetime.c LatencyThroughput/escapetime.c \
-	LatencyThroughput/image.c bitmap.c bitmap.h
+	LatencyThroughput/image.c bitmap.c bitmap.h testSuite.c
 	$(CC) $(CFLAGS) -o $@ $^ -lm
 
 

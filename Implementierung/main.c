@@ -12,6 +12,7 @@
 #include "Sym/image.h"
 #include "Circle/image.h"
 #include "LatencyThroughput/image.h"
+#include "testSuite.h"
 
 int main(int argc, char *argv[]) {
     char *end;
@@ -25,9 +26,20 @@ int main(int argc, char *argv[]) {
      * -r <SCHRITTWEITE PRO PIXEL> muss positive float sein
      * -o <NAME> name ohne .bmp angeben
      * -C || --color einfach setzen, dann wird bild mit Eintracht Braunschweig Farben ausgegeben
+     * -t || --test ; run Testsuite
      *
      */
 
+    // Testsuite
+    for (int i = 0; i < argc; i++) {
+        if (strcmp(argv[i], "--test") == 0 || strcmp(argv[i], "-t") == 0) {
+            if (testSuite() == 1) {
+                printf("Fehler beim Ausführen der Testsuite\n");
+                return 1;
+            }
+            return 0;
+        }
+    }
 
     // B
     bool isBenchmark = false;
@@ -234,7 +246,7 @@ int main(int argc, char *argv[]) {
             genImageLatencyThroughput(start, width, heightsigned, res, n, color, img);
         }
     } else {
-        printf("Error: V muss in [0;3] sein\n");
+        printf("Error: V muss in [0;4] sein\n");
         free(img);
         return 1;
     }
