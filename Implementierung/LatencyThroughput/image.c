@@ -104,7 +104,7 @@ void genImageLatencyThroughput(float complex start, size_t width, ssize_t height
             const float complex b3 = start + ((float) x + 6) * res + factor * (float) y * res * I;
             const float complex b4 = start + ((float) x + 7) * res + factor * (float) y * res * I;
 
-            twoIntegerLanes bothIterations = escapeTimeLatencyThroughput(n, a1, a2, a3, a4, b1, b2, b3, b4);
+            twoIntegerLanes bothIterations = escapeTimeLatencyThroughputTwo(n, a1, a2, a3, a4, b1, b2, b3, b4);
             _mm_storeu_si128((__m128i*)iterations,       bothIterations.a);
             _mm_storeu_si128((__m128i*)(iterations + 4), bothIterations.b);
 
@@ -137,7 +137,7 @@ void genImageLatencyThroughput(float complex start, size_t width, ssize_t height
             const float complex b3 = start + ((float) endIndex + 6) * res + factor * (float) y * res * I;
             const float complex b4 = start + ((float) endIndex + 7) * res + factor * (float) y * res * I;
 
-            twoIntegerLanes bothIterations = escapeTimeLatencyThroughput(n, a1, a2, a3, a4, b1, b2, b3, b4);
+            twoIntegerLanes bothIterations = escapeTimeLatencyThroughputTwo(n, a1, a2, a3, a4, b1, b2, b3, b4);
             _mm_storeu_si128((__m128i*)restIterations,       bothIterations.a);
             _mm_storeu_si128((__m128i*)(restIterations + 4), bothIterations.b);
 
