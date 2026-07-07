@@ -95,14 +95,15 @@ void genImageLatencyThroughput(float complex start, size_t width, ssize_t height
 
         for (size_t x = 0; x < endIndex; x += 8) {
             unsigned iterations[8];
-            const float complex a1 = start + (float) x * res + factor * (float) y * res * I;
-            const float complex a2 = start + ((float) x + 1) * res + factor * (float) y * res * I;
-            const float complex a3 = start + ((float) x + 2) * res + factor * (float) y * res * I;
-            const float complex a4 = start + ((float) x + 3) * res + factor * (float) y * res * I;
-            const float complex b1 = start + ((float) x + 4) * res + factor * (float) y * res * I;
-            const float complex b2 = start + ((float) x + 5) * res + factor * (float) y * res * I;
-            const float complex b3 = start + ((float) x + 6) * res + factor * (float) y * res * I;
-            const float complex b4 = start + ((float) x + 7) * res + factor * (float) y * res * I;
+            const float imagPart = factor * (float) y * res * I;
+            const float complex a1 = start + (float) x * res + imagPart;
+            const float complex a2 = start + ((float) x + 1) * res + imagPart;
+            const float complex a3 = start + ((float) x + 2) * res + imagPart;
+            const float complex a4 = start + ((float) x + 3) * res + imagPart;
+            const float complex b1 = start + ((float) x + 4) * res + imagPart;
+            const float complex b2 = start + ((float) x + 5) * res + imagPart;
+            const float complex b3 = start + ((float) x + 6) * res + imagPart;
+            const float complex b4 = start + ((float) x + 7) * res + imagPart;
 
             twoIntegerLanes bothIterations = escapeTimeLatencyThroughputTwo(n, a1, a2, a3, a4, b1, b2, b3, b4);
             _mm_storeu_si128((__m128i*)iterations,       bothIterations.a);
@@ -128,14 +129,15 @@ void genImageLatencyThroughput(float complex start, size_t width, ssize_t height
         // Es werden 4 werte in parallel berechnet, aber nur die benötigten eingetragen
         if(endIndex < width) {
             unsigned restIterations[8];
-            const float complex a1 = start + (float) endIndex * res + factor * (float) y * res * I;
-            const float complex a2 = start + ((float) endIndex + 1) * res + factor * (float) y * res * I;
-            const float complex a3 = start + ((float) endIndex + 2) * res + factor * (float) y * res * I;
-            const float complex a4 = start + ((float) endIndex + 3) * res + factor * (float) y * res * I;
-            const float complex b1 = start + ((float) endIndex + 4) * res + factor * (float) y * res * I;
-            const float complex b2 = start + ((float) endIndex + 5) * res + factor * (float) y * res * I;
-            const float complex b3 = start + ((float) endIndex + 6) * res + factor * (float) y * res * I;
-            const float complex b4 = start + ((float) endIndex + 7) * res + factor * (float) y * res * I;
+            float imag_part = factor * (float) y * res * I;
+            const float complex a1 = start + (float) endIndex * res + imag_part;
+            const float complex a2 = start + ((float) endIndex + 1) * res + imag_part;
+            const float complex a3 = start + ((float) endIndex + 2) * res + imag_part;
+            const float complex a4 = start + ((float) endIndex + 3) * res + imag_part;
+            const float complex b1 = start + ((float) endIndex + 4) * res + imag_part;
+            const float complex b2 = start + ((float) endIndex + 5) * res + imag_part;
+            const float complex b3 = start + ((float) endIndex + 6) * res + imag_part;
+            const float complex b4 = start + ((float) endIndex + 7) * res + imag_part;
 
             twoIntegerLanes bothIterations = escapeTimeLatencyThroughputTwo(n, a1, a2, a3, a4, b1, b2, b3, b4);
             _mm_storeu_si128((__m128i*)restIterations,       bothIterations.a);
