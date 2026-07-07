@@ -76,26 +76,27 @@ void genImageLatencyThroughput(float complex start, size_t width, ssize_t height
         HOWEVER. If due to weird resolutions etc the center is not at a clean y but at like 2.4 or something
         i see no way of using that optimization.
      */
-    double center =  (-cimag(start) /(double) (factor * res));
-    long centerRounded = lround(center);
-    int useSym = fabs(center - (double)centerRounded) < 1e-6; // If the middle is not at a clean y then dont use it
-
+    double center = -(cimag(start) / (double) (factor * res));
     for (ssize_t y = 0; y < top; y++) {
         unsigned char *bottomRow = img + y * row_size; // *row zeigt nun auf den Anfang von Zeile y (0-indexed)
 
-        ssize_t symPixelCord =(ssize_t)2 * centerRounded - y;
+        // Berechnen vom Imaginärteil von y und des kandidaten, Symmetrie wird nur bei exakter korrektheit verwendet
+        ssize_t sym_y = lround(2.0 * center - (double) y);
+        float imag_y = cimagf(start) + factor * (float) y * res;
+        float imag_sym = cimagf(start) + factor * (float) sym_y * res;
+        bool useSym = sym_y >= 0 && sym_y < top && imag_y == -imag_sym ;
         unsigned char *topRow = NULL;
-        if(useSym && symPixelCord >= 0 && symPixelCord < y) {
+        if(useSym && sym_y < y) {
             continue; // Koordinate schon berechnet und eingetragen
         }
 
-        if(useSym && symPixelCord >= 0 && symPixelCord < top && symPixelCord != y) {
-            topRow = img + symPixelCord * row_size; // Top Row nur berechnen wenn man es bracuht
+        if (useSym && sym_y != y) {
+            topRow = img + sym_y * row_size;
         }
 
         for (size_t x = 0; x < endIndex; x += 8) {
             unsigned iterations[8];
-            const float imagPart = factor * (float) y * res * I;
+            const float complex imagPart = factor * (float) y * res * I;
             const float complex a1 = start + (float) x * res + imagPart;
             const float complex a2 = start + ((float) x + 1) * res + imagPart;
             const float complex a3 = start + ((float) x + 2) * res + imagPart;
@@ -117,7 +118,7 @@ void genImageLatencyThroughput(float complex start, size_t width, ssize_t height
                 bottomOffset[0] =  rgb.b;
                 bottomOffset[1] =  rgb.g;
                 bottomOffset[2] =  rgb.r;
-                if(useSym && topRow != NULL && symPixelCord >= 0 && symPixelCord < top && symPixelCord != y){
+                if(topRow != NULL){
                     unsigned char *topOffset = topRow + x_offset;
                     topOffset[0] =  rgb.b;
                     topOffset[1] =  rgb.g;
@@ -129,7 +130,7 @@ void genImageLatencyThroughput(float complex start, size_t width, ssize_t height
         // Es werden 4 werte in parallel berechnet, aber nur die benötigten eingetragen
         if(endIndex < width) {
             unsigned restIterations[8];
-            float imag_part = factor * (float) y * res * I;
+            float complex imag_part = factor * (float) y * res * I;
             const float complex a1 = start + (float) endIndex * res + imag_part;
             const float complex a2 = start + ((float) endIndex + 1) * res + imag_part;
             const float complex a3 = start + ((float) endIndex + 2) * res + imag_part;
@@ -153,7 +154,7 @@ void genImageLatencyThroughput(float complex start, size_t width, ssize_t height
                 bottomOffset[0] =  rgb.b;
                 bottomOffset[1] =  rgb.g;
                 bottomOffset[2] =  rgb.r;
-                if(useSym && topRow != NULL && symPixelCord >= 0 && symPixelCord < top && symPixelCord != y){
+                if(topRow != NULL){
                     unsigned char *topOffset = topRow + x_offset;
                     topOffset[0] =  rgb.b;
                     topOffset[1] =  rgb.g;
@@ -164,7 +165,7 @@ void genImageLatencyThroughput(float complex start, size_t width, ssize_t height
 
         for (size_t i= width*3; i<row_size; i++) {
             bottomRow[i]=0; // restliche Padding Bits einer Zeile auffüllen
-            if (useSym && symPixelCord >= 0 && symPixelCord < top && symPixelCord != y) {
+            if (topRow != NULL) {
                 topRow[i]=0;
             }
         }
