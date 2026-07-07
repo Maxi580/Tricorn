@@ -94,8 +94,12 @@ void symGenImage(float complex start, size_t width, ssize_t height, float res, u
         }
 
         for (size_t x = 0; x < endIndex; x += 4) {
+
             unsigned iterations[4];
             const float complex c1 = start + (float) x * res + factor * (float) y * res * I;
+            if (x == 136 && y == 307) {
+                printf("DEBUG(REMOVE LATER!!!) x=%zu y=%zd c=%f %+.9fi\n", x,y,crealf(c1), cimagf(c1));
+            }
             const float complex c2 = start + ((float) x + 1) * res + factor * (float) y * res * I;
             const float complex c3 = start + ((float) x + 2) * res + factor * (float) y * res * I;
             const float complex c4 = start + ((float) x + 3) * res + factor * (float) y * res * I;
