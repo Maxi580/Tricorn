@@ -38,7 +38,7 @@ static RGB_Color* createColorMap(unsigned limit, bool color) {
             unsigned colorIndex = i % colorPalleteSize;
             mapping[i] = colorPallete[colorIndex];
         } else {
-            unsigned greyColor = 255 - 4 * (i % 64 );
+            unsigned greyColor = 255 - 4 * (i % 64);
             mapping[i] = (RGB_Color) {greyColor, greyColor, greyColor};
         }
     }

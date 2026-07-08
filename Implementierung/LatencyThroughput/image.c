@@ -38,7 +38,7 @@ static RGB_Color* createColorMap(unsigned limit, bool color) {
             unsigned colorIndex = i % colorPalleteSize;
             mapping[i] = colorPallete[colorIndex];
         } else {
-            unsigned greyColor = 255 - 4 * (i % 64 );
+            unsigned greyColor = 255 - 4 * (i % 64);
             mapping[i] = (RGB_Color) {greyColor, greyColor, greyColor};
         }
     }
@@ -76,35 +76,34 @@ void genImageLatencyThroughput(float complex start, size_t width, ssize_t height
         HOWEVER. If due to weird resolutions etc the center is not at a clean y but at like 2.4 or something
         i see no way of using that optimization.
      */
-    double center = -(cimag(start) / (double) (factor * res));
+    double center =  (-cimag(start) /(double) (factor * res));
+    long centerRounded = lround(center);
+    int useSym = fabs(center - (double)centerRounded) < 1e-6; // If the middle is not at a clean y then dont use it
+
     for (ssize_t y = 0; y < top; y++) {
         unsigned char *bottomRow = img + y * row_size; // *row zeigt nun auf den Anfang von Zeile y (0-indexed)
 
-        // Berechnen vom Imaginärteil von y und des kandidaten, Symmetrie wird nur bei exakter korrektheit verwendet
-        ssize_t sym_y = lround(2.0 * center - (double) y);
-        float imag_y = cimagf(start) + factor * (float) y * res;
-        float imag_sym = cimagf(start) + factor * (float) sym_y * res;
-        bool useSym = sym_y >= 0 && sym_y < top && imag_y == -imag_sym ;
-        unsigned char *topRow = NULL;
-        if(useSym && sym_y < y) {
+        ssize_t sym_pixel_cord =(ssize_t)2 * centerRounded - y;
+        unsigned char *top_row = NULL;
+        if(useSym && sym_pixel_cord >= 0 && sym_pixel_cord < y) {
             continue; // Koordinate schon berechnet und eingetragen
         }
 
-        if (useSym && sym_y != y) {
-            topRow = img + sym_y * row_size;
+        if(useSym && sym_pixel_cord >= 0 && sym_pixel_cord < top && sym_pixel_cord != y) {
+            top_row = img + sym_pixel_cord * row_size; // Top Row nur berechnen wenn man es bracuht
         }
 
         for (size_t x = 0; x < endIndex; x += 8) {
             unsigned iterations[8];
-            const float complex imagPart = factor * (float) y * res * I;
-            const float complex a1 = start + (float) x * res + imagPart;
-            const float complex a2 = start + ((float) x + 1) * res + imagPart;
-            const float complex a3 = start + ((float) x + 2) * res + imagPart;
-            const float complex a4 = start + ((float) x + 3) * res + imagPart;
-            const float complex b1 = start + ((float) x + 4) * res + imagPart;
-            const float complex b2 = start + ((float) x + 5) * res + imagPart;
-            const float complex b3 = start + ((float) x + 6) * res + imagPart;
-            const float complex b4 = start + ((float) x + 7) * res + imagPart;
+            const float complex imag_part = factor * (float) y * res * I;
+            const float complex a1 = start + (float) x * res + imag_part;
+            const float complex a2 = start + ((float) x + 1) * res + imag_part;
+            const float complex a3 = start + ((float) x + 2) * res + imag_part;
+            const float complex a4 = start + ((float) x + 3) * res + imag_part;
+            const float complex b1 = start + ((float) x + 4) * res + imag_part;
+            const float complex b2 = start + ((float) x + 5) * res + imag_part;
+            const float complex b3 = start + ((float) x + 6) * res + imag_part;
+            const float complex b4 = start + ((float) x + 7) * res + imag_part;
 
             twoIntegerLanes bothIterations = escapeTimeLatencyThroughputTwo(n, a1, a2, a3, a4, b1, b2, b3, b4);
             _mm_storeu_si128((__m128i*)iterations,       bothIterations.a);
@@ -118,8 +117,8 @@ void genImageLatencyThroughput(float complex start, size_t width, ssize_t height
                 bottomOffset[0] =  rgb.b;
                 bottomOffset[1] =  rgb.g;
                 bottomOffset[2] =  rgb.r;
-                if(topRow != NULL){
-                    unsigned char *topOffset = topRow + x_offset;
+                if(useSym && top_row != NULL && sym_pixel_cord >= 0 && sym_pixel_cord < top && sym_pixel_cord != y){
+                    unsigned char *topOffset = top_row + x_offset;
                     topOffset[0] =  rgb.b;
                     topOffset[1] =  rgb.g;
                     topOffset[2] =  rgb.r;
@@ -130,7 +129,7 @@ void genImageLatencyThroughput(float complex start, size_t width, ssize_t height
         // Es werden 4 werte in parallel berechnet, aber nur die benötigten eingetragen
         if(endIndex < width) {
             unsigned restIterations[8];
-            float complex imag_part = factor * (float) y * res * I;
+            const float complex imag_part = factor * (float) y * res * I;
             const float complex a1 = start + (float) endIndex * res + imag_part;
             const float complex a2 = start + ((float) endIndex + 1) * res + imag_part;
             const float complex a3 = start + ((float) endIndex + 2) * res + imag_part;
@@ -148,25 +147,25 @@ void genImageLatencyThroughput(float complex start, size_t width, ssize_t height
             size_t range = width - endIndex;
             for (size_t i = 0; i < range; i++){
                 size_t x_offset = (endIndex + i) * 3;
-                unsigned char *bottomOffset = bottomRow + x_offset;
+                unsigned char *bottom_offset = bottomRow + x_offset;
                 RGB_Color rgb = colorMap[restIterations[i]];
                 // rgb is reversed on bitmap
-                bottomOffset[0] =  rgb.b;
-                bottomOffset[1] =  rgb.g;
-                bottomOffset[2] =  rgb.r;
-                if(topRow != NULL){
-                    unsigned char *topOffset = topRow + x_offset;
-                    topOffset[0] =  rgb.b;
-                    topOffset[1] =  rgb.g;
-                    topOffset[2] =  rgb.r;
+                bottom_offset[0] =  rgb.b;
+                bottom_offset[1] =  rgb.g;
+                bottom_offset[2] =  rgb.r;
+                if(useSym && top_row != NULL && sym_pixel_cord >= 0 && sym_pixel_cord < top && sym_pixel_cord != y){
+                    unsigned char *top_offset = top_row + x_offset;
+                    top_offset[0] =  rgb.b;
+                    top_offset[1] =  rgb.g;
+                    top_offset[2] =  rgb.r;
                 }
             }
         }
 
         for (size_t i= width*3; i<row_size; i++) {
             bottomRow[i]=0; // restliche Padding Bits einer Zeile auffüllen
-            if (topRow != NULL) {
-                topRow[i]=0;
+            if (useSym && sym_pixel_cord >= 0 && sym_pixel_cord < top && sym_pixel_cord != y) {
+                top_row[i]=0;
             }
         }
     }

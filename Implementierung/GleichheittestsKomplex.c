@@ -23,6 +23,62 @@
 #include "Simd/escapetime.h"
 #include "Sym/escapetime.h"
 
+#define RANDOMIZED_TEST_AMOUNT 100000
+
+bool randomizedTests(size_t width, ssize_t height_signed){
+    printf("Starte randomisierte/ bruteforce tests\n");
+    bool all_true = true;
+    size_t height;
+    height = height_signed < 0 ? -height_signed : height_signed;
+
+    size_t row_size = ((width * 3+3)/4)*4;
+    size_t pixelArraySize = row_size * height;
+    unsigned char *v0 = malloc(pixelArraySize);
+    unsigned char *v1 = malloc(pixelArraySize);
+    unsigned char *v2 = malloc(pixelArraySize);
+    unsigned char *v3 = malloc(pixelArraySize);
+    unsigned char *v4 = malloc(pixelArraySize);
+
+    if (v0 == NULL || v1 == NULL || v2 == NULL || v3 == NULL || v4 == NULL) {
+        printf("malloc() returned NULL\n");
+        free(v0);
+        free(v1);
+        free(v2);
+        free(v3);
+        free(v4);
+        return false;
+    }
+    float max = 2.0f;
+    float min = -2.0f;
+    unsigned n = 256;
+    bool color = false;
+    for (int iterations = 0; iterations < RANDOMIZED_TEST_AMOUNT; iterations++) {
+        float start_real = min + (max - min) * ((float) rand()/ (float) RAND_MAX);
+        float start_imag = min + (max - min) * ((float) rand()/ (float) RAND_MAX);
+        float res = 100.0f * ((float) rand()/ (float) RAND_MAX);
+
+        genImage(start_real + start_imag * I, width, height_signed, res, n, color, v0);
+        genImageSIMD(start_real + start_imag * I, width, height_signed, res, n, color, v1);
+        symGenImage(start_real + start_imag * I, width, height_signed, res, n, color, v2);
+        genImageCircle(start_real + start_imag * I, width, height_signed, res, n, color, v3);
+        genImageLatencyThroughput(start_real + start_imag * I, width, height_signed, res, n, color, v4);
+
+        for (size_t i = 0; i < pixelArraySize; i++) {
+            if (v0[i] != v1[i] || v0[i] != v2[i] || v0[i] != v3[i] || v0[i] != v4[i]) {
+                printf("Erster Unterschied zu v0 bei Iteration %d mit den Koordinaten: %f %f I und res %f, "
+                       "Byte %zu: %u vs %u vs %u vs %u vs %u\n", iterations, start_real, start_imag, res, i, v0[i],
+                       v1[i], v2[i], v3[i], v4[i]);
+            }
+        }
+    }
+
+    free(v0);
+    free(v1);
+    free(v2);
+    free(v3);
+    free(v4);
+    return all_true;
+}
 
 bool compareCorrectnessTest(float complex start, size_t width, ssize_t heightsigned, float res, unsigned n, bool color) {
     printf("starte test\n");
@@ -172,9 +228,6 @@ bool BitmapVergleichTests() {
         {-2.0 +2.0f * I, 3, -300, 0.01f, 10 ,false, "3x300 "},
 
         {-0.5 +0.5 * I, 300, -200, 0.001f, 1500 ,false, "high iterations "},
-
-
-
     };
     size_t testCasesCount = sizeof(testCases)/sizeof(testCases[0]);
     size_t passed = 0;
@@ -191,6 +244,13 @@ bool BitmapVergleichTests() {
         }
     }
     printf("\nErgebnis: %zu/%zu Tests bestanden. \n", passed, testCasesCount);
+
+    bool result = randomizedTests(200, 200);
+    if (!result) {
+        printf("Randomized tests failed\n");
+    } else {
+        printf("Randomized tests passed\n");
+    }
 
     printf("\n");
     debug();

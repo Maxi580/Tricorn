@@ -46,14 +46,10 @@ int testAllVersions(const float complex start, const size_t width, const ssize_t
             for (size_t i=0; i < benchmarkIterations; i++) {
                 genImageCircle(start, width, height_signed, res, n, color, img);
             }
-        } else if (v == 4) {
+        } else {
             for (size_t i=0; i < benchmarkIterations; i++) {
                 genImageLatencyThroughput(start, width, height_signed, res, n, color, img);
             }
-        } else {
-            printf("Error: Implementation existiert nicht");
-            free(img);
-            return 1;
         }
 
         struct timespec time_end;
@@ -88,7 +84,7 @@ int testCase(const char *name, const float complex start, const size_t width, co
     size_t pixelArraySize = row_size * height;
 
     unsigned char *img = malloc(pixelArraySize);
-    if (img == NULL) { //Fehler
+    if (img == NULL) { // Fehler
         printf("Error allocating memory\n");
         return 1;
     }

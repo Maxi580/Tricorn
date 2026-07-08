@@ -25,18 +25,18 @@ twoIntegerLanes  escapeTimeLatencyThroughputTwo(const unsigned n, const float co
     unsigned i = 2;
 	// Rounds startet bei 1, da Z1 und Z0 bereits abgefangen worden sind. Jetzt wird für n>1 geprüft ob Z1 konvergiert.
     twoIntegerLanes rounds = (twoIntegerLanes) {_mm_set1_epi32(1), _mm_set1_epi32(1)};
-    __m128i one = _mm_set1_epi32(1);
-	__m128 circle_radius = _mm_set1_ps(0.0625f); //Sqrt(0.25) = 0.0625
-    __m128 minus_two = _mm_set1_ps(-2.0f);
-    __m128 squared_escape_distance = _mm_set1_ps(4.0f);
+    const __m128i one = _mm_set1_epi32(1);
+    const __m128 circle_radius = _mm_set1_ps(0.0625f); // Sqrt(0.25) = 0.0625
+    const __m128 minus_two = _mm_set1_ps(-2.0f);
+    const __m128 squared_escape_distance = _mm_set1_ps(4.0f);
 
 	/* Der Throughput der genutzten Operationen ist höher als die Latency, anstatt (wegen der Dependency)
 	 * auf das Ergebniss zu warten berechnen wir einfach das nächste*/
 	twoFloatLanes z_real = (twoFloatLanes) {_mm_setzero_ps(), _mm_setzero_ps()};
 	twoFloatLanes z_imagine = (twoFloatLanes) {_mm_setzero_ps(), _mm_setzero_ps()};
-	twoFloatLanes c_real = (twoFloatLanes) {_mm_setr_ps(crealf(a1), crealf(a2), crealf(a3), crealf(a4)),
+    const twoFloatLanes c_real = (twoFloatLanes) {_mm_setr_ps(crealf(a1), crealf(a2), crealf(a3), crealf(a4)),
 		_mm_setr_ps(crealf(b1), crealf(b2), crealf(b3), crealf(b4))};
-	twoFloatLanes c_imagine = (twoFloatLanes) {_mm_setr_ps(cimagf(a1), cimagf(a2), cimagf(a3), cimagf(a4)),
+    const twoFloatLanes c_imagine = (twoFloatLanes) {_mm_setr_ps(cimagf(a1), cimagf(a2), cimagf(a3), cimagf(a4)),
 		_mm_setr_ps(cimagf(b1), cimagf(b2), cimagf(b3), cimagf(b4))};
 
     twoFloatLanes real_squared = (twoFloatLanes) {_mm_setzero_ps(), _mm_setzero_ps()};
@@ -47,9 +47,10 @@ twoIntegerLanes  escapeTimeLatencyThroughputTwo(const unsigned n, const float co
 	__m128 b_amount = _mm_add_ps(_mm_mul_ps(c_real.b, c_real.b), _mm_mul_ps(c_imagine.b, c_imagine.b));
 	__m128 radius_mask_a = _mm_cmpgt_ps(a_amount, circle_radius); // FFFFFFFF wo cAmount > sqrt(radius), 0 sonst
 	__m128 radius_mask_b = _mm_cmpgt_ps(b_amount, circle_radius);
-	bool lane_a_is_finished = _mm_movemask_ps(radius_mask_a) == 0 ? true : false;
-	bool lane_bis_finished = _mm_movemask_ps(radius_mask_b) == 0 ? true : false;
-	if(lane_a_is_finished && lane_bis_finished) return (twoIntegerLanes) {_mm_set1_epi32(n), _mm_set1_epi32(n)};
+	if(_mm_movemask_ps(radius_mask_b) == 0 && _mm_movemask_ps(radius_mask_a) == 0) return (twoIntegerLanes)
+		{_mm_set1_epi32(n), _mm_set1_epi32(n)};
+	bool lane_a_is_finished = false;
+	bool lane_b_is_finished = false;
 
 	// Z1 Berechnen, weil man nicht checken muss ob Z0 konvergiert
 	z_imagine.a = _mm_add_ps(c_imagine.a, _mm_mul_ps(minus_two, _mm_mul_ps(z_real.a, z_imagine.a)));
@@ -69,14 +70,14 @@ twoIntegerLanes  escapeTimeLatencyThroughputTwo(const unsigned n, const float co
     	__m128 distance_a = _mm_add_ps(real_squared.a, imag_squared.a);
     	__m128 distance_b = _mm_add_ps(real_squared.b, imag_squared.b);
         __m128 maskA = _mm_cmple_ps(distance_a, squared_escape_distance); // FFFFFFFF wo distance <= 4, 0 sonst
-    	__m128 maskB = _mm_cmple_ps(distance_b, squared_escape_distance);
+    	__m128 mask_b = _mm_cmple_ps(distance_b, squared_escape_distance);
         if (_mm_movemask_ps(maskA) == 0) lane_a_is_finished = true; // Wenn die Maske 0 ist schon alles escaped und man kann aufhören.
-    	if (_mm_movemask_ps(maskB) == 0) lane_bis_finished = true;
-    	if(lane_a_is_finished && lane_bis_finished)break;
+    	if (_mm_movemask_ps(mask_b) == 0) lane_b_is_finished = true;
+    	if(lane_a_is_finished && lane_b_is_finished) break;
 
         // Setzt 1nsen genau da, wo die maske nicht 0 ist (Castet mask floats als int)
         __m128i incA  = _mm_and_si128(one, _mm_castps_si128(maskA));
-    	__m128i incB  = _mm_and_si128(one, _mm_castps_si128(maskB));
+    	__m128i incB  = _mm_and_si128(one, _mm_castps_si128(mask_b));
         rounds.a  = _mm_add_epi32(rounds.a , incA);
     	rounds.b  = _mm_add_epi32(rounds.b , incB);
 
@@ -100,10 +101,10 @@ twoIntegerLanes  escapeTimeLatencyThroughputTwo(const unsigned n, const float co
 	__m128 distance_b = _mm_add_ps(real_squared.b, imag_squared.b);
 	__m128 mask_a = _mm_cmple_ps(distance_a, squared_escape_distance); // FFFFFFFF wo distance <= 4, 0 sonst
 	__m128 mask_b = _mm_cmple_ps(distance_b, squared_escape_distance);
-	__m128i inc_a  = _mm_and_si128(one, _mm_castps_si128(mask_a));
-	__m128i inc_b  = _mm_and_si128(one, _mm_castps_si128(mask_b));
-	rounds.a  = _mm_add_epi32(rounds.a , inc_a);
-	rounds.b  = _mm_add_epi32(rounds.b , inc_b);
+	__m128i inc_a = _mm_and_si128(one, _mm_castps_si128(mask_a));
+	__m128i inc_b = _mm_and_si128(one, _mm_castps_si128(mask_b));
+	rounds.a = _mm_add_epi32(rounds.a , inc_a);
+	rounds.b = _mm_add_epi32(rounds.b , inc_b);
     return rounds;
 }
 
@@ -134,10 +135,10 @@ fourIntegerLanes  escapeTimeLatencyThroughputFour(const unsigned n, const float 
     fourIntegerLanes rounds = (fourIntegerLanes) {_mm_set1_epi32(1), _mm_set1_epi32(1),
     	_mm_set1_epi32(1), _mm_set1_epi32(1)};
 
-    __m128i one = _mm_set1_epi32(1);
-	__m128 circle_radius = _mm_set1_ps(0.0625f); //Sqrt(0.25) = 0.0625
-    __m128 minus_two = _mm_set1_ps(-2.0f);
-    __m128 squared_escape_distance = _mm_set1_ps(4.0f);
+    const __m128i one = _mm_set1_epi32(1);
+	const __m128 circle_radius = _mm_set1_ps(0.0625f); //Sqrt(0.25) = 0.0625
+    const __m128 minus_two = _mm_set1_ps(-2.0f);
+    const __m128 squared_escape_distance = _mm_set1_ps(4.0f);
 
 	/* Der Throughput der genutzten Operationen ist höher als die Latency, anstatt (wegen der Dependency)
 	 * auf das Ergebniss zu warten berechnen wir einfach das nächste*/
@@ -210,17 +211,17 @@ fourIntegerLanes  escapeTimeLatencyThroughputFour(const unsigned n, const float 
     	if (_mm_movemask_ps(mask_b) == 0) lane_b_is_finished = true;
 		if (_mm_movemask_ps(mask_c) == 0) lane_c_is_finished = true;
 		if (_mm_movemask_ps(mask_d) == 0) lane_d_is_finished = true;
-    	if(lane_a_is_finished && lane_b_is_finished && lane_c_is_finished && lane_d_is_finished)break;
+    	if (lane_a_is_finished && lane_b_is_finished && lane_c_is_finished && lane_d_is_finished)break;
 
         // Setzt 1nsen genau da, wo die maske nicht 0 ist (Castet mask floats als int)
         __m128i inc_a  = _mm_and_si128(one, _mm_castps_si128(mask_a));
     	__m128i inc_b  = _mm_and_si128(one, _mm_castps_si128(mask_b));
 		__m128i inc_c  = _mm_and_si128(one, _mm_castps_si128(mask_c));
 		__m128i inc_d  = _mm_and_si128(one, _mm_castps_si128(mask_d));
-        rounds.a  = _mm_add_epi32(rounds.a , inc_a);
-    	rounds.b  = _mm_add_epi32(rounds.b , inc_b);
-		rounds.c  = _mm_add_epi32(rounds.c , inc_c);
-		rounds.d  = _mm_add_epi32(rounds.d , inc_d);
+        rounds.a = _mm_add_epi32(rounds.a , inc_a);
+    	rounds.b = _mm_add_epi32(rounds.b , inc_b);
+		rounds.c = _mm_add_epi32(rounds.c , inc_c);
+		rounds.d = _mm_add_epi32(rounds.d , inc_d);
 
         // Zi+1 berechnen: z = realSquared - imagSquared - 2 * crealf(z) * cimagf(z) * I;
         z_imagine.a = _mm_add_ps(c_imagine.a, _mm_mul_ps(minus_two, _mm_mul_ps(z_real.a, z_imagine.a)));
