@@ -88,29 +88,3 @@ void genImageSIMD(float complex start, size_t width, ssize_t height, float res, 
         }
     }
 }
-
-/*
-int main(void) {
-    size_t width;
-    width = 500; //breite eingeben
-    ssize_t heightsigned = 700; //höhe eingeben
-    size_t height;
-    if (heightsigned < 0) {
-        height = heightsigned * (-1);
-    }
-    else {
-        height = heightsigned ;
-    }
-
-    size_t row_size = ((width * 3+3)/4)*4;
-    size_t pixelArraySize = row_size * height;
-
-    unsigned char *img = malloc(pixelArraySize);
-    if (img == NULL) {return 1;} //Fehler
-
-    genImage(width, heightsigned, img);
-    writeBmp("test.bmp", width, heightsigned, img);
-    free(img);
-    return 0;
-}
-*/

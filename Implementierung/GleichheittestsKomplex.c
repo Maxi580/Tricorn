@@ -37,12 +37,14 @@ bool symmetryTest(size_t width, ssize_t height_signed, int trials) {
     unsigned char *v0 = malloc(pixelArraySize);
     unsigned char *v1 = malloc(pixelArraySize);
     unsigned char *v2 = malloc(pixelArraySize);
+    unsigned char *v3 = malloc(pixelArraySize);
 
-    if (v0 == NULL || v1 == NULL) {
+    if (v0 == NULL || v1 == NULL || v2 == NULL || v3 == NULL) {
         printf("malloc() returned NULL\n");
         free(v0);
         free(v1);
         free(v2);
+        free(v3);
         return false;
     }
     unsigned errors = 0;
@@ -58,11 +60,12 @@ bool symmetryTest(size_t width, ssize_t height_signed, int trials) {
         genImage(start_real + start_imag * I, width, height, res, n, color, v0);
         symGenImage(start_real + start_imag * I, width, height, res, n, color, v1);
         genImageLatencyThroughput(start_real + start_imag * I, width, height, res, n, color, v2);
+        genImageCircle(start_real + start_imag * I, width, height, res, n, color, v3);
 
-        for (size_t i = 0; i < pixelArraySize; i++) {
-            if (v0[i] != v1[i] || v0[i] != v2[i]) {
+        for (size_t pixel = 0; pixel < pixelArraySize; pixel++) {
+            if (v0[pixel] != v1[pixel] || v0[pixel] != v2[pixel] || v0[pixel] != v3[pixel]) {
                 printf("Erster Unterschied zu v0 mit den Koordinaten: %f %f I und res %f, "
-                       "Byte %zu: %u vs %u vs %u\n", start_real, start_imag, res, i, v0[i], v1[i], v2[i]);
+                       "Byte %zu: %u vs %u vs %u vs %u\n", start_real, start_imag, res, pixel, v0[pixel], v1[pixel], v2[pixel], v3[pixel]);
                 all_true = false;
                 errors++;
                 break;
@@ -75,6 +78,7 @@ bool symmetryTest(size_t width, ssize_t height_signed, int trials) {
     free(v0);
     free(v1);
     free(v2);
+    free(v3);
     return all_true;
 }
 

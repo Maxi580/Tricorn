@@ -77,21 +77,22 @@ void genImageCircle(float complex start, size_t width, ssize_t height, float res
         HOWEVER. If due to weird resolutions etc the center is not at a clean y but at like 2.4 or something
         i see no way of using that optimization.
      */
-    double center =  (-cimag(start) /(double) (factor * res));
-    long centerRounded = lround(center);
-    int useSym = fabs(center - (double)centerRounded) < 1e-6; // If the middle is not at a clean y then dont use it
-
+    double center = -(cimag(start) / (double) (factor * res));
     for (ssize_t y = 0; y < top; y++) {
         unsigned char *bottomRow = img + y * row_size; // *row zeigt nun auf den Anfang von Zeile y (0-indexed)
 
-        ssize_t symPixelCord =(ssize_t)2 * centerRounded - y;
+        // Berechnen vom Imaginärteil von y und des kandidaten, Symmetrie wird nur bei exakter korrektheit verwendet
+        ssize_t sym_y = lround(2.0 * center - (double) y);
+        float imag_y = cimagf(start) + factor * (float) y * res;
+        float imag_sym = cimagf(start) + factor * (float) sym_y * res;
+        // Durch Exaktheit keine False Positives aber auch weniger Hits
+        bool useSym = sym_y >= 0 && sym_y < top && imag_y == -imag_sym ;
         unsigned char *topRow = NULL;
-        if(useSym && symPixelCord >= 0 && symPixelCord < y) {
+        if(useSym && sym_y < y) {
             continue; // Koordinate schon berechnet und eingetragen
         }
-
-        if(useSym && symPixelCord >= 0 && symPixelCord < top && symPixelCord != y) {
-            topRow = img + symPixelCord * row_size; // Top Row nur berechnen wenn man es bracuht
+        if (useSym && sym_y != y) {
+            topRow = img + sym_y * row_size;
         }
 
         for (size_t x = 0; x < endIndex; x += 4) {
@@ -110,7 +111,7 @@ void genImageCircle(float complex start, size_t width, ssize_t height, float res
                 bottomOffset[0] =  rgb.b;
                 bottomOffset[1] =  rgb.g;
                 bottomOffset[2] =  rgb.r;
-                if(useSym && topRow != NULL && symPixelCord >= 0 && symPixelCord < top && symPixelCord != y){
+                if(topRow != NULL){
                     unsigned char *topOffset = topRow + x_offset;
                     topOffset[0] =  rgb.b;
                     topOffset[1] =  rgb.g;
@@ -137,7 +138,7 @@ void genImageCircle(float complex start, size_t width, ssize_t height, float res
                 bottomOffset[0] =  rgb.b;
                 bottomOffset[1] =  rgb.g;
                 bottomOffset[2] =  rgb.r;
-                if(useSym && topRow != NULL && symPixelCord >= 0 && symPixelCord < top && symPixelCord != y){
+                if(topRow != NULL){
                     unsigned char *topOffset = topRow + x_offset;
                     topOffset[0] =  rgb.b;
                     topOffset[1] =  rgb.g;
@@ -148,36 +149,10 @@ void genImageCircle(float complex start, size_t width, ssize_t height, float res
 
         for (size_t i= width*3; i<row_size; i++) {
             bottomRow[i]=0; //restliche Padding Bits einer Zeile auffüllen
-            if (useSym && symPixelCord >= 0 && symPixelCord < top && symPixelCord != y) {
+            if (topRow != NULL) {
                 topRow[i]=0;
             }
         }
     }
     free(colorMap);
 }
-
-/*
-int main(void) {
-    size_t width;
-    width = 500; //breite eingeben
-    ssize_t heightsigned = 700; //höhe eingeben
-    size_t height;
-    if (heightsigned < 0) {
-        height = heightsigned * (-1);
-    }
-    else {
-        height = heightsigned ;
-    }
-
-    size_t row_size = ((width * 3+3)/4)*4;
-    size_t pixelArraySize = row_size * height;
-
-    unsigned char *img = malloc(pixelArraySize);
-    if (img == NULL) {return 1;} //Fehler
-
-    genImage(width, heightsigned, img);
-    writeBmp("test.bmp", width, heightsigned, img);
-    free(img);
-    return 0;
-}
-*/
