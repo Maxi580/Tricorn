@@ -23,9 +23,62 @@
 #include "Simd/escapetime.h"
 #include "Sym/escapetime.h"
 
-#define RANDOMIZED_TEST_AMOUNT 100000
+bool symmetryTest(size_t width, ssize_t height_signed, int trials) {
+    // Randomized tests, that fix the center around an even y so that symmetry would be applied
+    // Uses very small and randomized resolution to try and find weird behaviour in symmetry optimizations
+    printf("Starte Symmetrie tests\n");
+    bool all_true = true;
+    size_t height = height_signed < 0 ? -height_signed : height_signed;
+    float factor = height_signed < 0 ? -1.0f : 1.0f;
 
-bool randomizedTests(size_t width, ssize_t height_signed){
+    size_t row_size = ((width * 3+3)/4)*4;
+    size_t pixelArraySize = row_size * height;
+
+    unsigned char *v0 = malloc(pixelArraySize);
+    unsigned char *v1 = malloc(pixelArraySize);
+    unsigned char *v2 = malloc(pixelArraySize);
+
+    if (v0 == NULL || v1 == NULL) {
+        printf("malloc() returned NULL\n");
+        free(v0);
+        free(v1);
+        free(v2);
+        return false;
+    }
+    unsigned errors = 0;
+    unsigned n = 100;
+    bool color = false;
+    srand(3141592653);
+    for (int i = 0; i < trials;  trials++){
+        int center = height / 2 + rand() % 10; // center muss gerade sein sonst, triggern manche optimizations nicht, aber bissl variation ist gut ig
+        float res = 0.002f + 0.011f * ((float) rand()/(float) RAND_MAX); // Random small res
+        float start_real = -2.0f + 4.0f * ((float) rand()/ (float) RAND_MAX);
+        float start_imag = -(center * factor * res); // set imag so that the center is at center
+
+        genImage(start_real + start_imag * I, width, height, res, n, color, v0);
+        symGenImage(start_real + start_imag * I, width, height, res, n, color, v1);
+        genImageLatencyThroughput(start_real + start_imag * I, width, height, res, n, color, v2);
+
+        for (size_t i = 0; i < pixelArraySize; i++) {
+            if (v0[i] != v1[i] || v0[i] != v2[i]) {
+                printf("Erster Unterschied zu v0 mit den Koordinaten: %f %f I und res %f, "
+                       "Byte %zu: %u vs %u vs %u\n", start_real, start_imag, res, i, v0[i], v1[i], v2[i]);
+                all_true = false;
+                errors++;
+                break;
+            }
+        }
+
+    }
+    printf("Wrong: %d", errors);
+
+    free(v0);
+    free(v1);
+    free(v2);
+    return all_true;
+}
+
+bool randomizedTests(size_t width, ssize_t height_signed, int trials){
     printf("Starte randomisierte/ bruteforce tests\n");
     bool all_true = true;
     size_t height;
@@ -52,7 +105,7 @@ bool randomizedTests(size_t width, ssize_t height_signed){
     float min = -2.0f;
     unsigned n = 256;
     bool color = false;
-    for (int iterations = 0; iterations < RANDOMIZED_TEST_AMOUNT; iterations++) {
+    for (int iterations = 0; iterations < trials; iterations++) {
         float start_real = min + (max - min) * ((float) rand()/ (float) RAND_MAX);
         float start_imag = min + (max - min) * ((float) rand()/ (float) RAND_MAX);
         float res = 100.0f * ((float) rand()/ (float) RAND_MAX);
@@ -245,12 +298,20 @@ bool BitmapVergleichTests() {
     }
     printf("\nErgebnis: %zu/%zu Tests bestanden. \n", passed, testCasesCount);
 
-    bool result = randomizedTests(200, 200);
+    bool result = randomizedTests(300, 300, 1000);
     if (!result) {
         printf("Randomized tests failed\n");
     } else {
         printf("Randomized tests passed\n");
     }
+
+    result = symmetryTest(30, 300, 1000);
+    if (!result) {
+        printf("Symmetry tests failed\n");
+    } else {
+        printf("Symmetry tests passed\n");
+    }
+
 
     printf("\n");
     debug();
