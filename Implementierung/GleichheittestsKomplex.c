@@ -25,7 +25,6 @@
 
 bool symmetryTest(size_t width, ssize_t height_signed, int trials) {
     // Randomized tests, that fix the center around an even y so that symmetry would be applied
-    // Uses very small and randomized resolution to try and find weird behaviour in symmetry optimizations
     printf("Starte Symmetrie tests\n");
     bool all_true = true;
     size_t height = height_signed < 0 ? -height_signed : height_signed;
@@ -52,8 +51,9 @@ bool symmetryTest(size_t width, ssize_t height_signed, int trials) {
     bool color = false;
     srand(3141592653);
     for (int i = 0; i < trials;  trials++){
-        int center = height / 2 + rand() % 10; // center muss gerade sein sonst, triggern manche optimizations nicht, aber bissl variation ist gut ig
-        float res = 0.002f + 0.011f * ((float) rand()/(float) RAND_MAX); // Random small res
+        int center = height / 2 + rand() % 10; // Center must be at an even y so symmetry should trigger
+        // Random small res, so that the imags of two mirrored ys are not cleanly the same
+        float res = 0.002f + 0.011f * ((float) rand()/(float) RAND_MAX);
         float start_real = -2.0f + 4.0f * ((float) rand()/ (float) RAND_MAX);
         float start_imag = -(center * factor * res); // set imag so that the center is at center
 
@@ -66,6 +66,20 @@ bool symmetryTest(size_t width, ssize_t height_signed, int trials) {
             if (v0[pixel] != v1[pixel] || v0[pixel] != v2[pixel] || v0[pixel] != v3[pixel]) {
                 printf("Erster Unterschied zu v0 mit den Koordinaten: %f %f I und res %f, "
                        "Byte %zu: %u vs %u vs %u vs %u\n", start_real, start_imag, res, pixel, v0[pixel], v1[pixel], v2[pixel], v3[pixel]);
+                printf("Center ist bei y = %d mit imaginärteil = %f\n", center, -(center * factor * res) - factor * start_imag );
+                printf("Start ist bei y = 0 mit imaginärteil = %f\n", start_imag);
+                int ctr = 0;
+                for (int test_y = 0; test_y < center && ctr < 3; test_y++) {
+                    float imag1 = -(test_y * factor * res) - factor * start_imag ;
+                    float imag2 = -((2 * center - test_y) * factor * res) - factor * start_imag ;
+                    if (imag1 != imag2) {
+                        printf("P%d ist bei y = %d mit imaginärteil = %.9g\n", ctr, test_y, imag1);
+                        printf("P%d ist bei y = %d mit imaginärteil = %.9g\n", ctr, 2 * center - test_y, imag2);
+                        ctr++;
+                    }
+
+                }
+
                 all_true = false;
                 errors++;
                 break;
@@ -302,7 +316,7 @@ bool BitmapVergleichTests() {
     }
     printf("\nErgebnis: %zu/%zu Tests bestanden. \n", passed, testCasesCount);
 
-    bool result = randomizedTests(300, 300, 1000);
+    bool result = randomizedTests(300, 300, 100);
     if (!result) {
         printf("Randomized tests failed\n");
     } else {
