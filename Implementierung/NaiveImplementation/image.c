@@ -18,13 +18,12 @@
 
 
 void genImage(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
-    const unsigned farbpalletteSize = 5;
-    const unsigned farbpallette[5][3] = {
-        {0,   0,   0},
-        {100, 0,   0},
-        {255, 50,  0},
+    const unsigned farbpalletteSize = 4;
+    const unsigned farbpallette[4][3] = {
+        {128, 0, 0},
+        {255, 0, 0},
+        {255, 100, 0},
         {255, 255, 0},
-        {255, 255, 255},
     };
 
     if (height < 0) { // TOP-DOWN
