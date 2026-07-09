@@ -24,16 +24,6 @@
 #include "Sym/escapetime.h"
 #include "MultiThreading/image.h"
 
-bool compareImages(unsigned char *v0, unsigned char *v1, size_t pixelArraySize) {
-    for (size_t i = 0; i < pixelArraySize; i++) {
-        if (v0[i] != v1[i]) {
-            printf("Bytes v0: %d / v1: %d", v0[i], v1[i]);
-            return false;
-        }
-    }
-    return true;
-}
-
 bool compareCorrectnessTest(float complex start, size_t width, ssize_t height_signed, float res, unsigned n, bool color) {
     size_t height;
     bool all_equal = true;
@@ -59,27 +49,27 @@ bool compareCorrectnessTest(float complex start, size_t width, ssize_t height_si
 
     genImage(start, width, height_signed, res, n, color, v0);
     genImageSIMD(start, width, height_signed, res, n, color, v1);
-    if (!compareImages(v0, v1, pixelArraySize)) {
+    if (memcmp(v0, v1, pixelArraySize)) {
         printf("SIMD Error on randomized Tests\n");
         all_equal = false;
     }
     symGenImage(start, width, height_signed, res, n, color, v1);
-    if (!compareImages(v0, v1, pixelArraySize)) {
+    if (memcmp(v0, v1, pixelArraySize)) {
         printf("SIMD Version Error on randomized Tests\n");
         all_equal = false;
     }
     genImageCircle(start, width, height_signed, res, n, color, v1);
-    if (!compareImages(v0, v1, pixelArraySize)) {
+    if (memcmp(v0, v1, pixelArraySize)) {
         printf("Circle Version Error on randomized Tests\n");
         all_equal = false;
     }
     genImageLatencyThroughput(start, width, height_signed, res, n, color, v1);
-    if (!compareImages(v0, v1, pixelArraySize)) {
+    if (memcmp(v0, v1, pixelArraySize)) {
         printf("LatencyThroughput Version Error on randomized Tests\n");
         all_equal = false;
     }
     genImageMultiThreading(start, width, height_signed, res, n, color, v1);
-    if (!compareImages(v0, v1, pixelArraySize)) {
+    if (memcmp(v0, v1, pixelArraySize)) {
         printf("Multithreading Version Error on randomized Tests\n");
         all_equal = false;
     }
