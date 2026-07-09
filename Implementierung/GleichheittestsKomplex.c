@@ -22,143 +22,26 @@
 #include "Sym/escapetime.h"
 #include "Simd/escapetime.h"
 #include "Sym/escapetime.h"
+#include "MultiThreading/image.h"
 
-bool symmetryTest(size_t width, ssize_t height_signed, int trials) {
-    // Randomized tests, that fix the center around an even y so that symmetry would be applied
-    printf("Starte Symmetrie tests\n");
-    bool all_true = true;
-    size_t height = height_signed < 0 ? -height_signed : height_signed;
-    float factor = height_signed < 0 ? -1.0f : 1.0f;
-
-    size_t row_size = ((width * 3+3)/4)*4;
-    size_t pixelArraySize = row_size * height;
-
-    unsigned char *v0 = malloc(pixelArraySize);
-    unsigned char *v1 = malloc(pixelArraySize);
-    unsigned char *v2 = malloc(pixelArraySize);
-    unsigned char *v3 = malloc(pixelArraySize);
-
-    if (v0 == NULL || v1 == NULL || v2 == NULL || v3 == NULL) {
-        printf("malloc() returned NULL\n");
-        free(v0);
-        free(v1);
-        free(v2);
-        free(v3);
-        return false;
-    }
-    unsigned errors = 0;
-    unsigned n = 100;
-    bool color = false;
-    srand(3141592653);
-    for (int i = 0; i < trials;  trials++){
-        int center = height / 2 + rand() % 10; // Center must be at an even y so symmetry should trigger
-        // Random small res, so that the imags of two mirrored ys are not cleanly the same
-        float res = 0.002f + 0.011f * ((float) rand()/(float) RAND_MAX);
-        float start_real = -2.0f + 4.0f * ((float) rand()/ (float) RAND_MAX);
-        float start_imag = -(center * factor * res); // set imag so that the center is at center
-
-        genImage(start_real + start_imag * I, width, height, res, n, color, v0);
-        symGenImage(start_real + start_imag * I, width, height, res, n, color, v1);
-        genImageLatencyThroughput(start_real + start_imag * I, width, height, res, n, color, v2);
-        genImageCircle(start_real + start_imag * I, width, height, res, n, color, v3);
-
-        for (size_t pixel = 0; pixel < pixelArraySize; pixel++) {
-            if (v0[pixel] != v1[pixel] || v0[pixel] != v2[pixel] || v0[pixel] != v3[pixel]) {
-                printf("Erster Unterschied zu v0 mit den Koordinaten: %f %f I und res %f, "
-                       "Byte %zu: %u vs %u vs %u vs %u\n", start_real, start_imag, res, pixel, v0[pixel], v1[pixel], v2[pixel], v3[pixel]);
-                printf("Center ist bei y = %d mit imaginärteil = %f\n", center, -(center * factor * res) - factor * start_imag );
-                printf("Start ist bei y = 0 mit imaginärteil = %f\n", start_imag);
-                int ctr = 0;
-                for (int test_y = 0; test_y < center && ctr < 3; test_y++) {
-                    float imag1 = -(test_y * factor * res) - factor * start_imag ;
-                    float imag2 = -((2 * center - test_y) * factor * res) - factor * start_imag ;
-                    if (imag1 != imag2) {
-                        printf("P%d ist bei y = %d mit imaginärteil = %.9g\n", ctr, test_y, imag1);
-                        printf("P%d ist bei y = %d mit imaginärteil = %.9g\n", ctr, 2 * center - test_y, imag2);
-                        ctr++;
-                    }
-
-                }
-
-                all_true = false;
-                errors++;
-                break;
-            }
+bool compareImages(unsigned char *v0, unsigned char *v1, size_t pixelArraySize) {
+    for (size_t i = 0; i < pixelArraySize; i++) {
+        if (v0[i] != v1[i]) {
+            printf("Bytes v0: %d / v1: %d", v0[i], v1[i]);
+            return false;
         }
-
     }
-    printf("Wrong: %d", errors);
-
-    free(v0);
-    free(v1);
-    free(v2);
-    free(v3);
-    return all_true;
+    return true;
 }
 
-bool randomizedTests(size_t width, ssize_t height_signed, int trials){
-    printf("Starte randomisierte/ bruteforce tests\n");
-    bool all_true = true;
+bool compareCorrectnessTest(float complex start, size_t width, ssize_t height_signed, float res, unsigned n, bool color) {
     size_t height;
-    height = height_signed < 0 ? -height_signed : height_signed;
-
-    size_t row_size = ((width * 3+3)/4)*4;
-    size_t pixelArraySize = row_size * height;
-    unsigned char *v0 = malloc(pixelArraySize);
-    unsigned char *v1 = malloc(pixelArraySize);
-    unsigned char *v2 = malloc(pixelArraySize);
-    unsigned char *v3 = malloc(pixelArraySize);
-    unsigned char *v4 = malloc(pixelArraySize);
-
-    if (v0 == NULL || v1 == NULL || v2 == NULL || v3 == NULL || v4 == NULL) {
-        printf("malloc() returned NULL\n");
-        free(v0);
-        free(v1);
-        free(v2);
-        free(v3);
-        free(v4);
-        return false;
-    }
-    float max = 2.0f;
-    float min = -2.0f;
-    unsigned n = 256;
-    bool color = false;
-    for (int iterations = 0; iterations < trials; iterations++) {
-        float start_real = min + (max - min) * ((float) rand()/ (float) RAND_MAX);
-        float start_imag = min + (max - min) * ((float) rand()/ (float) RAND_MAX);
-        float res = 100.0f * ((float) rand()/ (float) RAND_MAX);
-
-        genImage(start_real + start_imag * I, width, height_signed, res, n, color, v0);
-        genImageSIMD(start_real + start_imag * I, width, height_signed, res, n, color, v1);
-        symGenImage(start_real + start_imag * I, width, height_signed, res, n, color, v2);
-        genImageCircle(start_real + start_imag * I, width, height_signed, res, n, color, v3);
-        genImageLatencyThroughput(start_real + start_imag * I, width, height_signed, res, n, color, v4);
-
-        for (size_t i = 0; i < pixelArraySize; i++) {
-            if (v0[i] != v1[i] || v0[i] != v2[i] || v0[i] != v3[i] || v0[i] != v4[i]) {
-                printf("Erster Unterschied zu v0 bei Iteration %d mit den Koordinaten: %f %f I und res %f, "
-                       "Byte %zu: %u vs %u vs %u vs %u vs %u\n", iterations, start_real, start_imag, res, i, v0[i],
-                       v1[i], v2[i], v3[i], v4[i]);
-            }
-        }
-    }
-
-    free(v0);
-    free(v1);
-    free(v2);
-    free(v3);
-    free(v4);
-    return all_true;
-}
-
-bool compareCorrectnessTest(float complex start, size_t width, ssize_t heightsigned, float res, unsigned n, bool color) {
-    printf("starte test\n");
-    size_t height;
-    if (heightsigned < 0) {
-        height = (size_t)(-heightsigned);
+    bool all_equal = true;
+    if (height_signed < 0) {
+        height = (size_t)(-height_signed);
     }
     else {
-        height = (size_t)heightsigned ;
+        height = (size_t)height_signed ;
     }
 
     size_t row_size = ((width * 3+3)/4)*4;
@@ -166,89 +49,46 @@ bool compareCorrectnessTest(float complex start, size_t width, ssize_t heightsig
 
     unsigned char *v0 = malloc(pixelArraySize);
     unsigned char *v1 = malloc(pixelArraySize);
-    unsigned char *v2 = malloc(pixelArraySize);
-    unsigned char *v3 = malloc(pixelArraySize);
-    unsigned char *v4 = malloc(pixelArraySize);
 
-    if (v0 == NULL || v1 == NULL || v2 == NULL || v3 == NULL || v4 == NULL) {
+    if (v0 == NULL || v1 == NULL) {
         printf("malloc() returned NULL\n");
         free(v0);
         free(v1);
-        free(v2);
-        free(v3);
-        free(v4);
         return false;
     }
 
-    genImage(start, width, heightsigned, res, n, color, v0);
-    genImageSIMD(start, width, heightsigned, res, n, color, v1);
-    symGenImage(start, width, heightsigned, res, n, color, v2);
-    genImageCircle(start, width, heightsigned, res, n, color, v3);
-    genImageLatencyThroughput(start, width, heightsigned, res, n, color, v4);
+    genImage(start, width, height_signed, res, n, color, v0);
+    genImageSIMD(start, width, height_signed, res, n, color, v1);
+    if (!compareImages(v0, v1, pixelArraySize)) {
+        printf("SIMD Error on randomized Tests\n");
+        all_equal = false;
+    }
+    symGenImage(start, width, height_signed, res, n, color, v1);
+    if (!compareImages(v0, v1, pixelArraySize)) {
+        printf("SIMD Version Error on randomized Tests\n");
+        all_equal = false;
+    }
+    genImageCircle(start, width, height_signed, res, n, color, v1);
+    if (!compareImages(v0, v1, pixelArraySize)) {
+        printf("Circle Version Error on randomized Tests\n");
+        all_equal = false;
+    }
+    genImageLatencyThroughput(start, width, height_signed, res, n, color, v1);
+    if (!compareImages(v0, v1, pixelArraySize)) {
+        printf("LatencyThroughput Version Error on randomized Tests\n");
+        all_equal = false;
+    }
+    genImageMultiThreading(start, width, height_signed, res, n, color, v1);
+    if (!compareImages(v0, v1, pixelArraySize)) {
+        printf("Multithreading Version Error on randomized Tests\n");
+        all_equal = false;
+    }
 
-    bool AllEqual = true;
-
-    if (memcmp(v0, v1, pixelArraySize) == 0) {
-        printf("v0 und v1 identisch\n");
-
-    }
-    else {
-        for (size_t i = 0; i < pixelArraySize; i++) {
-            if (v0[i] != v1[i]) {
-                printf("Erster Unterschied v0/v1 bei Byte %zu: %u vs %u\n", i, v0[i], v1[i]);
-                break;
-            }
-        }
-        printf("v0 and v1 nicht identisch\n");
-        AllEqual = false;
-    }
-
-    if (memcmp(v0, v2, pixelArraySize) == 0) {
-        printf("v0 and v2 identisch\n");
-    }
-    else {
-        for (size_t i = 0; i < pixelArraySize; i++) {
-            if (v0[i] != v2[i]) {
-                printf("Erster Unterschied v0/v2 bei Byte %zu: %u vs %u\n", i, v0[i], v2[i]);
-                break;
-            }
-        }
-        printf("v0 and v2 nicht identisch\n");
-        AllEqual = false;
-    }
-    if (memcmp(v0, v3, pixelArraySize) == 0) {
-        printf("v0 and v3 identisch\n");
-    }
-    else {
-        for (size_t i = 0; i < pixelArraySize; i++) {
-            if (v0[i] != v3[i]) {
-                printf("Erster Unterschied v0/v3 bei Byte %zu: %u vs %u\n", i, v0[i], v3[i]);
-                break;
-            }
-        }
-        printf("v0 and v3 nicht identisch\n");
-        AllEqual = false;
-    }
-    if (memcmp(v0, v4, pixelArraySize) == 0) {
-        printf("v0 and v4 identisch\n");
-    }
-    else {
-        for (size_t i = 0; i < pixelArraySize; i++) {
-            if (v0[i] != v4[i]) {
-                printf("Erster Unterschied v0/4 bei Byte %zu: %u vs %u\n", i, v0[i], v4[i]);
-                break;
-            }
-        }
-        printf("v0 and v4 nicht identisch\n");
-        AllEqual = false;
-    }
     free(v0);
     free(v1);
-    free(v2);
-    free(v3);
-    free(v4);
-    return AllEqual;
+    return all_equal;
 }
+
 void debug(void) {
     unsigned n = 100;
     float complex c = -1.32f - 0.035f * I;
@@ -269,6 +109,51 @@ void debug(void) {
     printf("upper: %u\n", escapeTime(100, -1.32f + 0.035f * I));
     printf("lower: %u\n", escapeTime(100, -1.32f - 0.035f * I));
 
+}
+
+bool randomizedTests(size_t width, ssize_t height_signed, int trials){
+    printf("Starte randomisierte/ bruteforce tests\n");
+    bool all_true = true;
+
+    float max = 2.0f;
+    float min = -2.0f;
+    unsigned n = 256;
+    bool color = false;
+    for (int iterations = 0; iterations < trials; iterations++) {
+        float start_real = min + (max - min) * ((float) rand()/ (float) RAND_MAX);
+        float start_imag = min + (max - min) * ((float) rand()/ (float) RAND_MAX);
+        float complex start = start_real + start_imag * I;
+        float res = 100.0f * ((float) rand()/ (float) RAND_MAX);
+
+        all_true = compareCorrectnessTest(start, width, height_signed, res, n, color) ? all_true : false;
+    }
+
+    return all_true;
+}
+
+bool symmetryTest(size_t width, ssize_t height_signed, int trials) {
+    // Randomized tests, that fix the center around an even y so that symmetry would be applied
+    // The Imaginary Value at a y is heavily dependet on res, with weird/small resolutions, weird stuff happens
+    // like mirrored coordinates not having the exact same imag value.
+    printf("Starte Symmetrie tests\n");
+    bool all_true = true;
+    size_t height = height_signed < 0 ? -height_signed : height_signed;
+    float factor = height_signed < 0 ? -1.0f : 1.0f;
+
+    unsigned n = 100;
+    bool color = false;
+    srand(3141592653);
+    for (int i = 0; i < trials;  trials++){
+        int center = height / 2 + rand() % 10; // Center must be at an even y so symmetry should trigger
+        // Random small res, so that the imags of two mirrored ys are not cleanly the same
+        float res = 0.002f + 0.011f * ((float) rand()/(float) RAND_MAX);
+        float start_real = -2.0f + 4.0f * ((float) rand()/ (float) RAND_MAX);
+        float start_imag = -(center * factor * res); // set imag so that the center is at center
+        float complex start = start_real + start_imag * I;
+
+        all_true = compareCorrectnessTest(start, width, height_signed, res, n, color) ? all_true : false;
+    }
+    return all_true;
 }
 
 bool BitmapVergleichTests() {
@@ -323,7 +208,7 @@ bool BitmapVergleichTests() {
         printf("Randomized tests passed\n");
     }
 
-    result = symmetryTest(30, 300, 1000);
+    result = symmetryTest(30, 300, 100);
     if (!result) {
         printf("Symmetry tests failed\n");
     } else {

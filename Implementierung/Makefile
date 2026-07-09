@@ -8,7 +8,8 @@ all: main
 
 main: main.c NaiveImplementation/escapetime.c NaiveImplementation/image.c Simd/escapetime.c Simd/image.c \
 	Sym/escapetime.c Sym/image.c Circle/image.c Circle/escapetime.c LatencyThroughput/escapetime.c \
-	LatencyThroughput/image.c bitmap.c bitmap.h testSuite.c GleichheittestsKomplex.c GleichheittestsKomplex.h
+	LatencyThroughput/image.c bitmap.c bitmap.h testSuite.c GleichheittestsKomplex.c GleichheittestsKomplex.h \
+	MultiThreading/image.c MultiThreading/image.h
 	$(CC) $(CFLAGS) -o $@ $^ -lm
 
 

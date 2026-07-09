@@ -12,6 +12,7 @@
 #include "Sym/image.h"
 #include "Circle/image.h"
 #include "LatencyThroughput/image.h"
+#include "MultiThreading/image.h"
 #include "testSuite.h"
 #include "GleichheittestsKomplex.h"
 
@@ -261,8 +262,12 @@ int main(int argc, char *argv[]) {
         for (ssize_t i=0; i < benchmarkIterations; i++) {
             genImageLatencyThroughput(start, width, heightsigned, res, n, color, img);
         }
+    } else if (v == 5) {
+            for (ssize_t i=0; i < benchmarkIterations; i++) {
+                genImageMultiThreading(start, width, heightsigned, res, n, color, img);
+            }
     } else {
-        printf("Error: V muss in [0;4] sein\n");
+        printf("Error: V muss in [0;5] sein\n");
         free(img);
         return 1;
     }
