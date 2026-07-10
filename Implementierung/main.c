@@ -14,7 +14,7 @@
 #include "LatencyThroughput/image.h"
 #include "MultiThreading/image.h"
 #include "testSuite.h"
-#include "GleichheittestsKomplex.h"
+#include "correctnesTests.h"
 
 int main(int argc, char *argv[]) {
     char *end;
@@ -28,12 +28,12 @@ int main(int argc, char *argv[]) {
      * -r <SCHRITTWEITE PRO PIXEL> muss positive float sein
      * -o <NAME> name ohne .bmp angeben
      * -C || --color einfach setzen, dann wird bild mit Eintracht Braunschweig Farben ausgegeben
-     * -t || --test ; run Testsuite
-     * -MOIN FLAG ZUM TESTEN VON MEINER IMPLEMENTIERUNG; ÜBERSCHREIBT SÄMTLICHE ANDERE FLAGS
+     * -t || --test ; run time tests
+     * -iscorrect Flag zum testen der Korrektheit aller Implementierungen, gegen die Naive
      */
 
     for (int i = 0; i < argc; i++) {
-        if (strcmp(argv[i], "-MOIN") == 0) {
+        if (strcmp(argv[i], "-iscorrect") == 0) {
             if (BitmapVergleichTests()) {
                 printf("Alle Bitmaps gleich\n");
 
@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
     }
 
 
-    // Testsuite
+    // zeit messen
     for (int i = 0; i < argc; i++) {
         if (strcmp(argv[i], "--test") == 0 || strcmp(argv[i], "-t") == 0) {
             if (testSuite() == 1) {
@@ -241,31 +241,30 @@ int main(int argc, char *argv[]) {
     if (isBenchmark) {
         clock_gettime(CLOCK_MONOTONIC, &time_start);
     }
-    
+
     if (v == 0) {
         for (ssize_t i=0; i < benchmarkIterations; i++) { // Ohne Benchmarking nur eine Iteration
-            genImage(start, width, heightsigned, res, n, color, img);
-
+            tricornNaive(start, width, heightsigned, res, n, color, img);
         }
     } else if (v == 1) {
         for (ssize_t i=0; i < benchmarkIterations; i++) {
-            genImageSIMD(start, width, heightsigned, res, n, color, img);
+            tricornSimd(start, width, heightsigned, res, n, color, img);
         }
     } else if (v == 2) {
         for (ssize_t i=0; i < benchmarkIterations; i++) {
-            symGenImage(start, width, heightsigned, res, n, color, img);
+            tricornSym(start, width, heightsigned, res, n, color, img);
         }
     } else if (v == 3) {
         for (ssize_t i=0; i < benchmarkIterations; i++) {
-            genImageCircle(start, width, heightsigned, res, n, color, img);
+            tricornCircle(start, width, heightsigned, res, n, color, img);
         }
     } else if (v == 4) {
         for (ssize_t i=0; i < benchmarkIterations; i++) {
-            genImageLatencyThroughput(start, width, heightsigned, res, n, color, img);
+            tricornLatencyThroughput(start, width, heightsigned, res, n, color, img);
         }
     } else if (v == 5) {
             for (ssize_t i=0; i < benchmarkIterations; i++) {
-                genImageMultiThreading(start, width, heightsigned, res, n, color, img);
+                tricornMultiThreading(start, width, heightsigned, res, n, color, img);
             }
     } else {
         printf("Error: V muss in [0;5] sein\n");

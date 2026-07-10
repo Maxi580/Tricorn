@@ -47,32 +47,32 @@ bool compareCorrectnessTest(float complex start, size_t width, ssize_t height_si
         return false;
     }
 
-    genImage(start, width, height_signed, res, n, color, v0);
-    genImageSIMD(start, width, height_signed, res, n, color, v1);
+    tricornNaive(start, width, height_signed, res, n, color, v0);
+    tricornSimd(start, width, height_signed, res, n, color, v1);
     if (memcmp(v0, v1, pixelArraySize)) {
         printf("SIMD Error on randomized Tests\n");
         all_equal = false;
     }
     memset(v1, 0xAA, pixelArraySize);
-    symGenImage(start, width, height_signed, res, n, color, v1);
+    tricornSym(start, width, height_signed, res, n, color, v1);
     if (memcmp(v0, v1, pixelArraySize)) {
         printf("Symmetry Version Error on randomized Tests\n");
         all_equal = false;
     }
     memset(v1, 0xAA, pixelArraySize);
-    genImageCircle(start, width, height_signed, res, n, color, v1);
+    tricornCircle(start, width, height_signed, res, n, color, v1);
     if (memcmp(v0, v1, pixelArraySize)) {
         printf("Circle Version Error on randomized Tests\n");
         all_equal = false;
     }
     memset(v1, 0xAA, pixelArraySize);
-    genImageLatencyThroughput(start, width, height_signed, res, n, color, v1);
+    tricornLatencyThroughput(start, width, height_signed, res, n, color, v1);
     if (memcmp(v0, v1, pixelArraySize)) {
         printf("LatencyThroughput Version Error on randomized Tests\n");
         all_equal = false;
     }
     memset(v1, 0xAA, pixelArraySize);
-    genImageMultiThreading(start, width, height_signed, res, n, color, v1);
+    tricornMultiThreading(start, width, height_signed, res, n, color, v1);
     if (memcmp(v0, v1, pixelArraySize) != 0) {
         printf("Multithreading Version Error on randomized Tests\n");
         all_equal = false;

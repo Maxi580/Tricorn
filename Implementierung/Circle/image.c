@@ -46,7 +46,7 @@ static RGB_Color* createColorMap(unsigned limit, bool color) {
     return mapping;
 }
 
-void genImageCircle(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
+void tricornCircle(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
     RGB_Color* colorMap = createColorMap(n, color);
     if (colorMap == NULL) {
         printf("Error allocating memory\n");

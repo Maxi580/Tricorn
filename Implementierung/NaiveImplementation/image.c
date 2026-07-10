@@ -17,7 +17,7 @@
  */
 
 
-void genImage(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
+void tricornNaive(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
     const unsigned farbpalletteSize = 4;
     const unsigned farbpallette[4][3] = {
         {128, 0, 0},
