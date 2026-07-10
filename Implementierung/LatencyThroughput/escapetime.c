@@ -42,7 +42,7 @@ twoIntegerLanes  escapeTimeLatencyThroughputTwo(const unsigned n, const float co
     twoFloatLanes real_squared = (twoFloatLanes) {_mm_setzero_ps(), _mm_setzero_ps()};
 	twoFloatLanes imag_squared = (twoFloatLanes) {_mm_setzero_ps(), _mm_setzero_ps()};
 
-	// Circle Check, für beide Punkte checken ob sie im Kreis liegen
+	// Circle Check, für beide Punkte checken, ob sie im Kreis liegen
 	__m128 a_amount = _mm_add_ps(_mm_mul_ps(c_real.a, c_real.a), _mm_mul_ps(c_imagine.a, c_imagine.a));
 	__m128 b_amount = _mm_add_ps(_mm_mul_ps(c_real.b, c_real.b), _mm_mul_ps(c_imagine.b, c_imagine.b));
 	__m128 radius_mask_a = _mm_cmpgt_ps(a_amount, circle_radius); // FFFFFFFF wo cAmount > sqrt(radius), 0 sonst

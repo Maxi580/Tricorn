@@ -2,8 +2,8 @@
 // Created by Hendrik on 14.06.2026.
 //
 
-#ifndef GRA26CAPSPROJECT_T105_S_H
-#define GRA26CAPSPROJECT_T105_S_H
+#ifndef GRA26CAPSPROJECT_T105_SIMD_ESCAPETIME_H
+#define GRA26CAPSPROJECT_T105_SIMD_ESCAPETIME_H
 
 #include <complex.h>
 #include <immintrin.h>

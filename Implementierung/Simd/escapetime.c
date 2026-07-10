@@ -11,7 +11,7 @@ __m128i simdEscapeTime(const unsigned n, const float complex c1, const float com
     /* Da wir zn nie berechnen, wurde die Distanzberechnung und Inkrementierung aus der Schleife gezogen,
      * dass bedeutet aber, dass wir das auch für z0 machen, da bei z0 die Distanz 0 ist und der Punkt damit
      * noch nicht divergiert ist, würde allerdings jede lane inkrementiert werden, was allerdings falsch ist.
-     * (Man könnte auch n = 1 abfangen, und dann gleich 1er lanes zurückgeben, dass ist aber unclean)*/
+     * (Man könnte auch n = 1 abfangen, und dann gleich 1er lanes zurückgeben, das ist aber unclean)*/
     if(n == 0){
     	return _mm_setzero_si128();
     }

@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include "../NaiveImplementation/escapetime.h"
 
-
+/*
 unsigned limit = 255;
 
 // Max Distance: 0.250200
@@ -20,4 +20,4 @@ int main() {;
         }
     }
     printf("Max Distance: %f\n", maxDistance);
-}
+}*/

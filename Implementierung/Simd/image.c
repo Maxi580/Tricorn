@@ -22,7 +22,7 @@ const unsigned colorPalleteSize = sizeof(colorPallete) / sizeof(colorPallete[0])
 
 
 __attribute__((hot))
-inline void colorizeBitmap(unsigned limit, unsigned iterations, unsigned char* row, bool color)  {
+void colorizeBitmap(unsigned limit, unsigned iterations, unsigned char* row, bool color)  {
     /* Colors one Pixel in the Bitmap */
     if (limit == iterations) {
         // Black (Did Not converge)

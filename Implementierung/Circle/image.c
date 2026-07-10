@@ -7,6 +7,8 @@
 #include <immintrin.h>
 #include "escapetime.h"
 #include <math.h>
+#include "escapetime.h"
+#include "escapetime.c"
 
 #define rgbSize 3
 

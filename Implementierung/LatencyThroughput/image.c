@@ -105,9 +105,44 @@ void tricornLatencyThroughput(float complex start, size_t width, ssize_t height,
             const float complex b3 = start + ((float) x + 6) * res + imag_part;
             const float complex b4 = start + ((float) x + 7) * res + imag_part;
 
+
             twoIntegerLanes bothIterations = escapeTimeLatencyThroughputTwo(n, a1, a2, a3, a4, b1, b2, b3, b4);
             _mm_storeu_si128((__m128i*)iterations,       bothIterations.a);
             _mm_storeu_si128((__m128i*)(iterations + 4), bothIterations.b);
+            if ((y == 4 && x == 8) ) {
+                printf("DEBUG!!(REMOVE LATER!!\n");
+                printf("v4 c1 = %.9f %+.9fi\n", crealf(b1), cimagf(b1));
+                printf("v4 c2 = %.9f %+.9fi\n", crealf(b2), cimagf(b2));
+                printf("v4 c3 = %.9f %+.9fi\n", crealf(b3), cimagf(b3));
+                printf("v4 c4 = %.9f %+.9fi\n", crealf(b4), cimagf(b4));
+                printf("v4 it = %u %u %u %u | %u %u %u %u\n",
+       iterations[0], iterations[1], iterations[2], iterations[3],
+       iterations[4], iterations[5], iterations[6], iterations[7]);
+                printf("pixel: %llu\n",(y*row_size)+(x));
+                printf("colorr: %u\n", colorMap[iterations[4]].r);
+                printf("colorg: %u\n", colorMap[iterations[4]].g);
+                printf("colorb: %u\n", colorMap[iterations[4]].b);
+
+            }
+            if ((y == 4 && x == 16) ) {
+                printf("DEBUG!!(REMOVE LATER!!\n");
+                printf("v4 c1 = %.9f %+.9fi\n", crealf(a1), cimagf(a1));
+                printf("v4 c2 = %.9f %+.9fi\n", crealf(a2), cimagf(a2));
+                printf("v4 c3 = %.9f %+.9fi\n", crealf(a3), cimagf(a3));
+                printf("v4 c4 = %.9f %+.9fi\n", crealf(a4), cimagf(a4));
+                printf("v4 c1 = %.9f %+.9fi\n", crealf(b1), cimagf(b1));
+                printf("v4 c2 = %.9f %+.9fi\n", crealf(b2), cimagf(b2));
+                printf("v4 c3 = %.9f %+.9fi\n", crealf(b3), cimagf(b3));
+                printf("v4 c4 = %.9f %+.9fi\n", crealf(b4), cimagf(b4));
+                printf("v4 it = %u %u %u %u | %u %u %u %u\n",
+       iterations[0], iterations[1], iterations[2], iterations[3],
+       iterations[4], iterations[5], iterations[6], iterations[7]);
+                printf("pixel: %llu\n",(y*row_size)+(x));
+            printf("colorr: %u\n", colorMap[iterations[0]].r);
+            printf("colorg: %u\n", colorMap[iterations[0]].g);
+            printf("colorb: %u\n", colorMap[iterations[0]].b);
+            }
+
 
             for (int i = 0; i < 8; i++){
                 size_t x_offset = (x + i) * 3;

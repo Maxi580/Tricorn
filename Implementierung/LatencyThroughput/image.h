@@ -1,5 +1,5 @@
-#ifndef GRA26CAPSPROJECT_T105_LT_H
-#define GRA26CAPSPROJECT_T105_LT_H
+#ifndef GRA26CAPSPROJECT_T105_LT_IMAGE_H
+#define GRA26CAPSPROJECT_T105_LT_IMAGE_H
 #include <stdbool.h>
 #include <complex.h>
 
