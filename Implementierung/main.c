@@ -32,6 +32,48 @@ int main(int argc, char *argv[]) {
      * -iscorrect Flag zum testen der Korrektheit aller Implementierungen, gegen die Naive
      */
 
+
+    /* CMakeLists.txt falls jmd kopieren will
+    *cmake_minimum_required(VERSION 4.2)
+project(gra26capsproject_t105 C)
+
+set(CMAKE_C_STANDARD 11)
+
+add_executable(gra26capsproject_t105
+        Implementierung/NaiveImplementation/image.h
+        Implementierung/NaiveImplementation/escapetime.c
+        Implementierung/NaiveImplementation/image.c
+        Implementierung/NaiveImplementation/escapetime.h
+        Implementierung/Simd/image.h
+        Implementierung/Simd/escapetime.c
+        Implementierung/Simd/image.c
+        Implementierung/Simd/escapetime.h
+        Implementierung/main.c
+        Implementierung/correctnesTests.h
+        Implementierung/correctnesTests.c
+        Implementierung/bitmap.c
+        Implementierung/bitmap.h
+        Implementierung/Sym/escapetime.c
+        Implementierung/Sym/escapetime.h
+        Implementierung/Sym/image.h
+        Implementierung/Sym/image.c
+        Implementierung/MultiThreading/image.h
+        Implementierung/MultiThreading/image.c
+        Implementierung/LatencyThroughput/escapetime.c
+        Implementierung/LatencyThroughput/escapetime.h
+        Implementierung/LatencyThroughput/image.h
+        Implementierung/LatencyThroughput/image.c
+        Implementierung/Circle/image.h
+        Implementierung/Circle/image.c
+        Implementierung/Circle/findCircleRad.c
+        Implementierung/Circle/image.h
+        Implementierung/Circle/image.c
+        Implementierung/testSuite.c
+        Implementierung/testSuite.h
+)
+
+     */
+
     for (int i = 0; i < argc; i++) {
         if (strcmp(argv[i], "-iscorrect") == 0) {
             if (BitmapVergleichTests()) {
