@@ -202,34 +202,30 @@ static void* genImageThreading(void* arg) {
 
 void genImageMultiThreading(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color,
     unsigned char* img) {
-    // Thread zu erstellen kostet ca. 0.005s, lohnt sich also erst bei einer gewissen dauer.
+    // Thread zu erstellen kostet ca. 0.000005s, lohnt sich also erst bei einer gewissen dauer.
     size_t max_y = height > 0 ? height : -height;
-    size_t half_y = max_y / 2;
 
-    /*int thread_amount = 2; // Hardcoded, find smarter value later
+    int thread_amount = 8;
+    pthread_t threads[thread_amount];
+    thread_data data[thread_amount];
 
     int split = max_y / thread_amount;
     int bottomY = 0;
     int topY = split;
     for (int i = 0; i < (thread_amount - 1); i++) {
         pthread_t thread;
-        thread_data data1 = (thread_data) {start, width, height, bottomY, topY, res, n, color, img};
-        pthread_create(&thread, NULL, genImageThreading, &data1);
+        data[i] = (thread_data) {start, width, height, bottomY, topY, res, n, color, img};;
+        pthread_create(&thread, NULL, genImageThreading, &data[i]);
         bottomY += split, topY += split;
+        threads[i] = thread;
     }
     // Finishes all the rest (Integer divison etc.)
     pthread_t rest_thread;
-    thread_data rest_data = (thread_data) {start, width, height, topY, max_y, res, n, color, img};
-    pthread_create(&rest_thread, NULL, genImageThreading, &rest_data);*/
+    thread_data rest_data = (thread_data) {start, width, height, bottomY, max_y, res, n, color, img};
+    pthread_create(&rest_thread, NULL, genImageThreading, &rest_data);
+    threads[thread_amount - 1] = rest_thread;
 
-    pthread_t thread1;
-    thread_data data1 = (thread_data) {start, width, height, 0, half_y, res, n, color, img};
-    pthread_create(&thread1, NULL, genImageThreading, &data1);
-
-    pthread_t thread2;
-    thread_data data2 = (thread_data) {start, width, height, half_y, max_y, res, n, color, img};
-    pthread_create(&thread2, NULL, genImageThreading, &data2);
-
-    pthread_join(thread1, NULL);
-    pthread_join(thread2, NULL);
+    for (int i = 0; i < thread_amount; i++) {
+        pthread_join(threads[i], NULL);
+    }
 }

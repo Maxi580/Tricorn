@@ -241,10 +241,11 @@ int main(int argc, char *argv[]) {
     if (isBenchmark) {
         clock_gettime(CLOCK_MONOTONIC, &time_start);
     }
-
+    
     if (v == 0) {
         for (ssize_t i=0; i < benchmarkIterations; i++) { // Ohne Benchmarking nur eine Iteration
             genImage(start, width, heightsigned, res, n, color, img);
+
         }
     } else if (v == 1) {
         for (ssize_t i=0; i < benchmarkIterations; i++) {

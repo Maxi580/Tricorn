@@ -53,23 +53,27 @@ bool compareCorrectnessTest(float complex start, size_t width, ssize_t height_si
         printf("SIMD Error on randomized Tests\n");
         all_equal = false;
     }
+    memset(v1, 0xAA, pixelArraySize);
     symGenImage(start, width, height_signed, res, n, color, v1);
     if (memcmp(v0, v1, pixelArraySize)) {
-        printf("SIMD Version Error on randomized Tests\n");
+        printf("Symmetry Version Error on randomized Tests\n");
         all_equal = false;
     }
+    memset(v1, 0xAA, pixelArraySize);
     genImageCircle(start, width, height_signed, res, n, color, v1);
     if (memcmp(v0, v1, pixelArraySize)) {
         printf("Circle Version Error on randomized Tests\n");
         all_equal = false;
     }
+    memset(v1, 0xAA, pixelArraySize);
     genImageLatencyThroughput(start, width, height_signed, res, n, color, v1);
     if (memcmp(v0, v1, pixelArraySize)) {
         printf("LatencyThroughput Version Error on randomized Tests\n");
         all_equal = false;
     }
+    memset(v1, 0xAA, pixelArraySize);
     genImageMultiThreading(start, width, height_signed, res, n, color, v1);
-    if (memcmp(v0, v1, pixelArraySize)) {
+    if (memcmp(v0, v1, pixelArraySize) != 0) {
         printf("Multithreading Version Error on randomized Tests\n");
         all_equal = false;
     }
@@ -133,7 +137,7 @@ bool symmetryTest(size_t width, ssize_t height_signed, int trials) {
     unsigned n = 100;
     bool color = false;
     srand(3141592653);
-    for (int i = 0; i < trials;  trials++){
+    for (int i = 0; i < trials;  i++){
         int center = height / 2 + rand() % 10; // Center must be at an even y so symmetry should trigger
         // Random small res, so that the imags of two mirrored ys are not cleanly the same
         float res = 0.002f + 0.011f * ((float) rand()/(float) RAND_MAX);
