@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
      * -o <NAME> name ohne .bmp angeben
      * -C || --color einfach setzen, dann wird bild mit Eintracht Braunschweig Farben ausgegeben
      * -t || --test ; run time tests
-     * -correct Flag zum testen der Korrektheit aller Implementierungen, gegen die Naive
+     * -correct Flag zum Testen der Korrektheit aller Implementierungen, gegen die Naive
      */
 
 
@@ -175,7 +175,7 @@ add_executable(gra26capsproject_t105
             }
             widthsigned = strtol(argv[i+1], &end, 10);
             if (*end != '\0') {
-                printf("Error: nach -d ist keine gültige Zahl f+r <WIDTH>\n");
+                printf("Error: nach -d ist keine gültige Zahl für <WIDTH>\n");
                 return 1;
             }
             heightsigned = strtol(argv[i+2], &end, 10);
@@ -214,7 +214,6 @@ add_executable(gra26capsproject_t105
                 return 1;
 
             }
-            res = res;
         }
     }
 
@@ -267,10 +266,10 @@ add_executable(gra26capsproject_t105
 
     size_t height;
     if (heightsigned < 0) {
-        height = heightsigned * (-1);
+        height = (size_t)(-heightsigned);
     }
     else {
-        height = heightsigned ;
+        height = (size_t)heightsigned ;
     }
 
     size_t row_size = ((width * 3+3)/4)*4;
@@ -321,12 +320,13 @@ add_executable(gra26capsproject_t105
     if (isBenchmark) {  // Zeitmessung (siehe Folien Benchmarking)
         struct timespec time_end;
         clock_gettime(CLOCK_MONOTONIC, &time_end);
-        double time = time_end.tv_sec - time_start.tv_sec + 1e-9 * (time_end.tv_nsec - time_start.tv_nsec);
+        const double time = (double)(time_end.tv_sec - time_start.tv_sec) + 1e-9 * (time_end.tv_nsec - time_start.tv_nsec);
         if (time < 1) { // unter 1 Sekunde getestet (ungültig)
-            printf("Error: Gesamtlaufzeit zu kurz. Erhöhe die Iterationen! (%f s < 1 s)\n", time);
+            printf("Error: Gesamtlaufzeit zu kurz. Erhöhe die Iterationen! (%fs < 1s)\n", time);
+            free(img);
             return 1;
         }
-        double avg_time = time / benchmarkIterations;
+        double avg_time = time / (double)benchmarkIterations;
         printf("Dauer pro Iteration: %f s\n", avg_time);
     }
 
