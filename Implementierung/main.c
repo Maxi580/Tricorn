@@ -34,7 +34,7 @@ int main(int argc, char *argv[]) {
 
 
     /* CMakeLists.txt falls jmd kopieren will
-    *cmake_minimum_required(VERSION 4.2)
+    cmake_minimum_required(VERSION 4.2)
 project(gra26capsproject_t105 C)
 
 set(CMAKE_C_STANDARD 11)
@@ -70,7 +70,10 @@ add_executable(gra26capsproject_t105
         Implementierung/Circle/image.c
         Implementierung/testSuite.c
         Implementierung/testSuite.h
+        Implementierung/Circle/escapetime.c
+        Implementierung/Circle/escapetime.h
 )
+
 
      */
 
