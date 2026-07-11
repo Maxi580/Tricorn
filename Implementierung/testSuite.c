@@ -89,97 +89,24 @@ double measureTime(void (*fn)(float complex, size_t, ssize_t, float,  unsigned, 
     return time / (double)benchmarkIterations;;
 }
 
-timeMeasurement* plotTableGenerationAgainstSizeAndRes(size_t start_length, size_t steps, size_t step_size,
-                    const unsigned n, const bool color) {
-    printf("Starting test against changing width and scale res:\n");
+timeMeasurement* plotTableGeneration(const size_t steps, const float complex start_value, const size_t start_length,  const size_t step_length,
+                    const size_t start_n, const size_t step_n, const float start_res, const bool color) {
     timeMeasurement* results = malloc(sizeof(timeMeasurement) * steps);
     if (results == NULL) {
         printf("malloc() returned NULL\n");
         return NULL;
     }
-    const float complex start_value = -2.0f -2.0f * I;
 
     for (size_t step = 0; step < steps; step++) {
-        size_t length = start_length + step * step_size;
-        const float res = 4.0f / (float) length;
+        const size_t length = start_length + step * step_length;
+        const size_t n = start_n + step * step_n;
+
+        const float res = (start_res == 0.0) ? (4.0f / (float) length) : start_res;
+
         results[step].width = length;
         results[step].iterations = n;
         results[step].res = res;
-        results[step].naive = measureTime(tricornNaive, start_value, length, (ssize_t)length, res, n, color, NULL);
-        results[step].simd = measureTime(tricornSimd, start_value, length, (ssize_t)length, res, n, color, NULL);
-        results[step].sym = measureTime(tricornSym, start_value, length, (ssize_t)length, res, n, color, NULL);
-        results[step].circle = measureTime(tricornCircle, start_value, length, (ssize_t)length, res, n, color, NULL);
-        results[step].latency = measureTime(tricornLatencyThroughput, start_value, length, (ssize_t)length, res, n, color, NULL);
-        results[step].multithreading = measureTime(tricornMultiThreading, start_value, length, (ssize_t)length, res, n, color, NULL);
-    }
-    return results;
-}
 
-timeMeasurement* plotTableGenerationAgainstIterationsBlack(const size_t length, const size_t steps, const size_t step_size, const float res,
-                    const unsigned start_n, const bool color) {
-    printf("Starting test against changing iterations in black of fractale (Start: 0+0i):\n");
-    timeMeasurement* results = malloc(sizeof(timeMeasurement) * steps);
-    if (results == NULL) {
-        printf("malloc() returned NULL\n");
-        return NULL;
-    }
-    const float complex start_value = 0.0;
-
-    for (size_t step = 0; step < steps; step++) {
-        unsigned n = start_n + step * step_size;
-        results[step].width = length;
-        results[step].iterations = n;
-        results[step].res = res;
-        results[step].naive = measureTime(tricornNaive, start_value, length, (ssize_t)length, res, n, color, NULL);
-        results[step].simd = measureTime(tricornSimd, start_value, length, (ssize_t)length, res, n, color, NULL);
-        results[step].sym = measureTime(tricornSym, start_value, length, (ssize_t)length, res, n, color, NULL);
-        results[step].circle = measureTime(tricornCircle, start_value, length, (ssize_t)length, res, n, color, NULL);
-        results[step].latency = measureTime(tricornLatencyThroughput, start_value, length, (ssize_t)length, res, n, color, NULL);
-        results[step].multithreading = measureTime(tricornMultiThreading, start_value, length, (ssize_t)length, res, n, color, NULL);
-    }
-    return results;
-}
-
-timeMeasurement* plotTableGenerationAgainstIterationsWhite(const size_t length, const size_t steps, const size_t step_size, const float res,
-                    const unsigned start_n, const bool color) {
-    printf("Starting test against changing iterations in empty space (Start: 3+3i):\n");
-    timeMeasurement* results = malloc(sizeof(timeMeasurement) * steps);
-    if (results == NULL) {
-        printf("malloc() returned NULL\n");
-        return NULL;
-    }
-    const float complex start_value = 3.0 + 3.0 * I;
-
-    for (size_t step = 0; step < steps; step++) {
-        unsigned n = start_n + step * step_size;
-        results[step].width = length;
-        results[step].iterations = n;
-        results[step].res = res;
-        results[step].naive = measureTime(tricornNaive, start_value, length, (ssize_t)length, res, n, color, NULL);
-        results[step].simd = measureTime(tricornSimd, start_value, length, (ssize_t)length, res, n, color, NULL);
-        results[step].sym = measureTime(tricornSym, start_value, length, (ssize_t)length, res, n, color, NULL);
-        results[step].circle = measureTime(tricornCircle, start_value, length, (ssize_t)length, res, n, color, NULL);
-        results[step].latency = measureTime(tricornLatencyThroughput, start_value, length, (ssize_t)length, res, n, color, NULL);
-        results[step].multithreading = measureTime(tricornMultiThreading, start_value, length, (ssize_t)length, res, n, color, NULL);
-    }
-    return results;
-}
-
-timeMeasurement* plotTableGenerationAgainstIterationsEdge(const size_t length, const size_t steps, const size_t step_size, const float res,
-                    const unsigned start_n, const bool color) {
-    printf("Starting test against changing iterations fractale edge (Start: -1+0i):\n");
-    timeMeasurement* results = malloc(sizeof(timeMeasurement) * steps);
-    if (results == NULL) {
-        printf("malloc() returned NULL\n");
-        return NULL;
-    }
-    float complex start_value = -1.0 + 0.0 * I;
-
-    for (size_t step = 0; step < steps; step++) {
-        unsigned n = start_n + step * step_size;
-        results[step].width = length;
-        results[step].iterations = n;
-        results[step].res = res;
         results[step].naive = measureTime(tricornNaive, start_value, length, (ssize_t)length, res, n, color, NULL);
         results[step].simd = measureTime(tricornSimd, start_value, length, (ssize_t)length, res, n, color, NULL);
         results[step].sym = measureTime(tricornSym, start_value, length, (ssize_t)length, res, n, color, NULL);
@@ -208,19 +135,27 @@ void printTable(const timeMeasurement* r, size_t steps) {
 int genGraphTable() {
     printf("Starte Performance Test für Graphen:\n");
 
-    timeMeasurement* time_table_size_res = plotTableGenerationAgainstSizeAndRes(50, 100, 50, 256, false);
+    printf("Starting test against changing width and scale res:\n");
+    timeMeasurement* time_table_size_res = plotTableGeneration(70,  (-2.0f -2.0f * I), 50,  50,
+                    256, 0, 0, false);
     printTable(time_table_size_res, 100);
     free(time_table_size_res);
 
-    timeMeasurement* time_table_iterations_black = plotTableGenerationAgainstIterationsBlack(800, 100, 20, 0.0001f, 20, false);
+    printf("Starting test against changing iterations in black of fractale (Start: 0+0i):\n");
+    timeMeasurement* time_table_iterations_black = plotTableGeneration(70, 0.0, 800,  0,
+                    50, 50, 0.0001f, false);
     printTable(time_table_iterations_black, 100);
     free(time_table_iterations_black);
 
-    timeMeasurement* time_table_iterations_white = plotTableGenerationAgainstIterationsWhite(800, 100, 20, 0.0001f, 20, false);
+    printf("Starting test against changing iterations in empty space (Start: 3+3i):\n");
+    timeMeasurement* time_table_iterations_white = plotTableGeneration(70, (3.0 + 3.0 * I), 800,  0,
+                    50, 50, 0.0001f, false);
     printTable(time_table_iterations_white, 100);
     free(time_table_iterations_white);
 
-    timeMeasurement* time_table_iterations_edge = plotTableGenerationAgainstIterationsEdge(800, 100, 20, 0.001f, 20, false);
+    printf("Starting test against changing iterations fractale edge (Start: -1+0i):\n");
+    timeMeasurement* time_table_iterations_edge = plotTableGeneration(50, (-1.0 + 0.0 * I), 800, 0,
+                    50, 50, 0.001f, false);
     printTable(time_table_iterations_edge, 100);
     free(time_table_iterations_edge);
 
@@ -244,9 +179,9 @@ int testSuite() {
         {-2.0 -2.0f * I, 2, 2, 0.01f, 10 ,false, "2x2 BottomUp"},
 
         {-2.0 +2.0f * I, 3, -3, 0.01f, 10 ,false, "3x3 topDown"},
-        {-2.0 +2.0f * I, 3, -300, 0.01f, 10 ,false, "3x300 "},
+        {-2.0 +2.0f * I, 3, -300, 0.01f, 10 ,false, "3x300"},
 
-        {-0.5 +0.5 * I, 300, -200, 0.001f, 1500 ,false, "high iterations "},
+        {-0.5 +0.5 * I, 300, -200, 0.001f, 1500 ,false, "high iterations"},
     };
 
     size_t testCasesCount = sizeof(testCases)/sizeof(testCases[0]);
