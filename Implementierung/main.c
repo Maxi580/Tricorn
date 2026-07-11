@@ -14,6 +14,7 @@
 #include "LatencyThroughput/image.h"
 #include "MultiThreading/image.h"
 #include "testSuite.h"
+#include "helpMessage.h"
 #include "correctnesTests.h"
 
 int main(int argc, char *argv[]) {
@@ -27,6 +28,7 @@ int main(int argc, char *argv[]) {
      * -n <MAXITERATIONS> muss Integer sein und positiv
      * -r <SCHRITTWEITE PRO PIXEL> muss positive float sein
      * -o <NAME> name ohne .bmp angeben
+     * -h || --help ; Help Message
      * -C || --color einfach setzen, dann wird bild mit Eintracht Braunschweig Farben ausgegeben
      * -t || --test ; run time tests
      * -graph || erstellt eine Tabelle für Graphen
@@ -110,6 +112,14 @@ add_executable(gra26capsproject_t105
                 printf("Fehler beim Ausführen der Testsuite\n");
                 return 1;
             }
+            return 0;
+        }
+    }
+
+    // Help Message
+    for (int i = 0; i < argc; i++) {
+        if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
+            helpMessage();
             return 0;
         }
     }

@@ -9,7 +9,7 @@ all: main
 main: main.c NaiveImplementation/escapetime.c NaiveImplementation/image.c Simd/escapetime.c Simd/image.c \
 	Sym/escapetime.c Sym/image.c Circle/image.c Circle/escapetime.c LatencyThroughput/escapetime.c \
 	LatencyThroughput/image.c bitmap.c bitmap.h testSuite.c correctnesTests.c correctnesTests.h \
-	MultiThreading/image.c MultiThreading/image.h colormap.h colormap.c
+	MultiThreading/image.c MultiThreading/image.h colormap.h colormap.c helpMessage.c helpMessage.h
 	$(CC) $(CFLAGS) -o $@ $^ -lm
 
 
