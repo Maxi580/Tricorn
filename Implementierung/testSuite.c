@@ -23,6 +23,8 @@ typedef struct {
     double latency;
     double multithreading;
     size_t width;
+    unsigned iterations;
+    float res;
 } timeMeasurement;
 
 double measureTime(void (*fn)(float complex, size_t, ssize_t, float,  unsigned, bool, unsigned char *),
@@ -40,7 +42,7 @@ double measureTime(void (*fn)(float complex, size_t, ssize_t, float,  unsigned, 
     unsigned char *img = malloc(pixelArraySize);
     if (img == NULL) {
         printf("malloc() returned NULL\n");
-        return false;
+        return -1.0;
     }
 
     struct timespec time_start;
@@ -70,6 +72,109 @@ timeMeasurement* measureAgainstSize(size_t start_length, size_t steps, size_t st
     for (size_t step = 0; step < steps; step++) {
         size_t length = start_length + step * step_size;
         results[step].width = length;
+        results[step].iterations = n;
+        results[step].res = res;
+        results[step].naive = measureTime(tricornNaive, start_value, length, length, res, n, color);
+        results[step].simd = measureTime(tricornSimd, start_value, length, length, res, n, color);
+        results[step].sym = measureTime(tricornSym, start_value, length, length, res, n, color);
+        results[step].circle = measureTime(tricornCircle, start_value, length, length, res, n, color);
+        results[step].latency = measureTime(tricornLatencyThroughput, start_value, length, length, res, n, color);
+        results[step].multithreading = measureTime(tricornMultiThreading, start_value, length, length, res, n, color);
+    }
+    return results;
+}
+
+timeMeasurement* measureAgainstSizeAndScaleRes(size_t start_length, size_t steps, size_t step_size, float res,
+                    const unsigned n, const bool color) {
+    printf("Starting test against changing width and scale res:\n");
+    timeMeasurement* results = malloc(sizeof(timeMeasurement) * steps);
+    if (results == NULL) {
+        printf("malloc() returned NULL\n");
+        return NULL;
+    }
+    float complex start_value = -2.0f -2.0f * I;
+
+    for (size_t step = 0; step < steps; step++) {
+        size_t length = start_length + step * step_size;
+        res = 4.0 / (float) length;
+        results[step].width = length;
+        results[step].iterations = n;
+        results[step].res = res;
+        results[step].naive = measureTime(tricornNaive, start_value, length, length, res, n, color);
+        results[step].simd = measureTime(tricornSimd, start_value, length, length, res, n, color);
+        results[step].sym = measureTime(tricornSym, start_value, length, length, res, n, color);
+        results[step].circle = measureTime(tricornCircle, start_value, length, length, res, n, color);
+        results[step].latency = measureTime(tricornLatencyThroughput, start_value, length, length, res, n, color);
+        results[step].multithreading = measureTime(tricornMultiThreading, start_value, length, length, res, n, color);
+    }
+    return results;
+}
+
+timeMeasurement* measureAgainstIterationsBlack(size_t length, size_t steps, size_t step_size, const float res,
+                    const unsigned start_n, const bool color) {
+    printf("Starting test against changing iterations in black of fractale (Start: 0+0i):\n");
+    timeMeasurement* results = malloc(sizeof(timeMeasurement) * steps);
+    if (results == NULL) {
+        printf("malloc() returned NULL\n");
+        return NULL;
+    }
+    float complex start_value = 0.0;
+
+    for (size_t step = 0; step < steps; step++) {
+        unsigned n = start_n + step * step_size;
+        results[step].width = length;
+        results[step].iterations = n;
+        results[step].res = res;
+        results[step].naive = measureTime(tricornNaive, start_value, length, length, res, n, color);
+        results[step].simd = measureTime(tricornSimd, start_value, length, length, res, n, color);
+        results[step].sym = measureTime(tricornSym, start_value, length, length, res, n, color);
+        results[step].circle = measureTime(tricornCircle, start_value, length, length, res, n, color);
+        results[step].latency = measureTime(tricornLatencyThroughput, start_value, length, length, res, n, color);
+        results[step].multithreading = measureTime(tricornMultiThreading, start_value, length, length, res, n, color);
+    }
+    return results;
+}
+
+timeMeasurement* measureAgainstIterationsWhite(size_t length, size_t steps, size_t step_size, const float res,
+                    const unsigned start_n, const bool color) {
+    printf("Starting test against changing iterations in empty space (Start: 3+3i):\n");
+    timeMeasurement* results = malloc(sizeof(timeMeasurement) * steps);
+    if (results == NULL) {
+        printf("malloc() returned NULL\n");
+        return NULL;
+    }
+    float complex start_value = 3.0 + 3.0 * I;
+
+    for (size_t step = 0; step < steps; step++) {
+        unsigned n = start_n + step * step_size;
+        results[step].width = length;
+        results[step].iterations = n;
+        results[step].res = res;
+        results[step].naive = measureTime(tricornNaive, start_value, length, length, res, n, color);
+        results[step].simd = measureTime(tricornSimd, start_value, length, length, res, n, color);
+        results[step].sym = measureTime(tricornSym, start_value, length, length, res, n, color);
+        results[step].circle = measureTime(tricornCircle, start_value, length, length, res, n, color);
+        results[step].latency = measureTime(tricornLatencyThroughput, start_value, length, length, res, n, color);
+        results[step].multithreading = measureTime(tricornMultiThreading, start_value, length, length, res, n, color);
+    }
+    return results;
+}
+
+timeMeasurement* measureAgainstIterationsEdge(size_t length, size_t steps, size_t step_size, const float res,
+                    const unsigned start_n, const bool color) {
+    printf("Starting test against changing iterations fractale edge (Start: -1+0i):\n");
+    timeMeasurement* results = malloc(sizeof(timeMeasurement) * steps);
+    if (results == NULL) {
+        printf("malloc() returned NULL\n");
+        return NULL;
+    }
+    float complex start_value = -1.0 + 0.0 * I;
+
+    for (size_t step = 0; step < steps; step++) {
+        unsigned n = start_n + step * step_size;
+        results[step].width = length;
+        results[step].iterations = n;
+        results[step].res = res;
         results[step].naive = measureTime(tricornNaive, start_value, length, length, res, n, color);
         results[step].simd = measureTime(tricornSimd, start_value, length, length, res, n, color);
         results[step].sym = measureTime(tricornSym, start_value, length, length, res, n, color);
@@ -86,11 +191,11 @@ void printTable(const timeMeasurement* r, size_t steps) {
         return;
     }
 
-    printf("%12s %12s %12s %12s %12s %12s %12s\n",
-           "width", "naive", "simd", "sym", "circle", "latency", "multithr");
+    printf("%12s %12s %12s %12s %12s %12s %12s %12s %12s\n",
+           "width", "iter", "res", "naive", "simd", "sym", "circle", "latency", "multithr");
     for (size_t i = 0; i < steps; i++) {
-        printf("%12zu %12f %12f %12f %12f %12f %12f\n",
-               r[i].width, r[i].naive, r[i].simd, r[i].sym,
+        printf("%12zu %12u %12f %12f %12f %12f %12f %12f %12f\n",
+               r[i].width, r[i].iterations, r[i].res, r[i].naive, r[i].simd, r[i].sym,
                r[i].circle, r[i].latency, r[i].multithreading);
     }
 }
@@ -98,10 +203,28 @@ void printTable(const timeMeasurement* r, size_t steps) {
 int testSuite() {
     printf("Starte Performance tests:\n");
 
-    timeMeasurement* time_table = measureAgainstSize(0, 200, 50, 1.0f, 256, false);
-    printTable(time_table, 100);
+    timeMeasurement* time_table_size = measureAgainstSize(50, 100, 50, 1.0f, 256, false);
+    printTable(time_table_size, 100);
+    free(time_table_size);
 
-    free(time_table);
+    timeMeasurement* time_table_size_res = measureAgainstSizeAndScaleRes(50, 100, 50, 1.0f, 256, false);
+    printTable(time_table_size_res, 100);
+    free(time_table_size_res);
+
+
+    timeMeasurement* time_table_iterations_black = measureAgainstIterationsBlack(800, 100, 20, 0.0001f, 20, false);
+    printTable(time_table_iterations_black, 100);
+    free(time_table_iterations_black);
+
+
+    timeMeasurement* time_table_iterations_white = measureAgainstIterationsWhite(800, 100, 20, 0.0001f, 20, false);
+    printTable(time_table_iterations_white, 100);
+    free(time_table_iterations_white);
+
+    timeMeasurement* time_table_iterations_edge = measureAgainstIterationsEdge(800, 100, 20, 0.001f, 20, false);
+    printTable(time_table_iterations_edge, 100);
+    free(time_table_iterations_edge);
+
     printf("\nTest Suite Fertig\n");
     return 0;
 }
