@@ -327,7 +327,7 @@ add_executable(gra26capsproject_t105
             return 1;
         }
         double avg_time = time / (double)benchmarkIterations;
-        printf("Dauer pro Iteration: %f s\n", avg_time);
+        printf("Dauer pro Iteration: %fs\n", avg_time); //%g für ganz kleine Zahlen?
     }
 
     writeBmp(neuerDateiname, width, heightsigned, img);
