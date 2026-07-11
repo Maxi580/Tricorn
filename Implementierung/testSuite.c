@@ -39,9 +39,9 @@ struct TestCase {
 double measureTime(void (*fn)(float complex, size_t, ssize_t, float,  unsigned, bool, unsigned char *),
                     const float complex start, const size_t width, const ssize_t height_signed, const float res, const unsigned n, const bool color, unsigned char *img) {
 
-    bool isAllocted = false;
+    bool is_allocated = false;
     if (img == NULL) {
-        isAllocted = true;
+        is_allocated = true;
 
         size_t height;
         if (height_signed < 0) {
@@ -82,7 +82,7 @@ double measureTime(void (*fn)(float complex, size_t, ssize_t, float,  unsigned, 
         }
     }
 
-    if (isAllocted) {
+    if (is_allocated) {
         free(img);
     }
 
@@ -136,7 +136,7 @@ int genGraphTable() {
     printf("Starte Performance Test für Graphen:\n");
 
     printf("Starting test against changing width and scale res:\n");
-    timeMeasurement* time_table_size_res = plotTableGeneration(70,  (-2.0f -2.0f * I), 50,  50,
+    timeMeasurement* time_table_size_res = plotTableGeneration(100,  (-2.0f -2.0f * I), 50,  50,
                     256, 0, 0, false);
     printTable(time_table_size_res, 100);
     free(time_table_size_res);
@@ -144,19 +144,19 @@ int genGraphTable() {
     printf("Starting test against changing iterations in black of fractale (Start: 0+0i):\n");
     timeMeasurement* time_table_iterations_black = plotTableGeneration(70, 0.0, 800,  0,
                     50, 50, 0.0001f, false);
-    printTable(time_table_iterations_black, 100);
+    printTable(time_table_iterations_black, 70);
     free(time_table_iterations_black);
 
     printf("Starting test against changing iterations in empty space (Start: 3+3i):\n");
     timeMeasurement* time_table_iterations_white = plotTableGeneration(70, (3.0 + 3.0 * I), 800,  0,
                     50, 50, 0.0001f, false);
-    printTable(time_table_iterations_white, 100);
+    printTable(time_table_iterations_white, 70);
     free(time_table_iterations_white);
 
     printf("Starting test against changing iterations fractale edge (Start: -1+0i):\n");
-    timeMeasurement* time_table_iterations_edge = plotTableGeneration(50, (-1.0 + 0.0 * I), 800, 0,
+    timeMeasurement* time_table_iterations_edge = plotTableGeneration(70, (-1.0 + 0.0 * I), 800, 0,
                     50, 50, 0.001f, false);
-    printTable(time_table_iterations_edge, 100);
+    printTable(time_table_iterations_edge, 70);
     free(time_table_iterations_edge);
 
     printf("\nPerformance Test für Graphen Fertig\n");
@@ -166,7 +166,7 @@ int genGraphTable() {
 int testSuite() {
     printf("Starte Performance Tests:\n");
 
-    struct TestCase testCases[] = {
+    const struct TestCase testCases[] = {
         {-2.0 +1.5f * I, 800, -600, 0.005f, 100 ,false, "topDownGray"},
         {-2.0 -1.5f * I, 800, +600, 0.005f, 100 ,false, "BottomUpGray"},
         {-2.0 +1.5f * I, 800, -600, 0.005f, 100 ,false, "TopDownGray"},
@@ -248,3 +248,7 @@ int testSuite() {
     printf("\nTest Suite Fertig\n");
     return 0;
 }
+
+// Schwarz: ./main -s -0 -0 -d 800 800 -n 100 -r 0.0001 -o test -V 4
+// Weiß: ./main -s 3 3 -d 800 800 -n 100 -r 0.0001 -o test -V 4
+// Kante vom Fraktal: ./main -s -1 0 -d 800 800 -n 100 -r 0.0001 -o test -V 4

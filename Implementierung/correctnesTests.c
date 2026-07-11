@@ -171,13 +171,13 @@ bool BitmapVergleichTests() {
         {-0.5 +2.0f * I, 200, -200, 0.01f, 50 ,false, "randomGrayscale"},
         {-2.0 +1.5f * I, 800, 600, 0.005f, 100 ,false, "OutOfSCope"},
 
-        {-2.0 +2.0f * I, 1, -1, 0.01f, 10 ,false, "1x1 topDonw"},
+        {-2.0 +2.0f * I, 1, -1, 0.01f, 10 ,false, "1x1 topDown"},
         {-2.0 -2.0f * I, 2, 2, 0.01f, 10 ,false, "2x2 BottomUp"},
 
         {-2.0 +2.0f * I, 3, -3, 0.01f, 10 ,false, "3x3 topDown"},
-        {-2.0 +2.0f * I, 3, -300, 0.01f, 10 ,false, "3x300 "},
+        {-2.0 +2.0f * I, 3, -300, 0.01f, 10 ,false, "3x300"},
 
-        {-0.5 +0.5 * I, 300, -200, 0.001f, 1500 ,false, "high iterations "},
+        {-0.5 +0.5 * I, 300, -200, 0.001f, 1500 ,false, "high iterations"},
     };
     size_t testCasesCount = sizeof(testCases)/sizeof(testCases[0]);
     size_t passed = 0;
