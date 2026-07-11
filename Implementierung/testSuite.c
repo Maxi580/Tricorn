@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <stdbool.h>
+#include <string.h>
 
 #include "NaiveImplementation/image.h"
 #include "Simd/image.h"
@@ -25,38 +26,70 @@ typedef struct {
     float res;
 } timeMeasurement;
 
+struct TestCase {
+    float complex start;
+    size_t width;
+    ssize_t height;
+    float res;
+    unsigned n;
+    bool color;
+    const char *name;
+};
+
 double measureTime(void (*fn)(float complex, size_t, ssize_t, float,  unsigned, bool, unsigned char *),
-                    const float complex start, const size_t width, const ssize_t height_signed, const float res, const unsigned n, const bool color) {
-    size_t height;
-    if (height_signed < 0) {
-        height = (size_t)(-height_signed);
-    }
-    else {
-        height = (size_t)height_signed ;
-    }
-    const size_t row_size = ((width * 3+3)/4)*4;
-    const size_t pixelArraySize = row_size * height;
+                    const float complex start, const size_t width, const ssize_t height_signed, const float res, const unsigned n, const bool color, unsigned char *img) {
 
-    unsigned char *img = malloc(pixelArraySize);
+    bool isAllocted = false;
     if (img == NULL) {
-        printf("malloc() returned NULL\n");
-        return -1.0;
+        isAllocted = true;
+
+        size_t height;
+        if (height_signed < 0) {
+            height = (size_t)(-height_signed);
+        }
+        else {
+            height = (size_t)height_signed ;
+        }
+        const size_t row_size = ((width * 3+3)/4)*4;
+        const size_t pixelArraySize = row_size * height;
+
+        img = malloc(pixelArraySize);
+        if (img == NULL) {
+            printf("malloc() returned NULL\n");
+            return -1.0;
+        }
     }
 
-    struct timespec time_start;
-    clock_gettime(CLOCK_MONOTONIC, &time_start);
 
-    fn(start, width, height_signed, res, n, color, img);
+    size_t benchmarkIterations = 3;
+    struct timespec time_start, time_end;
+    double time = 0;
+    bool isValid = false;
 
-    struct timespec time_end;
-    clock_gettime(CLOCK_MONOTONIC, &time_end);
-    const double time = (double)(time_end.tv_sec - time_start.tv_sec) + 1e-9 * (time_end.tv_nsec - time_start.tv_nsec);
+    while (!isValid) {
+        clock_gettime(CLOCK_MONOTONIC, &time_start);
+        for (size_t i = 0; i < benchmarkIterations; i++) {
+            fn(start, width, height_signed, res, n, color, img);
+        }
+        clock_gettime(CLOCK_MONOTONIC, &time_end);
 
-    free(img);
-    return time;
+        time = (double)(time_end.tv_sec - time_start.tv_sec) + 1e-9 * (time_end.tv_nsec - time_start.tv_nsec);
+        if (time < 1.0) { // unter 1 Sekunde getestet (ungültig) → erhöhe iterationen
+            size_t calcBenchmarkIterations = (time > 0.0) ? (size_t) ((double)benchmarkIterations * (1.3/time)) : 0;
+            benchmarkIterations = (calcBenchmarkIterations > benchmarkIterations) ? calcBenchmarkIterations : (benchmarkIterations + 1);
+        } else {
+            isValid = true;
+        }
+    }
+
+    if (isAllocted) {
+        free(img);
+    }
+
+    return time / (double)benchmarkIterations;;
 }
 
-timeMeasurement* plotTableGenerationAgainstSizeAndRes(const size_t start_length, const size_t steps, const size_t step_size,
+timeMeasurement* plotTableGenerationAgainstSizeAndRes(size_t start_length, size_t steps, size_t step_size,
                     const unsigned n, const bool color) {
     printf("Starting test against changing width and scale res:\n");
     timeMeasurement* results = malloc(sizeof(timeMeasurement) * steps);
@@ -72,12 +105,12 @@ timeMeasurement* plotTableGenerationAgainstSizeAndRes(const size_t start_length,
         results[step].width = length;
         results[step].iterations = n;
         results[step].res = res;
-        results[step].naive = measureTime(tricornNaive, start_value, length, (ssize_t)length, res, n, color);
-        results[step].simd = measureTime(tricornSimd, start_value, length, (ssize_t)length, res, n, color);
-        results[step].sym = measureTime(tricornSym, start_value, length, (ssize_t)length, res, n, color);
-        results[step].circle = measureTime(tricornCircle, start_value, length, (ssize_t)length, res, n, color);
-        results[step].latency = measureTime(tricornLatencyThroughput, start_value, length, (ssize_t)length, res, n, color);
-        results[step].multithreading = measureTime(tricornMultiThreading, start_value, length, (ssize_t)length, res, n, color);
+        results[step].naive = measureTime(tricornNaive, start_value, length, (ssize_t)length, res, n, color, NULL);
+        results[step].simd = measureTime(tricornSimd, start_value, length, (ssize_t)length, res, n, color, NULL);
+        results[step].sym = measureTime(tricornSym, start_value, length, (ssize_t)length, res, n, color, NULL);
+        results[step].circle = measureTime(tricornCircle, start_value, length, (ssize_t)length, res, n, color, NULL);
+        results[step].latency = measureTime(tricornLatencyThroughput, start_value, length, (ssize_t)length, res, n, color, NULL);
+        results[step].multithreading = measureTime(tricornMultiThreading, start_value, length, (ssize_t)length, res, n, color, NULL);
     }
     return results;
 }
@@ -97,12 +130,12 @@ timeMeasurement* plotTableGenerationAgainstIterationsBlack(const size_t length, 
         results[step].width = length;
         results[step].iterations = n;
         results[step].res = res;
-        results[step].naive = measureTime(tricornNaive, start_value, length, (ssize_t)length, res, n, color);
-        results[step].simd = measureTime(tricornSimd, start_value, length, (ssize_t)length, res, n, color);
-        results[step].sym = measureTime(tricornSym, start_value, length, (ssize_t)length, res, n, color);
-        results[step].circle = measureTime(tricornCircle, start_value, length, (ssize_t)length, res, n, color);
-        results[step].latency = measureTime(tricornLatencyThroughput, start_value, length, (ssize_t)length, res, n, color);
-        results[step].multithreading = measureTime(tricornMultiThreading, start_value, length, (ssize_t)length, res, n, color);
+        results[step].naive = measureTime(tricornNaive, start_value, length, (ssize_t)length, res, n, color, NULL);
+        results[step].simd = measureTime(tricornSimd, start_value, length, (ssize_t)length, res, n, color, NULL);
+        results[step].sym = measureTime(tricornSym, start_value, length, (ssize_t)length, res, n, color, NULL);
+        results[step].circle = measureTime(tricornCircle, start_value, length, (ssize_t)length, res, n, color, NULL);
+        results[step].latency = measureTime(tricornLatencyThroughput, start_value, length, (ssize_t)length, res, n, color, NULL);
+        results[step].multithreading = measureTime(tricornMultiThreading, start_value, length, (ssize_t)length, res, n, color, NULL);
     }
     return results;
 }
@@ -122,12 +155,12 @@ timeMeasurement* plotTableGenerationAgainstIterationsWhite(const size_t length, 
         results[step].width = length;
         results[step].iterations = n;
         results[step].res = res;
-        results[step].naive = measureTime(tricornNaive, start_value, length, (ssize_t)length, res, n, color);
-        results[step].simd = measureTime(tricornSimd, start_value, length, (ssize_t)length, res, n, color);
-        results[step].sym = measureTime(tricornSym, start_value, length, (ssize_t)length, res, n, color);
-        results[step].circle = measureTime(tricornCircle, start_value, length, (ssize_t)length, res, n, color);
-        results[step].latency = measureTime(tricornLatencyThroughput, start_value, length, (ssize_t)length, res, n, color);
-        results[step].multithreading = measureTime(tricornMultiThreading, start_value, length, (ssize_t)length, res, n, color);
+        results[step].naive = measureTime(tricornNaive, start_value, length, (ssize_t)length, res, n, color, NULL);
+        results[step].simd = measureTime(tricornSimd, start_value, length, (ssize_t)length, res, n, color, NULL);
+        results[step].sym = measureTime(tricornSym, start_value, length, (ssize_t)length, res, n, color, NULL);
+        results[step].circle = measureTime(tricornCircle, start_value, length, (ssize_t)length, res, n, color, NULL);
+        results[step].latency = measureTime(tricornLatencyThroughput, start_value, length, (ssize_t)length, res, n, color, NULL);
+        results[step].multithreading = measureTime(tricornMultiThreading, start_value, length, (ssize_t)length, res, n, color, NULL);
     }
     return results;
 }
@@ -147,12 +180,12 @@ timeMeasurement* plotTableGenerationAgainstIterationsEdge(const size_t length, c
         results[step].width = length;
         results[step].iterations = n;
         results[step].res = res;
-        results[step].naive = measureTime(tricornNaive, start_value, length, (ssize_t)length, res, n, color);
-        results[step].simd = measureTime(tricornSimd, start_value, length, (ssize_t)length, res, n, color);
-        results[step].sym = measureTime(tricornSym, start_value, length, (ssize_t)length, res, n, color);
-        results[step].circle = measureTime(tricornCircle, start_value, length, (ssize_t)length, res, n, color);
-        results[step].latency = measureTime(tricornLatencyThroughput, start_value, length, (ssize_t)length, res, n, color);
-        results[step].multithreading = measureTime(tricornMultiThreading, start_value, length, (ssize_t)length, res, n, color);
+        results[step].naive = measureTime(tricornNaive, start_value, length, (ssize_t)length, res, n, color, NULL);
+        results[step].simd = measureTime(tricornSimd, start_value, length, (ssize_t)length, res, n, color, NULL);
+        results[step].sym = measureTime(tricornSym, start_value, length, (ssize_t)length, res, n, color, NULL);
+        results[step].circle = measureTime(tricornCircle, start_value, length, (ssize_t)length, res, n, color, NULL);
+        results[step].latency = measureTime(tricornLatencyThroughput, start_value, length, (ssize_t)length, res, n, color, NULL);
+        results[step].multithreading = measureTime(tricornMultiThreading, start_value, length, (ssize_t)length, res, n, color, NULL);
     }
     return results;
 }
@@ -172,8 +205,8 @@ void printTable(const timeMeasurement* r, size_t steps) {
     }
 }
 
-int testSuite() {
-    printf("Starte Performance tests:\n");
+int genGraphTable() {
+    printf("Starte Performance Test für Graphen:\n");
 
     timeMeasurement* time_table_size_res = plotTableGenerationAgainstSizeAndRes(50, 100, 50, 256, false);
     printTable(time_table_size_res, 100);
@@ -191,11 +224,92 @@ int testSuite() {
     printTable(time_table_iterations_edge, 100);
     free(time_table_iterations_edge);
 
-    printf("\nTest Suite Fertig\n");
+    printf("\nPerformance Test für Graphen Fertig\n");
     return 0;
 }
 
-// Für neue Testfällen einfach neuen testCase() in testSuite() hinzufügen
+int testSuite() {
+    printf("Starte Performance Tests:\n");
 
-// Bei neuen Implementationen/Versionen in testAllVersions() das Schleifenlimit
-// erhöhen und die neue Version als if else hinzufügen
+    struct TestCase testCases[] = {
+        {-2.0 +1.5f * I, 800, -600, 0.005f, 100 ,false, "topDownGray"},
+        {-2.0 -1.5f * I, 800, +600, 0.005f, 100 ,false, "BottomUpGray"},
+        {-2.0 +1.5f * I, 800, -600, 0.005f, 100 ,false, "TopDownGray"},
+        {-2.0 -1.5f * I, 800, +600, 0.005f, 100 ,false, "BottomUpGray"},
+
+        {-0.5 +2.0f * I, 200, -200, 0.01f, 50 ,false, "randomGrayscale"},
+        {-2.0 +1.5f * I, 800, 600, 0.005f, 100 ,false, "OutOfSCope"},
+
+        {-2.0 +2.0f * I, 1, -1, 0.01f, 10 ,false, "1x1 topDown"},
+        {-2.0 -2.0f * I, 2, 2, 0.01f, 10 ,false, "2x2 BottomUp"},
+
+        {-2.0 +2.0f * I, 3, -3, 0.01f, 10 ,false, "3x3 topDown"},
+        {-2.0 +2.0f * I, 3, -300, 0.01f, 10 ,false, "3x300 "},
+
+        {-0.5 +0.5 * I, 300, -200, 0.001f, 1500 ,false, "high iterations "},
+    };
+
+    size_t testCasesCount = sizeof(testCases)/sizeof(testCases[0]);
+
+    for (size_t i = 0; i < testCasesCount; i++) {
+        const struct TestCase tc = testCases[i];
+        printf("\nTest %zu/%zu: \t%s\n", i+1, testCasesCount, tc.name);
+        printf("Dimension:\t%zu x %zd\n",tc.width, tc.height);
+        printf("Start:\t\t%f + %fi\n", crealf(tc.start), cimagf(tc.start));
+        printf("Auflösung:\t%f\n", tc.res);
+        printf("Iterationen n:\t%u\n", tc.n);
+        printf("Farbe:\t\t%s\n", tc.color ? "true" : "false");
+
+        printf("\nDauer pro Iteration:\n");
+
+        size_t height;
+        if (tc.height < 0) {
+            height = (size_t)(-tc.height);
+        }
+        else {
+            height = (size_t)tc.height ;
+        }
+
+        const size_t row_size = ((tc.width * 3+3)/4)*4;
+        const size_t pixelArraySize = row_size * height;
+
+        unsigned char *imgNaive = malloc(pixelArraySize);
+        unsigned char *img = malloc(pixelArraySize);
+        if (img == NULL || imgNaive == NULL) { //Fehler
+            printf("Error allocating memory\n");
+            free(imgNaive);
+            free(img);
+            return 1;
+        }
+
+        for (size_t v = 0; v < 6; v++) {
+            double avg_time = 0;
+            switch (v) {
+                case 0: avg_time = measureTime(tricornNaive, tc.start, tc.width, tc.height, tc.res, tc.n, tc.color, imgNaive); break;
+                case 1: avg_time = measureTime(tricornSimd, tc.start, tc.width, tc.height, tc.res, tc.n, tc.color, img); break;
+                case 2: avg_time = measureTime(tricornSym, tc.start, tc.width, tc.height, tc.res, tc.n, tc.color, img); break;
+                case 3: avg_time = measureTime(tricornCircle, tc.start, tc.width, tc.height, tc.res, tc.n, tc.color, img); break;
+                case 4: avg_time = measureTime(tricornLatencyThroughput, tc.start, tc.width, tc.height, tc.res, tc.n, tc.color, img); break;
+                default: avg_time = measureTime(tricornMultiThreading, tc.start, tc.width, tc.height, tc.res, tc.n, tc.color, img); break;
+            }
+            printf("V%zu: %gs\n", v, avg_time);
+
+            if (v != 0) { // Naive Implementation (v0) mit den anderen Versionen vergleichen
+                if (memcmp(imgNaive, img, pixelArraySize) != 0) {
+                    for (size_t j = 0; j < pixelArraySize; j++) {
+                        if (imgNaive[j] != img[j]) {
+                            printf("Error: Bitmap unterschiedlich v0/v%zu bei Byte %zu: %u vs %u\n", v, j, imgNaive[j], img[j]);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        free(imgNaive);
+        free(img);
+
+    }
+    printf("\nTest Suite Fertig\n");
+    return 0;
+}

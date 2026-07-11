@@ -29,6 +29,7 @@ int main(int argc, char *argv[]) {
      * -o <NAME> name ohne .bmp angeben
      * -C || --color einfach setzen, dann wird bild mit Eintracht Braunschweig Farben ausgegeben
      * -t || --test ; run time tests
+     * -graph || erstellt eine Tabelle für Graphen
      * -correct Flag zum Testen der Korrektheit aller Implementierungen, gegen die Naive
      */
 
@@ -91,6 +92,16 @@ add_executable(gra26capsproject_t105
 
     }
 
+    // Graph Tabelle erstellen
+    for (int i = 0; i < argc; i++) {
+        if (strcmp(argv[i], "-graph") == 0) {
+            if (genGraphTable() == 1) {
+                printf("Fehler beim Erstellen des Graphen\n");
+                return 1;
+            }
+            return 0;
+        }
+    }
 
     // zeit messen
     for (int i = 0; i < argc; i++) {
