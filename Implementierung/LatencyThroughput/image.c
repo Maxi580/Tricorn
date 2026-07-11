@@ -6,47 +6,10 @@
 #include <immintrin.h>
 #include "escapetime.h"
 #include <math.h>
-
-#define rgbSize 3
-
-typedef struct {
-    uint8_t r;
-    uint8_t g;
-    uint8_t b;
-} RGB_Color;
-
-
-static const RGB_Color colorPallete[4] = {
-    // We call modulo with the size of this pallete, quite a few times, it would be nicer if this is a multiple of 2 ig
-    // Red, Green, Blue
-    {0, 0, 128},
-    {0, 0, 255},
-    {0, 100, 255},
-    {0, 255, 255},
-};
-static const unsigned colorPalleteSize = sizeof(colorPallete) / sizeof(colorPallete[0]);
-
-static RGB_Color* createColorMap(unsigned limit, bool color) {
-    RGB_Color* mapping = malloc((limit + 1) * sizeof(RGB_Color));
-    if (mapping == NULL) {
-        return NULL;
-    }
-
-    for (unsigned i = 0; i < limit; i++) {
-        if (color) {
-            unsigned colorIndex = i % colorPalleteSize;
-            mapping[i] = colorPallete[colorIndex];
-        } else {
-            unsigned greyColor = 255 - 4 * (i % 64 );
-            mapping[i] = (RGB_Color) {greyColor, greyColor, greyColor};
-        }
-    }
-    mapping[limit] = (RGB_Color) {0, 0, 0};
-    return mapping;
-}
+#include "../colormap.h"
 
 void tricornLatencyThroughput(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
-    RGB_Color* colorMap = createColorMap(n, color);
+    RGB_color* colorMap = createColorMap(n, color);
     if (colorMap == NULL) {
         printf("Error allocating memory\n");
         return;
@@ -109,45 +72,11 @@ void tricornLatencyThroughput(float complex start, size_t width, ssize_t height,
             twoIntegerLanes bothIterations = escapeTimeLatencyThroughputTwo(n, a1, a2, a3, a4, b1, b2, b3, b4);
             _mm_storeu_si128((__m128i*)iterations,       bothIterations.a);
             _mm_storeu_si128((__m128i*)(iterations + 4), bothIterations.b);
-       //      if ((y == 4 && x == 8) ) {
-       //          printf("DEBUG!!(REMOVE LATER!!\n");
-       //          printf("v4 c1 = %.9f %+.9fi\n", crealf(b1), cimagf(b1));
-       //          printf("v4 c2 = %.9f %+.9fi\n", crealf(b2), cimagf(b2));
-       //          printf("v4 c3 = %.9f %+.9fi\n", crealf(b3), cimagf(b3));
-       //          printf("v4 c4 = %.9f %+.9fi\n", crealf(b4), cimagf(b4));
-       //          printf("v4 it = %u %u %u %u | %u %u %u %u\n",
-       // iterations[0], iterations[1], iterations[2], iterations[3],
-       // iterations[4], iterations[5], iterations[6], iterations[7]);
-       //          printf("pixel: %llu\n",(y*row_size)+(x));
-       //          printf("colorr: %u\n", colorMap[iterations[4]].r);
-       //          printf("colorg: %u\n", colorMap[iterations[4]].g);
-       //          printf("colorb: %u\n", colorMap[iterations[4]].b);
-       //
-       //      }
-       //      if ((y == 4 && x == 16) ) {
-       //          printf("DEBUG!!(REMOVE LATER!!\n");
-       //          printf("v4 c1 = %.9f %+.9fi\n", crealf(a1), cimagf(a1));
-       //          printf("v4 c2 = %.9f %+.9fi\n", crealf(a2), cimagf(a2));
-       //          printf("v4 c3 = %.9f %+.9fi\n", crealf(a3), cimagf(a3));
-       //          printf("v4 c4 = %.9f %+.9fi\n", crealf(a4), cimagf(a4));
-       //          printf("v4 c1 = %.9f %+.9fi\n", crealf(b1), cimagf(b1));
-       //          printf("v4 c2 = %.9f %+.9fi\n", crealf(b2), cimagf(b2));
-       //          printf("v4 c3 = %.9f %+.9fi\n", crealf(b3), cimagf(b3));
-       //          printf("v4 c4 = %.9f %+.9fi\n", crealf(b4), cimagf(b4));
-       //          printf("v4 it = %u %u %u %u | %u %u %u %u\n",
-       // iterations[0], iterations[1], iterations[2], iterations[3],
-       // iterations[4], iterations[5], iterations[6], iterations[7]);
-       //          printf("pixel: %llu\n",(y*row_size)+(x));
-       //      printf("colorr: %u\n", colorMap[iterations[0]].r);
-       //      printf("colorg: %u\n", colorMap[iterations[0]].g);
-       //      printf("colorb: %u\n", colorMap[iterations[0]].b);
-       //      }
-
 
             for (int i = 0; i < 8; i++){
                 size_t x_offset = (x + i) * 3;
                 unsigned char *bottomOffset = bottomRow + x_offset;
-                RGB_Color rgb = colorMap[iterations[i]];
+                RGB_color rgb = colorMap[iterations[i]];
                 // rgb is reversed on bitmap
                 bottomOffset[0] =  rgb.b;
                 bottomOffset[1] =  rgb.g;
@@ -183,7 +112,7 @@ void tricornLatencyThroughput(float complex start, size_t width, ssize_t height,
             for (size_t i = 0; i < range; i++){
                 size_t x_offset = (endIndex + i) * 3;
                 unsigned char *bottomOffset = bottomRow + x_offset;
-                RGB_Color rgb = colorMap[restIterations[i]];
+                RGB_color rgb = colorMap[restIterations[i]];
                 // rgb is reversed on bitmap
                 bottomOffset[0] =  rgb.b;
                 bottomOffset[1] =  rgb.g;

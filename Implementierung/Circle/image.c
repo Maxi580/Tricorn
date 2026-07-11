@@ -3,56 +3,16 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <immintrin.h>
 #include "escapetime.h"
 #include <math.h>
-#include "escapetime.h"
+#include "../colormap.h"
 
-
-#define rgbSize 3
-
-typedef struct {
-    uint8_t r;
-    uint8_t g;
-    uint8_t b;
-} RGB_Color;
-
-
-static const RGB_Color colorPallete[4] = {
-    // We call modulo with the size of this pallete, quite a few times, it would be nicer if this is a multiple of 2 ig
-    // Red, Green, Blue
-    {0, 0, 128},
-    {0, 0, 255},
-    {0, 100, 255},
-    {0, 255, 255},
-};
-static const unsigned colorPalleteSize = sizeof(colorPallete) / sizeof(colorPallete[0]);
-
-static RGB_Color* createColorMap(unsigned limit, bool color) {
-    RGB_Color* mapping = malloc((limit + 1) * sizeof(RGB_Color));
-    if (mapping == NULL) {
-        return NULL;
-    }
-
-    for (unsigned i = 0; i < limit; i++) {
-        if (color) {
-            unsigned colorIndex = i % colorPalleteSize;
-            mapping[i] = colorPallete[colorIndex];
-        } else {
-            unsigned greyColor = 255 - 4 * (i % 64);
-            mapping[i] = (RGB_Color) {greyColor, greyColor, greyColor};
-        }
-    }
-    mapping[limit] = (RGB_Color) {0, 0, 0};
-    return mapping;
-}
 
 void tricornCircle(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
-    RGB_Color* colorMap = createColorMap(n, color);
+    RGB_color* colorMap = createColorMap(n, color);
     if (colorMap == NULL) {
         printf("Error allocating memory\n");
-        free(colorMap);
         return;
     }
 
@@ -72,7 +32,7 @@ void tricornCircle(float complex start, size_t width, ssize_t height, float res,
        Now we calculate the same stuff as before, however if we find a partner, that is smaller than the current y
        this must mean that it already was computed, as we go from 0 to top i guess. The only issue is now that
        if the center is out of bounds. When it is below the image with our formula this would mean that we already
-        have calculated everything. So we only skip if the partner is larger than 0. If it is above the image, we dont
+       have calculated everything. So we only skip if the partner is larger than 0. If it is above the image, we dont
        skip anything, but we obviously cant save anyhting either. We must consider that we can only draw pixels in bound
        so we check both later.
 
@@ -98,7 +58,9 @@ void tricornCircle(float complex start, size_t width, ssize_t height, float res,
             topRow = img + sym_y * row_size;
         }
 
+
         for (size_t x = 0; x < endIndex; x += 4) {
+
             unsigned iterations[4];
             const float complex c1 = start + (float) x * res + factor * (float) y * res * I;
             const float complex c2 = start + ((float) x + 1) * res + factor * (float) y * res * I;
@@ -109,7 +71,7 @@ void tricornCircle(float complex start, size_t width, ssize_t height, float res,
             for (int i = 0; i < 4; i++){
                 size_t x_offset = (x + i) * 3;
                 unsigned char *bottomOffset = bottomRow + x_offset;
-                RGB_Color rgb = colorMap[iterations[i]];
+                RGB_color rgb = colorMap[iterations[i]];
                 // rgb is reversed on bitmap
                 bottomOffset[0] =  rgb.b;
                 bottomOffset[1] =  rgb.g;
@@ -136,7 +98,7 @@ void tricornCircle(float complex start, size_t width, ssize_t height, float res,
             for (size_t i = 0; i < range; i++){
                 size_t x_offset = (endIndex + i) * 3;
                 unsigned char *bottomOffset = bottomRow + x_offset;
-                RGB_Color rgb = colorMap[restIterations[i]];
+                RGB_color rgb = colorMap[restIterations[i]];
                 // rgb is reversed on bitmap
                 bottomOffset[0] =  rgb.b;
                 bottomOffset[1] =  rgb.g;
@@ -159,29 +121,3 @@ void tricornCircle(float complex start, size_t width, ssize_t height, float res,
     }
     free(colorMap);
 }
-
-/*
-int main(void) {
-    size_t width;
-    width = 500; //breite eingeben
-    ssize_t heightsigned = 700; //höhe eingeben
-    size_t height;
-    if (heightsigned < 0) {
-        height = heightsigned * (-1);
-    }
-    else {
-        height = heightsigned ;
-    }
-
-    size_t row_size = ((width * 3+3)/4)*4;
-    size_t pixelArraySize = row_size * height;
-
-    unsigned char *img = malloc(pixelArraySize);
-    if (img == NULL) {return 1;} //Fehler
-
-    genImage(width, heightsigned, img);
-    writeBmp("test.bmp", width, heightsigned, img);
-    free(img);
-    return 0;
-}
-*/

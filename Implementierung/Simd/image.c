@@ -10,7 +10,7 @@
 #define rgbSize 3
 
 
-const unsigned colorPallete[4][rgbSize] = {
+const unsigned old_color_pallete[4][rgbSize] = {
     // We call modulo with the size of this pallete, quite a few times, it would be nicer if this is a multiple of 2 ig
     // Blue, Green, Red
     {128, 0, 0},
@@ -18,7 +18,7 @@ const unsigned colorPallete[4][rgbSize] = {
     {255, 100, 0},
     {255, 255, 0},
 };
-const unsigned colorPalleteSize = sizeof(colorPallete) / sizeof(colorPallete[0]);
+const unsigned old_color_pallete_size = sizeof(old_color_pallete) / sizeof(old_color_pallete[0]);
 
 
 __attribute__((hot))
@@ -35,10 +35,10 @@ void colorizeBitmap(unsigned limit, unsigned iterations, unsigned char* row, boo
             row[0] = row[1] = row[2] = colorPixel;
         } else {
             // Colorized
-            unsigned colorIndex = iterations % colorPalleteSize;
-            row[0]= colorPallete[colorIndex][0];
-            row[1]= colorPallete[colorIndex][1];
-            row[2]= colorPallete[colorIndex][2];
+            unsigned colorIndex = iterations % old_color_pallete_size;
+            row[0] = old_color_pallete[colorIndex][0];
+            row[1] = old_color_pallete[colorIndex][1];
+            row[2] = old_color_pallete[colorIndex][2];
         }
     }
 }

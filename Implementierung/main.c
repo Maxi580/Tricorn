@@ -29,12 +29,12 @@ int main(int argc, char *argv[]) {
      * -o <NAME> name ohne .bmp angeben
      * -C || --color einfach setzen, dann wird bild mit Eintracht Braunschweig Farben ausgegeben
      * -t || --test ; run time tests
-     * -iscorrect Flag zum testen der Korrektheit aller Implementierungen, gegen die Naive
+     * -correct Flag zum testen der Korrektheit aller Implementierungen, gegen die Naive
      */
 
 
     /* CMakeLists.txt falls jmd kopieren will
-    *cmake_minimum_required(VERSION 4.2)
+    cmake_minimum_required(VERSION 4.2)
 project(gra26capsproject_t105 C)
 
 set(CMAKE_C_STANDARD 11)
@@ -70,12 +70,15 @@ add_executable(gra26capsproject_t105
         Implementierung/Circle/image.c
         Implementierung/testSuite.c
         Implementierung/testSuite.h
+        Implementierung/Circle/escapetime.c
+        Implementierung/Circle/escapetime.h
 )
+
 
      */
 
     for (int i = 0; i < argc; i++) {
-        if (strcmp(argv[i], "-iscorrect") == 0) {
+        if (strcmp(argv[i], "-correct") == 0) {
             if (BitmapVergleichTests()) {
                 printf("Alle Bitmaps gleich\n");
 

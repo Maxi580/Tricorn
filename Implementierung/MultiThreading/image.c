@@ -8,14 +8,7 @@
 #include <pthread.h>
 
 #include "../LatencyThroughput/escapetime.h"
-
-#define rgbSize 3
-
-typedef struct {
-    uint8_t r;
-    uint8_t g;
-    uint8_t b;
-} RGB_Color;
+#include "../colormap.h"
 
 typedef struct{
     float complex start;
@@ -30,35 +23,6 @@ typedef struct{
 } thread_data;
 
 
-static const RGB_Color colorPallete[4] = {
-    // We call modulo with the size of this pallete, quite a few times, it would be nicer if this is a multiple of 2 ig
-    // Red, Green, Blue
-    {0, 0, 128},
-    {0, 0, 255},
-    {0, 100, 255},
-    {0, 255, 255},
-};
-static const unsigned colorPalleteSize = sizeof(colorPallete) / sizeof(colorPallete[0]);
-
-static RGB_Color* createColorMap(unsigned limit, bool color) {
-    RGB_Color* mapping = malloc((limit + 1) * sizeof(RGB_Color));
-    if (mapping == NULL) {
-        return NULL;
-    }
-
-    for (unsigned i = 0; i < limit; i++) {
-        if (color) {
-            unsigned colorIndex = i % colorPalleteSize;
-            mapping[i] = colorPallete[colorIndex];
-        } else {
-            unsigned greyColor = 255 - 4 * (i % 64 );
-            mapping[i] = (RGB_Color) {greyColor, greyColor, greyColor};
-        }
-    }
-    mapping[limit] = (RGB_Color) {0, 0, 0};
-    return mapping;
-}
-
 static void* tricornThreading(void* arg) {
     thread_data* values  = arg;
 
@@ -72,7 +36,7 @@ static void* tricornThreading(void* arg) {
     bool color = values->color;
     unsigned char* img = values->img;
 
-    RGB_Color* colorMap = createColorMap(n, color);
+    RGB_color* colorMap = createColorMap(n, color);
     if (colorMap == NULL) {
         printf("Error allocating memory\n");
         return NULL;
@@ -139,7 +103,7 @@ static void* tricornThreading(void* arg) {
             for (int i = 0; i < 8; i++){
                 size_t x_offset = (x + i) * 3;
                 unsigned char *bottomOffset = bottomRow + x_offset;
-                RGB_Color rgb = colorMap[iterations[i]];
+                RGB_color rgb = colorMap[iterations[i]];
                 // rgb is reversed on bitmap
                 bottomOffset[0] =  rgb.b;
                 bottomOffset[1] =  rgb.g;
@@ -175,7 +139,7 @@ static void* tricornThreading(void* arg) {
             for (size_t i = 0; i < range; i++){
                 size_t x_offset = (endIndex + i) * 3;
                 unsigned char *bottomOffset = bottomRow + x_offset;
-                RGB_Color rgb = colorMap[restIterations[i]];
+                RGB_color rgb = colorMap[restIterations[i]];
                 // rgb is reversed on bitmap
                 bottomOffset[0] =  rgb.b;
                 bottomOffset[1] =  rgb.g;
