@@ -18,8 +18,8 @@
 
 
 void tricornNaive(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
-    const unsigned farbpalletteSize = 4;
-    const unsigned farbpallette[4][3] = {
+    const unsigned naive_color_pallete_size = 4;
+    const unsigned naive_color_pallete[4][3] = {
         {128, 0, 0},
         {255, 0, 0},
         {255, 100, 0},
@@ -48,16 +48,16 @@ void tricornNaive(float complex start, size_t width, ssize_t height, float res, 
                 } else {
                     if (!color) {
                         //Grauton (von Formel aus der Aufgabe)
-                        unsigned colorPixel = 255 - 4 * ( iterations % 64 );
-                        row[x * 3]=colorPixel; // Blau
-                        row[x *3+1]=colorPixel; // Grün
-                        row[x *3+2]=colorPixel; // Rot
+                        unsigned color_pixel = 255 - 4 * ( iterations % 64 );
+                        row[x * 3]= color_pixel; // Blau
+                        row[x *3+1]= color_pixel; // Grün
+                        row[x *3+2]= color_pixel; // Rot
                     } else {
                         //Bunt
-                        unsigned farbIndex = iterations % farbpalletteSize;
-                        row[x * 3]= farbpallette[farbIndex][0]; // Blau
-                        row[x *3+1]= farbpallette[farbIndex][1]; // Grün
-                        row[x *3+2]= farbpallette[farbIndex][2]; // Rot
+                        unsigned farbIndex = iterations % naive_color_pallete_size;
+                        row[x * 3]= naive_color_pallete[farbIndex][0]; // Blau
+                        row[x *3+1]= naive_color_pallete[farbIndex][1]; // Grün
+                        row[x *3+2]= naive_color_pallete[farbIndex][2]; // Rot
                     }
                 }
             }
@@ -88,16 +88,16 @@ void tricornNaive(float complex start, size_t width, ssize_t height, float res, 
                 } else {
                     if (!color) {
                         //Grauton (von Formel aus der Aufgabe)
-                        unsigned colorPixel = 255 - 4 * ( iterations % 64 );
-                        row[x * 3]=colorPixel; // 255 ganzes Bild Blau
-                        row[x *3+1]=colorPixel; // Grün
-                        row[x *3+2]=colorPixel; // Rot
+                        unsigned color_pixel = 255 - 4 * ( iterations % 64 );
+                        row[x * 3]=color_pixel; // 255 ganzes Bild Blau
+                        row[x *3+1]=color_pixel; // Grün
+                        row[x *3+2]=color_pixel; // Rot
                     } else {
                         //Bunt
-                        unsigned farbIndex = iterations % farbpalletteSize;
-                        row[x * 3]= farbpallette[farbIndex][0]; // 255 ganzes Bild Blau
-                        row[x *3+1]= farbpallette[farbIndex][1]; // Grün
-                        row[x *3+2]= farbpallette[farbIndex][2]; // Rot
+                        unsigned farbIndex = iterations % naive_color_pallete_size;
+                        row[x * 3]= naive_color_pallete[farbIndex][0]; // 255 ganzes Bild Blau
+                        row[x *3+1]= naive_color_pallete[farbIndex][1]; // Grün
+                        row[x *3+2]= naive_color_pallete[farbIndex][2]; // Rot
                     }
                 }
             }
@@ -107,29 +107,3 @@ void tricornNaive(float complex start, size_t width, ssize_t height, float res, 
         }
     }
 }
-
-/*
-int main(void) {
-    size_t width;
-    width = 500; //breite eingeben
-    ssize_t heightsigned = 700; //höhe eingeben
-    size_t height;
-    if (heightsigned < 0) {
-        height = heightsigned * (-1);
-    }
-    else {
-        height = heightsigned ;
-    }
-
-    size_t row_size = ((width * 3+3)/4)*4;
-    size_t pixelArraySize = row_size * height;
-
-    unsigned char *img = malloc(pixelArraySize);
-    if (img == NULL) {return 1;} //Fehler
-
-    genImage(width, heightsigned, img);
-    writeBmp("test.bmp", width, heightsigned, img);
-    free(img);
-    return 0;
-}
-*/

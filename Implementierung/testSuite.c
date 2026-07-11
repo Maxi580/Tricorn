@@ -57,8 +57,8 @@ double measureTime(void (*fn)(float complex, size_t, ssize_t, float,  unsigned, 
 }
 
 
-timeMeasurement* measureAgainstSize(size_t start_length, size_t steps, size_t step_size, const float res,
-                    const unsigned n, const bool color) {
+timeMeasurement* plotTableGenerationAgainstSize(size_t start_length, size_t steps, size_t step_size, const unsigned n,
+                                    const bool color) {
     printf("Starting test against changing width:\n");
     timeMeasurement* results = malloc(sizeof(timeMeasurement) * steps);
     if (results == NULL) {
@@ -66,7 +66,7 @@ timeMeasurement* measureAgainstSize(size_t start_length, size_t steps, size_t st
         return NULL;
     }
     float complex start_value = -2.0f -2.0f * I;
-
+    const float res = 4.0f/ (float) start_length;
     for (size_t step = 0; step < steps; step++) {
         size_t length = start_length + step * step_size;
         results[step].width = length;
@@ -98,7 +98,7 @@ void printTable(const timeMeasurement* r, size_t steps) {
 int testSuite() {
     printf("Starte Performance tests:\n");
 
-    timeMeasurement* time_table = measureAgainstSize(0, 200, 50, 1.0f, 256, false);
+    timeMeasurement* time_table = plotTableGenerationAgainstSize(0, 400, 50, 256, false);
     printTable(time_table, 100);
 
     free(time_table);

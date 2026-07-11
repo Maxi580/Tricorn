@@ -7,52 +7,15 @@
 #include <immintrin.h>
 #include "escapetime.h"
 #include <math.h>
+#include "../colormap.h"
 
-#define rgbSize 3
-
-typedef struct {
-    uint8_t r;
-    uint8_t g;
-    uint8_t b;
-} RGB_Color;
-
-
-static const RGB_Color colorPallete[4] = {
-    // We call modulo with the size of this pallete, quite a few times, it would be nicer if this is a multiple of 2 ig
-    // Red, Green, Blue
-    {0, 0, 128},
-    {0, 0, 255},
-    {0, 100, 255},
-    {0, 255, 255},
-};
-static const unsigned colorPalleteSize = sizeof(colorPallete) / sizeof(colorPallete[0]);
-
-static RGB_Color* createColorMap(unsigned limit, bool color) {
-    RGB_Color* mapping = malloc((limit + 1) * sizeof(RGB_Color));
-    if (mapping == NULL) {
-        return NULL;
-    }
-
-    for (unsigned i = 0; i < limit; i++) {
-        if (color) {
-            unsigned colorIndex = i % colorPalleteSize;
-            mapping[i] = colorPallete[colorIndex];
-        } else {
-            unsigned greyColor = 255 - 4 * (i % 64 );
-            mapping[i] = (RGB_Color) {greyColor, greyColor, greyColor};
-        }
-    }
-    mapping[limit] = (RGB_Color) {0, 0, 0};
-    return mapping;
-}
 
 void tricornSym(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
-    RGB_Color* colorMap = createColorMap(n, color);
+    RGB_color* colorMap = createColorMap(n, color);
     if (colorMap == NULL) {
         printf("Error allocating memory\n");
         return;
     }
-
     size_t row_size = ((width * 3+3)/4)*4; // Größe einer Reihe würde auf 4 Byte aufgefüllt(Padding)
 
     /* Wenn heigt größer 0 ist, startet man unten links und geht nach oben also addiert man +y und sonst
@@ -94,7 +57,6 @@ void tricornSym(float complex start, size_t width, ssize_t height, float res, un
             topRow = img + sym_y * row_size;
         }
 
-
         for (size_t x = 0; x < endIndex; x += 4) {
 
             unsigned iterations[4];
@@ -107,7 +69,7 @@ void tricornSym(float complex start, size_t width, ssize_t height, float res, un
             for (int i = 0; i < 4; i++){
                 size_t x_offset = (x + i) * 3;
                 unsigned char *bottomOffset = bottomRow + x_offset;
-                RGB_Color rgb = colorMap[iterations[i]];
+                RGB_color rgb = colorMap[iterations[i]];
                 // rgb is reversed on bitmap
                 bottomOffset[0] =  rgb.b;
                 bottomOffset[1] =  rgb.g;
@@ -123,18 +85,18 @@ void tricornSym(float complex start, size_t width, ssize_t height, float res, un
         // Den Rest von width auch noch fillen (bis zu 3 elemente)
         // Es werden 4 werte in parallel berechnet, aber nur die benötigten eingetragen
         if(endIndex < width) {
-            unsigned restIterations[4];
+            unsigned rest_iterations[4];
             const float complex c1 = start + (float) endIndex * res + factor * (float) y * res * I;
             const float complex c2 = start + ((float) endIndex + 1) * res + factor * (float) y * res * I;
             const float complex c3 = start + ((float) endIndex + 2) * res + factor * (float) y * res * I;
             const float complex c4 = start + ((float) endIndex + 3) * res + factor * (float) y * res * I;
-            _mm_storeu_si128((__m128i*) restIterations, symEscapeTime(n, c1, c2, c3, c4));
+            _mm_storeu_si128((__m128i*) rest_iterations, symEscapeTime(n, c1, c2, c3, c4));
 
             size_t range = width - endIndex;
             for (size_t i = 0; i < range; i++){
                 size_t x_offset = (endIndex + i) * 3;
                 unsigned char *bottomOffset = bottomRow + x_offset;
-                RGB_Color rgb = colorMap[restIterations[i]];
+                RGB_color rgb = colorMap[rest_iterations[i]];
                 // rgb is reversed on bitmap
                 bottomOffset[0] =  rgb.b;
                 bottomOffset[1] =  rgb.g;
