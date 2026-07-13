@@ -190,18 +190,21 @@ add_executable(gra26capsproject_t105
     ssize_t heightsigned = -4000;
     for (int i=0; i<argc; i++) {
         if (strcmp(argv[i], "-d") == 0) {
-            if (i+2>=argc) {
-                fprintf(stderr, "Error: Fehlendes Argument\n");
+            if (i+1>=argc) {
+                printf("Error: Fehlendes Argument\n");
                 return 1;
             }
+            char *end;
+            errno = 0;
             widthsigned = strtol(argv[i+1], &end, 10);
-            if (*end != '\0') {
-                fprintf(stderr, "Error: nach -d ist keine gültige Zahl für <WIDTH>\n");
+            if (errno != 0 || *end != ',') {
+                printf("ungültiges Format\n");
                 return 1;
             }
-            heightsigned = strtol(argv[i+2], &end, 10);
-            if (*end != '\0') {
-                fprintf(stderr, "Error: nach -d ist keine gültige Zahl für <HEIGHT>\n");
+            errno = 0;
+            heightsigned = strtol(end+1, &end, 10);
+            if (errno != 0 || *end != '\0') {
+                printf("Ungültiges Format\n");
                 return 1;
             }
         }
