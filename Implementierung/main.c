@@ -17,6 +17,7 @@
 #include "testSuite.h"
 #include "helpMessage.h"
 #include "correctnesTests.h"
+#include <errno.h>
 
 int main(int argc, char *argv[]) {
     char *end;
@@ -44,13 +45,13 @@ project(gra26capsproject_t105 C)
 set(CMAKE_C_STANDARD 11)
 
 add_executable(gra26capsproject_t105
-        Implementierung/NaiveImplementation/tricorn_V4.h
+
         Implementierung/NaiveImplementation/escapetime.c
-        Implementierung/NaiveImplementation/tricorn_V4.c
+
         Implementierung/NaiveImplementation/escapetime.h
-        Implementierung/Simd/tricorn_V4.h
+
         Implementierung/Simd/escapetime.c
-        Implementierung/Simd/tricorn_V4.c
+
         Implementierung/Simd/escapetime.h
         Implementierung/main.c
         Implementierung/correctnesTests.h
@@ -59,24 +60,35 @@ add_executable(gra26capsproject_t105
         Implementierung/bitmap.h
         Implementierung/Sym/escapetime.c
         Implementierung/Sym/escapetime.h
-        Implementierung/Sym/tricorn_V4.h
-        Implementierung/Sym/tricorn_V4.c
-        Implementierung/MultiThreading/tricorn_V4.h
-        Implementierung/MultiThreading/tricorn_V4.c
+
         Implementierung/LatencyThroughput/escapetime.c
         Implementierung/LatencyThroughput/escapetime.h
-        Implementierung/LatencyThroughput/tricorn_V4.h
-        Implementierung/LatencyThroughput/tricorn_V4.c
-        Implementierung/Circle/tricorn_V4.h
-        Implementierung/Circle/tricorn_V4.c
+
+
         Implementierung/Circle/findCircleRad.c
-        Implementierung/Circle/tricorn_V4.h
+
         Implementierung/Circle/tricorn_V4.c
+        Implementierung/Circle/tricorn_V4.h
+        Implementierung/LatencyThroughput/tricorn_V5.c
+        Implementierung/LatencyThroughput/tricorn_V5.h
+        Implementierung/NaiveImplementation/tricorn_V1.c
+        Implementierung/NaiveImplementation/tricorn_V1.h
+        Implementierung/Simd/tricorn_V2.c
+        Implementierung/Simd/tricorn_V2.h
+        Implementierung/Sym/tricorn_V3.c
+        Implementierung/Sym/tricorn_V3.h
         Implementierung/testSuite.c
         Implementierung/testSuite.h
         Implementierung/Circle/escapetime.c
         Implementierung/Circle/escapetime.h
+        Implementierung/helpMessage.c
+        Implementierung/helpMessage.h
+        Implementierung/colormap.c
+        Implementierung/colormap.h
+        Implementierung/MultiThreading/tricorn.c
+        Implementierung/MultiThreading/tricorn.h
 )
+
 
 
      */
@@ -134,9 +146,10 @@ add_executable(gra26capsproject_t105
                 fprintf(stderr, "Error: Fehlendes Argument\n");
                 return 1;
             }
+            errno = 0;
             ssize_t tempIteration = benchmarkIterations = strtol(argv[i+1], &end, 10);
             isBenchmark = true;
-            if (*end != '\0' || tempIteration <= 0) {
+            if (*end != '\0' || tempIteration <= 0||errno != 0) {
                 fprintf(stderr, "Error: nach -B ist kein gültiger Int für die Anzahl an Wiederholungen\n");
                 return 1;
             }
@@ -165,22 +178,27 @@ add_executable(gra26capsproject_t105
     float imaginaerteil;
     for (int i=0; i<argc; i++) {
         if (strcmp(argv[i], "-s") == 0) {
-            if (i+2>=argc) {
+            if (i+1>=argc) {
                 fprintf(stderr, "Error: Fehlendes Argument\n");
                 return 1;
             }
+            char *end;
+            errno = 0;
+
             realteil = strtof(argv[i+1], &end);
-            if (*end != '\0') {
+            if (*end != ','||errno != 0||argv[i+1]==end) {
                 fprintf(stderr, "Error: nach -s ist kein gültiger Float für den realteil\n");
                 return 1;
             }
-            imaginaerteil = strtof(argv[i+2], &end2);
-            if (*end2 != '\0') {
+            errno = 0;
+            imaginaerteil = strtof(end+1, &end2);
+            if (*end2 != '\0'||errno != 0||end+1==end2) {
                 fprintf(stderr, "Error: nach -s ist kein gültiger Float für den imaginärteil\n");
                 return 1;
             }
             start = realteil + imaginaerteil* I;
         }
+
     }
 
 
@@ -198,21 +216,24 @@ add_executable(gra26capsproject_t105
             char *end;
             errno = 0;
             widthsigned = strtol(argv[i+1], &end, 10);
-            if (errno != 0 || *end != ',') {
+            if (errno != 0 || *end != ','||argv[i+1]==end) {
                 printf("ungültiges Format\n");
                 return 1;
             }
             errno = 0;
-            heightsigned = strtol(end+1, &end, 10);
-            if (errno != 0 || *end != '\0') {
+            heightsigned = strtol(end+1, &end2, 10);
+            if (errno != 0 || *end2 != '\0'||end+1==end2) {
                 printf("Ungültiges Format\n");
                 return 1;
             }
         }
     }
-    if (widthsigned < 0) {
-        fprintf(stderr, "Error: width negativ\n");
+    if (widthsigned <= 0) {
+        fprintf(stderr, "Error: width nicht positiv\n");
         return 1;
+    }
+    if (heightsigned == 0) {
+        fprintf(stderr, "height = 0\n");
     }
     width = widthsigned ;
 
@@ -225,8 +246,9 @@ add_executable(gra26capsproject_t105
                 fprintf(stderr, "Error: Fehlendes Argument\n");
                 return 1;
             }
+            errno = 0;
             res = strtof(argv[i+1], &end);
-            if (*end != '\0') {
+            if (*end != '\0'||errno != 0) {
                 fprintf(stderr, "Error: nach -r ist keine gültige Zahl für <RESOLUTION>\n");
                 return 1;
             }
@@ -251,8 +273,10 @@ add_executable(gra26capsproject_t105
                 fprintf(stderr, "Error: Fehlendes Argument\n");
                 return 1;
             }
+            errno = 0;
+
             n1 = strtol(argv[i+1], &end, 10);
-            if (*end != '\0') {
+            if (*end != '\0'||errno != 0) {
                 fprintf(stderr, "Error: nach -n ist keine gültige Zahl\n");
                 return 1;
             }
