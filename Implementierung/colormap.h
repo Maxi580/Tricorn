@@ -21,7 +21,7 @@ static const unsigned color_pallete_size = sizeof(color_pallete) / sizeof(color_
 
 static const RGB_color black = {0, 0, 0};
 
-static inline RGB_color getColor(unsigned limit, unsigned iterations, bool color) {
+static RGB_color getColor(unsigned limit, unsigned iterations, bool color) {
     if(iterations == limit) {
         return black;
     }
