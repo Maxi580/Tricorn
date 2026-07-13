@@ -5,6 +5,6 @@
 #include <sys/types.h>
 #include <complex.h>
 
-void tricornV1(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img);
+void tricorn_V2(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img);
 
 #endif //GRA26CAPSPROJECT_T105_SIMD_H

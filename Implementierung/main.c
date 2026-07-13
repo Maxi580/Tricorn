@@ -5,18 +5,17 @@
 #include <string.h>
 #include <time.h>
 
+#include "NaiveImplementation/tricorn_V1.h"
+#include "Simd/tricorn_V2.h"
+#include "Sym/tricorn_V3.h"
+#include "Circle/tricorn_V4.h"
+#include "LatencyThroughput/tricorn_V5.h"
+
 #include "bitmap.h"
-#include "NaiveImplementation/tricornV0.h"
-#include "Simd/tricornV1.h"
-#include "Simd/escapetime.h"
-#include "Sym/tricornV2.h"
-#include "Circle/tricornV3.h"
-#include "LatencyThroughput/tricornV4.h"
 #include "MultiThreading/tricorn.h"
 #include "testSuite.h"
 #include "helpMessage.h"
 #include "correctnesTests.h"
-#include <errno.h>
 
 int main(int argc, char *argv[]) {
     char *end;
@@ -44,13 +43,13 @@ project(gra26capsproject_t105 C)
 set(CMAKE_C_STANDARD 11)
 
 add_executable(gra26capsproject_t105
-        Implementierung/NaiveImplementation/tricornV3.h
+        Implementierung/NaiveImplementation/tricorn_V4.h
         Implementierung/NaiveImplementation/escapetime.c
-        Implementierung/NaiveImplementation/tricornV3.c
+        Implementierung/NaiveImplementation/tricorn_V4.c
         Implementierung/NaiveImplementation/escapetime.h
-        Implementierung/Simd/tricornV3.h
+        Implementierung/Simd/tricorn_V4.h
         Implementierung/Simd/escapetime.c
-        Implementierung/Simd/tricornV3.c
+        Implementierung/Simd/tricorn_V4.c
         Implementierung/Simd/escapetime.h
         Implementierung/main.c
         Implementierung/correctnesTests.h
@@ -59,19 +58,19 @@ add_executable(gra26capsproject_t105
         Implementierung/bitmap.h
         Implementierung/Sym/escapetime.c
         Implementierung/Sym/escapetime.h
-        Implementierung/Sym/tricornV3.h
-        Implementierung/Sym/tricornV3.c
-        Implementierung/MultiThreading/tricornV3.h
-        Implementierung/MultiThreading/tricornV3.c
+        Implementierung/Sym/tricorn_V4.h
+        Implementierung/Sym/tricorn_V4.c
+        Implementierung/MultiThreading/tricorn_V4.h
+        Implementierung/MultiThreading/tricorn_V4.c
         Implementierung/LatencyThroughput/escapetime.c
         Implementierung/LatencyThroughput/escapetime.h
-        Implementierung/LatencyThroughput/tricornV3.h
-        Implementierung/LatencyThroughput/tricornV3.c
-        Implementierung/Circle/tricornV3.h
-        Implementierung/Circle/tricornV3.c
+        Implementierung/LatencyThroughput/tricorn_V4.h
+        Implementierung/LatencyThroughput/tricorn_V4.c
+        Implementierung/Circle/tricorn_V4.h
+        Implementierung/Circle/tricorn_V4.c
         Implementierung/Circle/findCircleRad.c
-        Implementierung/Circle/tricornV3.h
-        Implementierung/Circle/tricornV3.c
+        Implementierung/Circle/tricorn_V4.h
+        Implementierung/Circle/tricorn_V4.c
         Implementierung/testSuite.c
         Implementierung/testSuite.h
         Implementierung/Circle/escapetime.c
@@ -88,7 +87,7 @@ add_executable(gra26capsproject_t105
 
             }
             else {
-                printf("FehlerImCode\n");
+                printf("Fehler Im Code\n");
             }
             return 0;
         }
@@ -99,7 +98,7 @@ add_executable(gra26capsproject_t105
     for (int i = 0; i < argc; i++) {
         if (strcmp(argv[i], "-graph") == 0) {
             if (genGraphTable() == 1) {
-                printf("Fehler beim Erstellen des Graphen\n");
+                fprintf(stderr, "Fehler beim Erstellen des Graphen\n");
                 return 1;
             }
             return 0;
@@ -110,7 +109,7 @@ add_executable(gra26capsproject_t105
     for (int i = 0; i < argc; i++) {
         if (strcmp(argv[i], "--test") == 0 || strcmp(argv[i], "-t") == 0) {
             if (testSuite() == 1) {
-                printf("Fehler beim Ausführen der Testsuite\n");
+                fprintf(stderr, "Fehler beim Ausführen der Testsuite\n");
                 return 1;
             }
             return 0;
@@ -131,14 +130,13 @@ add_executable(gra26capsproject_t105
     for (int i=0; i<argc; i++) {
         if (strcmp(argv[i], "-B") == 0) {
             if (i+1>=argc) {
-                printf("Error: Fehlendes Argument\n");
+                fprintf(stderr, "Error: Fehlendes Argument\n");
                 return 1;
             }
-            errno = 0;
             ssize_t tempIteration = benchmarkIterations = strtol(argv[i+1], &end, 10);
             isBenchmark = true;
-            if (*end != '\0' || tempIteration <= 0|| errno != 0) {
-                printf("Error: nach -B ist kein gültiger Int für die Anzahl an Wiederholungen\n");
+            if (*end != '\0' || tempIteration <= 0) {
+                fprintf(stderr, "Error: nach -B ist kein gültiger Int für die Anzahl an Wiederholungen\n");
                 return 1;
             }
         }
@@ -149,13 +147,12 @@ add_executable(gra26capsproject_t105
     for (int i=0; i<argc; i++) {
         if (strcmp(argv[i], "-V") == 0) {
             if (i+1>=argc) {
-                printf("Error: Fehlendes Argument\n");
+                fprintf(stderr, "Error: Fehlendes Argument\n");
                 return 1;
             }
-            errno = 0;
             v = strtol(argv[i+1], &end, 10);
-            if (*end != '\0'||errno != 0) {
-                printf("Error: nach -V ist kein gültiger Int für den realteil\n");
+            if (*end != '\0') {
+                fprintf(stderr, "Error: nach -V ist kein gültiger Int für den realteil\n");
                 return 1;
             }
         }
@@ -167,21 +164,18 @@ add_executable(gra26capsproject_t105
     float imaginaerteil;
     for (int i=0; i<argc; i++) {
         if (strcmp(argv[i], "-s") == 0) {
-            if (i+1>=argc) {
-                printf("Error: Fehlendes Argument\n");
+            if (i+2>=argc) {
+                fprintf(stderr, "Error: Fehlendes Argument\n");
                 return 1;
             }
-            char *end;
-            errno = 0;
             realteil = strtof(argv[i+1], &end);
-            if (*end != ','||errno != 0||argv[i+1]==end) {
-                printf("Error: nach -s ist kein gültiger Float für den realteil\n");
+            if (*end != '\0') {
+                fprintf(stderr, "Error: nach -s ist kein gültiger Float für den realteil\n");
                 return 1;
             }
-            errno = 0;
-            imaginaerteil = strtof(end+1, &end2);
-            if (*end2 != '\0'||errno != 0||end+1==end2) {
-                printf("Error: nach -s ist kein gültiger Float für den imaginärteil\n");
+            imaginaerteil = strtof(argv[i+2], &end2);
+            if (*end2 != '\0') {
+                fprintf(stderr, "Error: nach -s ist kein gültiger Float für den imaginärteil\n");
                 return 1;
             }
             start = realteil + imaginaerteil* I;
@@ -213,11 +207,10 @@ add_executable(gra26capsproject_t105
                 printf("Ungültiges Format\n");
                 return 1;
             }
-
         }
     }
     if (widthsigned < 0) {
-        printf("Error: width negativ\n");
+        fprintf(stderr, "Error: width negativ\n");
         return 1;
     }
     width = widthsigned ;
@@ -228,21 +221,20 @@ add_executable(gra26capsproject_t105
     for (int i=0; i<argc; i++) {
         if (strcmp(argv[i], "-r") == 0) {
             if (i+1>=argc) {
-                printf("Error: Fehlendes Argument\n");
+                fprintf(stderr, "Error: Fehlendes Argument\n");
                 return 1;
             }
-            errno = 0;
             res = strtof(argv[i+1], &end);
-            if (*end != '\0'||errno != 0) {
-                printf("Error: nach -r ist keine gültige Zahl für <RESOLUTION>\n");
+            if (*end != '\0') {
+                fprintf(stderr, "Error: nach -r ist keine gültige Zahl für <RESOLUTION>\n");
                 return 1;
             }
             if (res<0) {
-                printf("Error: res negativ\n");
+                fprintf(stderr, "Error: res negativ\n");
                 return 1;
             }
             if (res == 0) {
-                printf("Error: res zero\n");
+                fprintf(stderr, "Error: res zero\n");
                 return 1;
 
             }
@@ -255,19 +247,18 @@ add_executable(gra26capsproject_t105
     for (int i=0; i<argc; i++) {
         if (strcmp(argv[i], "-n") == 0) {
             if (i+1>=argc) {
-                printf("Error: Fehlendes Argument\n");
+                fprintf(stderr, "Error: Fehlendes Argument\n");
                 return 1;
             }
-            errno = 0;
             n1 = strtol(argv[i+1], &end, 10);
-            if (*end != '\0'||errno != 0) {
-                printf("Error: nach -n ist keine gültige Zahl\n");
+            if (*end != '\0') {
+                fprintf(stderr, "Error: nach -n ist keine gültige Zahl\n");
                 return 1;
             }
         }
     }
     if (n1<0) {
-        printf("Error: n negativ\n");
+        fprintf(stderr, "Error: n negativ\n");
         return 1;
     }
     unsigned n = n1;
@@ -282,20 +273,20 @@ add_executable(gra26capsproject_t105
             color = true;
         }
     }
-    //TODO .bmp end updaten
+
     //Dateiname angeben, falls gegeben
-    char *dateiname = "test";
+    char *filename = "test";
     for (int i=0; i<argc; i++) {
         if (strcmp(argv[i], "-o") == 0) {
             if (i+1>=argc) {
-                printf("Error: Fehlendes Argument\n");
+                fprintf(stderr, "Error: Fehlendes Argument\n");
                 return 1;
             }
-            dateiname = argv[i+1];
+            filename = argv[i+1];
         }
     }
-    char neuerDateiname[256];
-    snprintf(neuerDateiname, 256, "%s.bmp", dateiname);
+    char new_filename[256];
+    snprintf(new_filename, 256, "%s.bmp", filename);
 
     size_t height;
     if (heightsigned < 0) {
@@ -309,8 +300,8 @@ add_executable(gra26capsproject_t105
     size_t pixelArraySize = row_size * height;
 
     unsigned char *img = malloc(pixelArraySize);
-    if (img == NULL) { //Fehler
-        printf("Error allocating memory\n");
+    if (img == NULL) {
+        fprintf(stderr, "Error allocating memory\n");
         return 1;
     }
 
@@ -321,30 +312,30 @@ add_executable(gra26capsproject_t105
 
     if (v == 0) {
         for (ssize_t i=0; i < benchmarkIterations; i++) { // Ohne Benchmarking nur eine Iteration
-            tricornV0(start, width, heightsigned, res, n, color, img);
+            tricorn_V1(start, width, heightsigned, res, n, color, img);
         }
     } else if (v == 1) {
         for (ssize_t i=0; i < benchmarkIterations; i++) {
-            tricornV1(start, width, heightsigned, res, n, color, img);
+            tricorn_V2(start, width, heightsigned, res, n, color, img);
         }
     } else if (v == 2) {
         for (ssize_t i=0; i < benchmarkIterations; i++) {
-            tricornV2(start, width, heightsigned, res, n, color, img);
+            tricorn_V3(start, width, heightsigned, res, n, color, img);
         }
     } else if (v == 3) {
         for (ssize_t i=0; i < benchmarkIterations; i++) {
-            tricornV3(start, width, heightsigned, res, n, color, img);
+            tricorn_V4(start, width, heightsigned, res, n, color, img);
         }
     } else if (v == 4) {
         for (ssize_t i=0; i < benchmarkIterations; i++) {
-            tricornV4(start, width, heightsigned, res, n, color, img);
+            tricorn_V5(start, width, heightsigned, res, n, color, img);
         }
     } else if (v == 5) {
             for (ssize_t i=0; i < benchmarkIterations; i++) {
                 tricorn(start, width, heightsigned, res, n, color, img);
             }
     } else {
-        printf("Error: V muss in [0;5] sein\n");
+        fprintf(stderr, "Error: V muss in [0;5] sein\n");
         free(img);
         return 1;
     }
@@ -355,22 +346,21 @@ add_executable(gra26capsproject_t105
         clock_gettime(CLOCK_MONOTONIC, &time_end);
         const double time = (double)(time_end.tv_sec - time_start.tv_sec) + 1e-9 * (time_end.tv_nsec - time_start.tv_nsec);
         if (time < 1) { // unter 1 Sekunde getestet (ungültig)
-            printf("Error: Gesamtlaufzeit zu kurz. Erhöhe die Iterationen! (%fs < 1s)\n", time);
-            free(img);
-            return 1;
+            fprintf(stderr, "Warnung: Gesamtlaufzeit liegt unter 1sek. Erhöhe die Iterationen! (%fs < 1s)\n", time);
         }
         double avg_time = time / (double)benchmarkIterations;
+        printf("Gesamtlaufzeit: %fs bei %zu Wiederholungen\n", time, benchmarkIterations);
         printf("Dauer pro Iteration: %fs\n", avg_time); //%g für ganz kleine Zahlen?
     }
 
-    writeBmp(neuerDateiname, width, heightsigned, img);
+    writeBmp(new_filename, width, heightsigned, img);
 
     free(img);
     return 0;
 }
 
 /* Betriebsanleitung:
- * gcc Implementierung/NaiveImplementation/main.c Implementierung/NaiveImplementation/tricornV3.c Implementierung/NaiveImplementation/escapetime.c -o test
+ * gcc Implementierung/NaiveImplementation/main.c Implementierung/NaiveImplementation/tricorn_V4.c Implementierung/NaiveImplementation/escapetime.c -o test
  * ./test
  * explorer.exe test.bmp
  */

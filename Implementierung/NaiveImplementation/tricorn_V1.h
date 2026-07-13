@@ -9,7 +9,7 @@
 #include <sys/types.h>
 #include <complex.h>
 
-void tricornV0(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img);
+void tricorn_V1(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img);
 void writeBmp(char *filename, size_t width, ssize_t heightsigned, unsigned char *img);
 
 

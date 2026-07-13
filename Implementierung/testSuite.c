@@ -6,11 +6,11 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "NaiveImplementation/tricornV0.h"
-#include "Simd/tricornV1.h"
-#include "Sym/tricornV2.h"
-#include "Circle/tricornV3.h"
-#include "LatencyThroughput/tricornV4.h"
+#include "NaiveImplementation/tricorn_V1.h"
+#include "Simd/tricorn_V2.h"
+#include "Sym/tricorn_V3.h"
+#include "Circle/tricorn_V4.h"
+#include "LatencyThroughput/tricorn_V5.h"
 #include "MultiThreading/tricorn.h"
 #include "testSuite.h"
 
@@ -107,11 +107,11 @@ timeMeasurement* plotTableGeneration(const size_t steps, const float complex sta
         results[step].iterations = n;
         results[step].res = res;
 
-        results[step].naive = measureTime(tricornV0, start_value, length, (ssize_t)length, res, n, color, NULL);
-        results[step].simd = measureTime(tricornV1, start_value, length, (ssize_t)length, res, n, color, NULL);
-        results[step].sym = measureTime(tricornV2, start_value, length, (ssize_t)length, res, n, color, NULL);
-        results[step].circle = measureTime(tricornV3, start_value, length, (ssize_t)length, res, n, color, NULL);
-        results[step].latency = measureTime(tricornV4, start_value, length, (ssize_t)length, res, n, color, NULL);
+        results[step].naive = measureTime(tricorn_V1, start_value, length, (ssize_t)length, res, n, color, NULL);
+        results[step].simd = measureTime(tricorn_V2, start_value, length, (ssize_t)length, res, n, color, NULL);
+        results[step].sym = measureTime(tricorn_V3, start_value, length, (ssize_t)length, res, n, color, NULL);
+        results[step].circle = measureTime(tricorn_V4, start_value, length, (ssize_t)length, res, n, color, NULL);
+        results[step].latency = measureTime(tricorn_V5, start_value, length, (ssize_t)length, res, n, color, NULL);
         results[step].multithreading = measureTime(tricorn, start_value, length, (ssize_t)length, res, n, color, NULL);
     }
     return results;
@@ -220,11 +220,11 @@ int testSuite() {
         for (size_t v = 0; v < 6; v++) {
             double avg_time = 0;
             switch (v) {
-                case 0: avg_time = measureTime(tricornV0, tc.start, tc.width, tc.height, tc.res, tc.n, tc.color, imgNaive); break;
-                case 1: avg_time = measureTime(tricornV1, tc.start, tc.width, tc.height, tc.res, tc.n, tc.color, img); break;
-                case 2: avg_time = measureTime(tricornV2, tc.start, tc.width, tc.height, tc.res, tc.n, tc.color, img); break;
-                case 3: avg_time = measureTime(tricornV3, tc.start, tc.width, tc.height, tc.res, tc.n, tc.color, img); break;
-                case 4: avg_time = measureTime(tricornV4, tc.start, tc.width, tc.height, tc.res, tc.n, tc.color, img); break;
+                case 0: avg_time = measureTime(tricorn_V1, tc.start, tc.width, tc.height, tc.res, tc.n, tc.color, imgNaive); break;
+                case 1: avg_time = measureTime(tricorn_V2, tc.start, tc.width, tc.height, tc.res, tc.n, tc.color, img); break;
+                case 2: avg_time = measureTime(tricorn_V3, tc.start, tc.width, tc.height, tc.res, tc.n, tc.color, img); break;
+                case 3: avg_time = measureTime(tricorn_V4, tc.start, tc.width, tc.height, tc.res, tc.n, tc.color, img); break;
+                case 4: avg_time = measureTime(tricorn_V5, tc.start, tc.width, tc.height, tc.res, tc.n, tc.color, img); break;
                 default: avg_time = measureTime(tricorn, tc.start, tc.width, tc.height, tc.res, tc.n, tc.color, img); break;
             }
             printf("V%zu: %gs\n", v, avg_time);

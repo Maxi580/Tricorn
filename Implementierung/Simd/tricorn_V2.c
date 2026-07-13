@@ -43,7 +43,7 @@ void colorizeBitmap(unsigned limit, unsigned iterations, unsigned char* row, boo
     }
 }
 
-void tricornV1(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
+void tricorn_V2(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
     size_t row_size = ((width * 3+3)/4)*4; // Größe einer Reihe würde auf 4 Byte aufgefüllt(Padding)
 
     /* Wenn heigt kleiner 0 ist, startet man unten links und geht nach oben also addiert man +y und sonst
