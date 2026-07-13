@@ -17,7 +17,7 @@ static int getCoreAmount(){
         GetSystemInfo(&sysinfo);
         cores = sysinfo.dwNumberOfProcessors;
     #else
-        cores = sysconf(_SC_NPROCESSORS_ONLN)
+        cores = sysconf(_SC_NPROCESSORS_ONLN);
     #endif
 
     // Error bei cores = -1
