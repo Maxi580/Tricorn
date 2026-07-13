@@ -6,10 +6,10 @@ CFLAGS = -g -Wall -Wextra -std=c11 -INaiveImplementation -D_POSIX_C_SOURCE=20080
 
 all: main
 
-main: main.c NaiveImplementation/escapetime.c NaiveImplementation/image.c Simd/escapetime.c Simd/image.c \
-	Sym/escapetime.c Sym/image.c Circle/image.c Circle/escapetime.c LatencyThroughput/escapetime.c \
-	LatencyThroughput/image.c bitmap.c bitmap.h testSuite.c correctnesTests.c correctnesTests.h \
-	MultiThreading/image.c MultiThreading/image.h colormap.h colormap.c helpMessage.c helpMessage.h
+main: main.c NaiveImplementation/escapetime.c NaiveImplementation/tricornV0.c Simd/escapetime.c Simd/tricornV1.c \
+	Sym/escapetime.c Sym/tricornV2.c Circle/tricornV3.c Circle/escapetime.c LatencyThroughput/escapetime.c \
+	LatencyThroughput/tricornV4.c bitmap.c bitmap.h testSuite.c correctnesTests.c correctnesTests.h \
+	MultiThreading/tricorn.c MultiThreading/tricorn.h colormap.h colormap.c helpMessage.c helpMessage.h
 	$(CC) $(CFLAGS) -o $@ $^ -lm
 
 

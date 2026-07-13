@@ -7,6 +7,6 @@
 #include <stdio.h>
 
 
-void tricornMultiThreading(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img);
+void tricorn(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img);
 
 #endif

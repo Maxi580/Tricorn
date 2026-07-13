@@ -6,12 +6,12 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "NaiveImplementation/image.h"
-#include "Simd/image.h"
-#include "Sym/image.h"
-#include "Circle/image.h"
-#include "LatencyThroughput/image.h"
-#include "MultiThreading/image.h"
+#include "NaiveImplementation/tricornV0.h"
+#include "Simd/tricornV1.h"
+#include "Sym/tricornV2.h"
+#include "Circle/tricornV3.h"
+#include "LatencyThroughput/tricornV4.h"
+#include "MultiThreading/tricorn.h"
 #include "testSuite.h"
 
 typedef struct {
@@ -107,12 +107,12 @@ timeMeasurement* plotTableGeneration(const size_t steps, const float complex sta
         results[step].iterations = n;
         results[step].res = res;
 
-        results[step].naive = measureTime(tricornNaive, start_value, length, (ssize_t)length, res, n, color, NULL);
-        results[step].simd = measureTime(tricornSimd, start_value, length, (ssize_t)length, res, n, color, NULL);
-        results[step].sym = measureTime(tricornSym, start_value, length, (ssize_t)length, res, n, color, NULL);
-        results[step].circle = measureTime(tricornCircle, start_value, length, (ssize_t)length, res, n, color, NULL);
-        results[step].latency = measureTime(tricornLatencyThroughput, start_value, length, (ssize_t)length, res, n, color, NULL);
-        results[step].multithreading = measureTime(tricornMultiThreading, start_value, length, (ssize_t)length, res, n, color, NULL);
+        results[step].naive = measureTime(tricornV0, start_value, length, (ssize_t)length, res, n, color, NULL);
+        results[step].simd = measureTime(tricornV1, start_value, length, (ssize_t)length, res, n, color, NULL);
+        results[step].sym = measureTime(tricornV2, start_value, length, (ssize_t)length, res, n, color, NULL);
+        results[step].circle = measureTime(tricornV3, start_value, length, (ssize_t)length, res, n, color, NULL);
+        results[step].latency = measureTime(tricornV4, start_value, length, (ssize_t)length, res, n, color, NULL);
+        results[step].multithreading = measureTime(tricorn, start_value, length, (ssize_t)length, res, n, color, NULL);
     }
     return results;
 }
@@ -220,12 +220,12 @@ int testSuite() {
         for (size_t v = 0; v < 6; v++) {
             double avg_time = 0;
             switch (v) {
-                case 0: avg_time = measureTime(tricornNaive, tc.start, tc.width, tc.height, tc.res, tc.n, tc.color, imgNaive); break;
-                case 1: avg_time = measureTime(tricornSimd, tc.start, tc.width, tc.height, tc.res, tc.n, tc.color, img); break;
-                case 2: avg_time = measureTime(tricornSym, tc.start, tc.width, tc.height, tc.res, tc.n, tc.color, img); break;
-                case 3: avg_time = measureTime(tricornCircle, tc.start, tc.width, tc.height, tc.res, tc.n, tc.color, img); break;
-                case 4: avg_time = measureTime(tricornLatencyThroughput, tc.start, tc.width, tc.height, tc.res, tc.n, tc.color, img); break;
-                default: avg_time = measureTime(tricornMultiThreading, tc.start, tc.width, tc.height, tc.res, tc.n, tc.color, img); break;
+                case 0: avg_time = measureTime(tricornV0, tc.start, tc.width, tc.height, tc.res, tc.n, tc.color, imgNaive); break;
+                case 1: avg_time = measureTime(tricornV1, tc.start, tc.width, tc.height, tc.res, tc.n, tc.color, img); break;
+                case 2: avg_time = measureTime(tricornV2, tc.start, tc.width, tc.height, tc.res, tc.n, tc.color, img); break;
+                case 3: avg_time = measureTime(tricornV3, tc.start, tc.width, tc.height, tc.res, tc.n, tc.color, img); break;
+                case 4: avg_time = measureTime(tricornV4, tc.start, tc.width, tc.height, tc.res, tc.n, tc.color, img); break;
+                default: avg_time = measureTime(tricorn, tc.start, tc.width, tc.height, tc.res, tc.n, tc.color, img); break;
             }
             printf("V%zu: %gs\n", v, avg_time);
 

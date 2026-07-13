@@ -9,7 +9,7 @@
 #include "../colormap.h"
 
 
-void tricornCircle(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
+void tricornV3(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
     RGB_color* colorMap = createColorMap(n, color);
     if (colorMap == NULL) {
         printf("Error allocating memory\n");
