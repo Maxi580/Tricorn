@@ -24,7 +24,6 @@ static int getCoreAmount(){
     if (cores < MIN_THREADS){
         return MIN_THREADS;
     }
-
     if(cores > MAX_THREADS){
         return MAX_THREADS;
     }
