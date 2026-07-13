@@ -195,30 +195,19 @@ add_executable(gra26capsproject_t105
                 printf("Error: Fehlendes Argument\n");
                 return 1;
             }
-            char *erste = strtok(argv[i+1], ",");
-            char *zweite = strtok(NULL, ",");
-
-            if (zweite == NULL||erste==NULL) {
-                printf("Error: format muss breite, höhe sein");
-                return 1;
-            }
-
+            char *end;
             errno = 0;
-            char *end1;
-            widthsigned = (ssize_t) strtol(erste, &end1, 10);
-            if (errno != 0||*end1 != '\0') {
-                printf("Error: Ungueltige Breite\n");
+            widthsigned = strtol(argv[i+1], &end, 10);
+            if (errno != 0 || *end != ',') {
+                printf("ungültiges Format\n");
                 return 1;
             }
             errno = 0;
-            char *end2;
-            heightsigned = (ssize_t) strtol(zweite, &end2, 10);
-            if (errno != 0||*end2 != '\0') {
-                printf("Error: Ungueltige Höhe\n");
+            heightsigned = strtol(end+1, &end, 10);
+            if (errno != 0 || *end != '\0') {
+                printf("Ungültiges Format\n");
                 return 1;
             }
-
-
 
         }
     }
