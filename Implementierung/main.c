@@ -6,13 +6,13 @@
 #include <time.h>
 
 #include "bitmap.h"
-#include "NaiveImplementation/image.h"
-#include "Simd/image.h"
+#include "NaiveImplementation/tricornV0.h"
+#include "Simd/tricornV1.h"
 #include "Simd/escapetime.h"
-#include "Sym/image.h"
-#include "Circle/image.h"
-#include "LatencyThroughput/image.h"
-#include "MultiThreading/image.h"
+#include "Sym/tricornV2.h"
+#include "Circle/tricornV3.h"
+#include "LatencyThroughput/tricornV4.h"
+#include "MultiThreading/tricorn.h"
 #include "testSuite.h"
 #include "helpMessage.h"
 #include "correctnesTests.h"
@@ -43,13 +43,13 @@ project(gra26capsproject_t105 C)
 set(CMAKE_C_STANDARD 11)
 
 add_executable(gra26capsproject_t105
-        Implementierung/NaiveImplementation/image.h
+        Implementierung/NaiveImplementation/tricornV3.h
         Implementierung/NaiveImplementation/escapetime.c
-        Implementierung/NaiveImplementation/image.c
+        Implementierung/NaiveImplementation/tricornV3.c
         Implementierung/NaiveImplementation/escapetime.h
-        Implementierung/Simd/image.h
+        Implementierung/Simd/tricornV3.h
         Implementierung/Simd/escapetime.c
-        Implementierung/Simd/image.c
+        Implementierung/Simd/tricornV3.c
         Implementierung/Simd/escapetime.h
         Implementierung/main.c
         Implementierung/correctnesTests.h
@@ -58,19 +58,19 @@ add_executable(gra26capsproject_t105
         Implementierung/bitmap.h
         Implementierung/Sym/escapetime.c
         Implementierung/Sym/escapetime.h
-        Implementierung/Sym/image.h
-        Implementierung/Sym/image.c
-        Implementierung/MultiThreading/image.h
-        Implementierung/MultiThreading/image.c
+        Implementierung/Sym/tricornV3.h
+        Implementierung/Sym/tricornV3.c
+        Implementierung/MultiThreading/tricornV3.h
+        Implementierung/MultiThreading/tricornV3.c
         Implementierung/LatencyThroughput/escapetime.c
         Implementierung/LatencyThroughput/escapetime.h
-        Implementierung/LatencyThroughput/image.h
-        Implementierung/LatencyThroughput/image.c
-        Implementierung/Circle/image.h
-        Implementierung/Circle/image.c
+        Implementierung/LatencyThroughput/tricornV3.h
+        Implementierung/LatencyThroughput/tricornV3.c
+        Implementierung/Circle/tricornV3.h
+        Implementierung/Circle/tricornV3.c
         Implementierung/Circle/findCircleRad.c
-        Implementierung/Circle/image.h
-        Implementierung/Circle/image.c
+        Implementierung/Circle/tricornV3.h
+        Implementierung/Circle/tricornV3.c
         Implementierung/testSuite.c
         Implementierung/testSuite.h
         Implementierung/Circle/escapetime.c
@@ -309,27 +309,27 @@ add_executable(gra26capsproject_t105
 
     if (v == 0) {
         for (ssize_t i=0; i < benchmarkIterations; i++) { // Ohne Benchmarking nur eine Iteration
-            tricornNaive(start, width, heightsigned, res, n, color, img);
+            tricornV0(start, width, heightsigned, res, n, color, img);
         }
     } else if (v == 1) {
         for (ssize_t i=0; i < benchmarkIterations; i++) {
-            tricornSimd(start, width, heightsigned, res, n, color, img);
+            tricornV1(start, width, heightsigned, res, n, color, img);
         }
     } else if (v == 2) {
         for (ssize_t i=0; i < benchmarkIterations; i++) {
-            tricornSym(start, width, heightsigned, res, n, color, img);
+            tricornV2(start, width, heightsigned, res, n, color, img);
         }
     } else if (v == 3) {
         for (ssize_t i=0; i < benchmarkIterations; i++) {
-            tricornCircle(start, width, heightsigned, res, n, color, img);
+            tricornV3(start, width, heightsigned, res, n, color, img);
         }
     } else if (v == 4) {
         for (ssize_t i=0; i < benchmarkIterations; i++) {
-            tricornLatencyThroughput(start, width, heightsigned, res, n, color, img);
+            tricornV4(start, width, heightsigned, res, n, color, img);
         }
     } else if (v == 5) {
             for (ssize_t i=0; i < benchmarkIterations; i++) {
-                tricornMultiThreading(start, width, heightsigned, res, n, color, img);
+                tricorn(start, width, heightsigned, res, n, color, img);
             }
     } else {
         printf("Error: V muss in [0;5] sein\n");
@@ -358,7 +358,7 @@ add_executable(gra26capsproject_t105
 }
 
 /* Betriebsanleitung:
- * gcc Implementierung/NaiveImplementation/main.c Implementierung/NaiveImplementation/image.c Implementierung/NaiveImplementation/escapetime.c -o test
+ * gcc Implementierung/NaiveImplementation/main.c Implementierung/NaiveImplementation/tricornV3.c Implementierung/NaiveImplementation/escapetime.c -o test
  * ./test
  * explorer.exe test.bmp
  */

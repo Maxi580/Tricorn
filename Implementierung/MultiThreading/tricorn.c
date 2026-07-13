@@ -164,7 +164,7 @@ static void* tricornThreading(void* arg) {
     return NULL;
 }
 
-void tricornMultiThreading(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color,
+void tricorn(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color,
     unsigned char* img) {
     // Thread zu erstellen kostet ca. 0.000005s, lohnt sich also erst bei einer gewissen dauer.
     size_t max_y = height > 0 ? height : -height;
