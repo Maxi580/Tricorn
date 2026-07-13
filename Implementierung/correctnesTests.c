@@ -48,31 +48,31 @@ bool compareCorrectnessTest(float complex start, size_t width, ssize_t height_si
     tricorn_V1(start, width, height_signed, res, n, color, v0);
     tricorn_V2(start, width, height_signed, res, n, color, v1);
     if (memcmp(v0, v1, pixelArraySize)) {
-        printf("SIMD Error on randomized Tests\n");
+        printf("SIMD Error\n");
         all_equal = false;
     }
     memset(v1, 0xAA, pixelArraySize);
     tricorn_V3(start, width, height_signed, res, n, color, v1);
     if (memcmp(v0, v1, pixelArraySize)) {
-        printf("Symmetry Version Error on randomized Tests\n");
+        printf("Symmetry Version Error\n");
         all_equal = false;
     }
     memset(v1, 0xAA, pixelArraySize);
     tricorn_V4(start, width, height_signed, res, n, color, v1);
     if (memcmp(v0, v1, pixelArraySize)) {
-        printf("Circle Version Error on randomized Tests\n");
+        printf("Circle Version Error\n");
         all_equal = false;
     }
     memset(v1, 0xAA, pixelArraySize);
     tricorn_V5(start, width, height_signed, res, n, color, v1);
     if (memcmp(v0, v1, pixelArraySize)) {
-        printf("LatencyThroughput Version Error on randomized Tests\n");
+        printf("LatencyThroughput Version Error\n");
         all_equal = false;
     }
     memset(v1, 0xAA, pixelArraySize);
     tricorn(start, width, height_signed, res, n, color, v1);
     if (memcmp(v0, v1, pixelArraySize) != 0) {
-        printf("Multithreading Version Error on randomized Tests\n");
+        printf("Multithreading Version Error\n");
         all_equal = false;
     }
 
