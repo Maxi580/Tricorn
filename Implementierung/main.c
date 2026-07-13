@@ -283,8 +283,8 @@ int main(int argc, char *argv[]) {
         printf("Dauer pro Iteration: %fs\n", avg_time); //%g für ganz kleine Zahlen?
     }
 
-    writeBmp(new_filename, width, heightsigned, img);
+    int result = writeBmp(new_filename, width, heightsigned, img);
 
     free(img);
-    return 0;
+    return result;
 }
