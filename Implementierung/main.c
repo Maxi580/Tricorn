@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <errno.h>
 
 #include "NaiveImplementation/tricorn_V1.h"
 #include "Simd/tricorn_V2.h"
@@ -44,13 +45,13 @@ project(gra26capsproject_t105 C)
 set(CMAKE_C_STANDARD 11)
 
 add_executable(gra26capsproject_t105
-        Implementierung/NaiveImplementation/tricorn_V4.h
+
         Implementierung/NaiveImplementation/escapetime.c
-        Implementierung/NaiveImplementation/tricorn_V4.c
+
         Implementierung/NaiveImplementation/escapetime.h
-        Implementierung/Simd/tricorn_V4.h
+
         Implementierung/Simd/escapetime.c
-        Implementierung/Simd/tricorn_V4.c
+
         Implementierung/Simd/escapetime.h
         Implementierung/main.c
         Implementierung/correctnesTests.h
@@ -59,24 +60,35 @@ add_executable(gra26capsproject_t105
         Implementierung/bitmap.h
         Implementierung/Sym/escapetime.c
         Implementierung/Sym/escapetime.h
-        Implementierung/Sym/tricorn_V4.h
-        Implementierung/Sym/tricorn_V4.c
-        Implementierung/MultiThreading/tricorn_V4.h
-        Implementierung/MultiThreading/tricorn_V4.c
+
         Implementierung/LatencyThroughput/escapetime.c
         Implementierung/LatencyThroughput/escapetime.h
-        Implementierung/LatencyThroughput/tricorn_V4.h
-        Implementierung/LatencyThroughput/tricorn_V4.c
-        Implementierung/Circle/tricorn_V4.h
-        Implementierung/Circle/tricorn_V4.c
+
+
         Implementierung/Circle/findCircleRad.c
-        Implementierung/Circle/tricorn_V4.h
+
         Implementierung/Circle/tricorn_V4.c
+        Implementierung/Circle/tricorn_V4.h
+        Implementierung/LatencyThroughput/tricorn_V5.c
+        Implementierung/LatencyThroughput/tricorn_V5.h
+        Implementierung/NaiveImplementation/tricorn_V1.c
+        Implementierung/NaiveImplementation/tricorn_V1.h
+        Implementierung/Simd/tricorn_V2.c
+        Implementierung/Simd/tricorn_V2.h
+        Implementierung/Sym/tricorn_V3.c
+        Implementierung/Sym/tricorn_V3.h
         Implementierung/testSuite.c
         Implementierung/testSuite.h
         Implementierung/Circle/escapetime.c
         Implementierung/Circle/escapetime.h
+        Implementierung/helpMessage.c
+        Implementierung/helpMessage.h
+        Implementierung/colormap.c
+        Implementierung/colormap.h
+        Implementierung/MultiThreading/tricorn.c
+        Implementierung/MultiThreading/tricorn.h
 )
+
 
 
      */
@@ -366,10 +378,10 @@ add_executable(gra26capsproject_t105
         printf("Dauer pro Iteration: %fs\n", avg_time); //%g für ganz kleine Zahlen?
     }
 
-    writeBmp(new_filename, width, heightsigned, img);
+    int result = writeBmp(new_filename, width, heightsigned, img);
 
     free(img);
-    return 0;
+    return result;
 }
 
 /* Betriebsanleitung:

@@ -54,10 +54,10 @@ void tricorn_V1(float complex start, size_t width, ssize_t height, float res, un
                         row[x *3+2]= color_pixel; // Rot
                     } else {
                         //Bunt
-                        unsigned farbIndex = iterations % naive_color_pallete_size;
-                        row[x * 3]= naive_color_pallete[farbIndex][0]; // Blau
-                        row[x *3+1]= naive_color_pallete[farbIndex][1]; // Grün
-                        row[x *3+2]= naive_color_pallete[farbIndex][2]; // Rot
+                        unsigned color_index = iterations % naive_color_pallete_size;
+                        row[x * 3]= naive_color_pallete[color_index][0]; // Blau
+                        row[x *3+1]= naive_color_pallete[color_index][1]; // Grün
+                        row[x *3+2]= naive_color_pallete[color_index][2]; // Rot
                     }
                 }
             }
@@ -68,7 +68,6 @@ void tricorn_V1(float complex start, size_t width, ssize_t height, float res, un
     }
     else{ // BOTTOM-UP
         size_t row_size = ((width * 3+3)/4)*4;    //größe einer Reihe würde auf 4 Byte aufgefüllt(Padding)
-
 
         for (ssize_t y = height-1; y >= 0; y--) {
             unsigned char *row = img + y*row_size; // *row zeigt nun auf den Anfang von Zeile height-1-y (0-indexed)

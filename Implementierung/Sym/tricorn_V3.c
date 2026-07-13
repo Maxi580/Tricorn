@@ -11,11 +11,6 @@
 
 
 void tricorn_V3(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
-    RGB_color* colorMap = createColorMap(n, color);
-    if (colorMap == NULL) {
-        printf("Error allocating memory for colormap\n");
-        return;
-    }
     size_t row_size = ((width * 3+3)/4)*4; // Größe einer Reihe würde auf 4 Byte aufgefüllt(Padding)
 
     /* Wenn heigt größer 0 ist, startet man unten links und geht nach oben also addiert man +y und sonst
@@ -69,7 +64,7 @@ void tricorn_V3(float complex start, size_t width, ssize_t height, float res, un
             for (int i = 0; i < 4; i++){
                 size_t x_offset = (x + i) * 3;
                 unsigned char *bottomOffset = bottomRow + x_offset;
-                RGB_color rgb = colorMap[iterations[i]];
+                RGB_color rgb = getColor(n, iterations[i], color);
                 // rgb is reversed on bitmap
                 bottomOffset[0] =  rgb.b;
                 bottomOffset[1] =  rgb.g;
@@ -96,7 +91,7 @@ void tricorn_V3(float complex start, size_t width, ssize_t height, float res, un
             for (size_t i = 0; i < range; i++){
                 size_t x_offset = (endIndex + i) * 3;
                 unsigned char *bottomOffset = bottomRow + x_offset;
-                RGB_color rgb = colorMap[rest_iterations[i]];
+                RGB_color rgb = getColor(n, rest_iterations[i], color);
                 // rgb is reversed on bitmap
                 bottomOffset[0] =  rgb.b;
                 bottomOffset[1] =  rgb.g;
@@ -117,5 +112,4 @@ void tricorn_V3(float complex start, size_t width, ssize_t height, float res, un
             }
         }
     }
-    free(colorMap);
 }

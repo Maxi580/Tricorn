@@ -9,11 +9,6 @@
 #include "../colormap.h"
 
 void tricorn_V5(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
-    RGB_color* colorMap = createColorMap(n, color);
-    if (colorMap == NULL) {
-        printf("Error allocating memory\n");
-        return;
-    }
     size_t row_size = ((width * 3+3)/4)*4; // Größe einer Reihe würde auf 4 Byte aufgefüllt(Padding)
 
     /* Wenn heigt kleiner 0 ist, startet man unten links und geht nach oben also addiert man +y und sonst
@@ -76,7 +71,8 @@ void tricorn_V5(float complex start, size_t width, ssize_t height, float res, un
             for (int i = 0; i < 8; i++){
                 size_t x_offset = (x + i) * 3;
                 unsigned char *bottomOffset = bottomRow + x_offset;
-                RGB_color rgb = colorMap[iterations[i]];
+                RGB_color rgb = getColor(n, iterations[i], color);
+
                 // rgb is reversed on bitmap
                 bottomOffset[0] =  rgb.b;
                 bottomOffset[1] =  rgb.g;
@@ -92,7 +88,7 @@ void tricorn_V5(float complex start, size_t width, ssize_t height, float res, un
         // Den Rest von width auch noch fillen (bis zu (ParallelElemente - 1) elemente)
         // Es werden 4 werte in parallel berechnet, aber nur die benötigten eingetragen
         if(endIndex < width) {
-            unsigned restIterations[8];
+            unsigned rest_iterations[8];
             float complex imag_part = factor * (float) y * res * I;
             const float complex a1 = start + (float) endIndex * res + imag_part;
             const float complex a2 = start + ((float) endIndex + 1) * res + imag_part;
@@ -104,15 +100,15 @@ void tricorn_V5(float complex start, size_t width, ssize_t height, float res, un
             const float complex b4 = start + ((float) endIndex + 7) * res + imag_part;
 
             twoIntegerLanes bothIterations = escapeTimeLatencyThroughputTwo(n, a1, a2, a3, a4, b1, b2, b3, b4);
-            _mm_storeu_si128((__m128i*)restIterations,       bothIterations.a);
-            _mm_storeu_si128((__m128i*)(restIterations + 4), bothIterations.b);
+            _mm_storeu_si128((__m128i*)rest_iterations,       bothIterations.a);
+            _mm_storeu_si128((__m128i*)(rest_iterations + 4), bothIterations.b);
 
             // Nur die Werte eintragen, die tatsächlich noch benötigt werden, Overflow wird ignoiert.
             size_t range = width - endIndex;
             for (size_t i = 0; i < range; i++){
                 size_t x_offset = (endIndex + i) * 3;
                 unsigned char *bottomOffset = bottomRow + x_offset;
-                RGB_color rgb = colorMap[restIterations[i]];
+                RGB_color rgb = getColor(n, rest_iterations[i], color);
                 // rgb is reversed on bitmap
                 bottomOffset[0] =  rgb.b;
                 bottomOffset[1] =  rgb.g;
@@ -133,5 +129,4 @@ void tricorn_V5(float complex start, size_t width, ssize_t height, float res, un
             }
         }
     }
-    free(colorMap);
 }
