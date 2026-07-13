@@ -16,6 +16,7 @@
 #include "testSuite.h"
 #include "helpMessage.h"
 #include "correctnesTests.h"
+#include <errno.h>
 
 int main(int argc, char *argv[]) {
     char *end;
@@ -190,20 +191,35 @@ add_executable(gra26capsproject_t105
     ssize_t heightsigned = -4000;
     for (int i=0; i<argc; i++) {
         if (strcmp(argv[i], "-d") == 0) {
-            if (i+2>=argc) {
+            if (i+1>=argc) {
                 printf("Error: Fehlendes Argument\n");
                 return 1;
             }
-            widthsigned = strtol(argv[i+1], &end, 10);
-            if (*end != '\0') {
-                printf("Error: nach -d ist keine gültige Zahl für <WIDTH>\n");
+            char *erste = strtok(argv[i+1], ",");
+            char *zweite = strtok(NULL, ",");
+
+            if (zweite == NULL||erste==NULL) {
+                printf("Error: format muss breite, höhe sein");
                 return 1;
             }
-            heightsigned = strtol(argv[i+2], &end, 10);
-            if (*end != '\0') {
-                printf("Error: nach -d ist keine gültige Zahl für <HEIGHT>\n");
+
+            errno = 0;
+            char *end1;
+            widthsigned = (ssize_t) strtol(erste, &end1, 10);
+            if (errno != 0||*end1 != '\0') {
+                printf("Error: Ungueltige Breite\n");
                 return 1;
             }
+            errno = 0;
+            char *end2;
+            heightsigned = (ssize_t) strtol(zweite, &end2, 10);
+            if (errno != 0||*end2 != '\0') {
+                printf("Error: Ungueltige Höhe\n");
+                return 1;
+            }
+
+
+
         }
     }
     if (widthsigned < 0) {
@@ -270,7 +286,7 @@ add_executable(gra26capsproject_t105
             color = true;
         }
     }
-
+    //TODO .bmp end updaten
     //Dateiname angeben, falls gegeben
     char *dateiname = "test";
     for (int i=0; i<argc; i++) {

@@ -49,6 +49,8 @@ void writeBmp(char *filename, size_t width, ssize_t heightsigned, unsigned char 
     header[36] = (unsigned char) (pixelArraySize >> 16);
     header[37] = (unsigned char) (pixelArraySize >> 24);
 
+
+
     FILE *f = fopen(filename, "wb");
     if (f == NULL) {return;}
     fwrite(header, 1, 54, f);
