@@ -1,14 +1,13 @@
 #ifndef GRA26CAPSPROJECT_T105_CORECALC_H
 #define GRA26CAPSPROJECT_T105_CORECALC_H
-#endif
 
 #define MIN_THREADS 1
 #define MAX_THREADS 256
 
 #ifdef _WIN32
-#include <windows.h>
+    #include <windows.h>
 #else
-#include <unistd.h> // Unix
+    #include <unistd.h> // Unix
 #endif
 
 static int getCoreAmount(){
@@ -32,3 +31,4 @@ static int getCoreAmount(){
     return cores;
 }
 
+#endif
