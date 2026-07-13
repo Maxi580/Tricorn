@@ -2,6 +2,9 @@
 #define GRA26CAPSPROJECT_T105_CORECALC_H
 #endif
 
+#define MIN_THREADS 1
+#define MAX_THREADS 256
+
 #ifdef _WIN32
 #include <windows.h>
 #else
@@ -9,12 +12,23 @@
 #endif
 
 static int getCoreAmount(){
+    int cores;
     #ifdef _WIN32
         SYSTEM_INFO sysinfo;
         GetSystemInfo(&sysinfo);
-        return sysinfo.dwNumberOfProcessors;
+        cores = sysinfo.dwNumberOfProcessors;
     #else
-        return sysconf(_SC_NPROCESSORS_ONLN)
+        cores = sysconf(_SC_NPROCESSORS_ONLN)
     #endif
+
+    // Error bei cores = -1
+    if (cores < MIN_THREADS){
+        return MIN_THREADS;
+    }
+
+    if(cores > MAX_THREADS){
+        return MAX_THREADS;
+    }
+    return cores;
 }
 
