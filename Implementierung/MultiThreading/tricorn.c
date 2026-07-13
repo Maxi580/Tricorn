@@ -9,6 +9,7 @@
 
 #include "../LatencyThroughput/escapetime.h"
 #include "../colormap.h"
+#include "corecalculator.h"
 
 typedef struct{
     float complex start;
@@ -181,7 +182,7 @@ void tricorn(float complex start, size_t width, ssize_t height, float res, unsig
     // Man startet die threads alle mit leichten offset aber geht in gleichen schritten hoch dann ist alles abgedeckt
     size_t max_y = height > 0 ? height : -height;
 
-    int thread_amount = 20;
+    int thread_amount = getCoreAmount();
     pthread_t threads[thread_amount];
     thread_data data[thread_amount];
 

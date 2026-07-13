@@ -157,7 +157,6 @@ int main(int argc, char *argv[]) {
         }
         //resolution (auch frei wählbar) mit -r <FLOAT>; <FLOAT> muss hierbei ein Float sein
         else if (strcmp(argv[i], "-r") == 0) {
-
             if (i+1>=argc) {
                 fprintf(stderr, "Error: Fehlendes Argument\n");
                 return 1;
