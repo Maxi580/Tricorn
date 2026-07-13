@@ -378,10 +378,10 @@ add_executable(gra26capsproject_t105
         printf("Dauer pro Iteration: %fs\n", avg_time); //%g für ganz kleine Zahlen?
     }
 
-    writeBmp(new_filename, width, heightsigned, img);
+    int result = writeBmp(new_filename, width, heightsigned, img);
 
     free(img);
-    return 0;
+    return result;
 }
 
 /* Betriebsanleitung:
