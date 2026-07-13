@@ -3,22 +3,22 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <immintrin.h>
 #include "escapetime.h"
 #include <math.h>
 #include "../colormap.h"
 
 
-void tricornV2(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
+void tricorn_V4(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
     RGB_color* colorMap = createColorMap(n, color);
     if (colorMap == NULL) {
         printf("Error allocating memory\n");
         return;
     }
+
     size_t row_size = ((width * 3+3)/4)*4; // Größe einer Reihe würde auf 4 Byte aufgefüllt(Padding)
 
-    /* Wenn heigt größer 0 ist, startet man unten links und geht nach oben also addiert man +y und sonst
+    /* Wenn heigt kleiner 0 ist, startet man unten links und geht nach oben also addiert man +y und sonst
      * startet man oben links un zieht y ab, das vorzeichen wird über factor kontrolliert*/
     float factor = height < 0 ? -1.0f : 1.0f;
     ssize_t top = height < 0 ? -height : height;
@@ -50,12 +50,14 @@ void tricornV2(float complex start, size_t width, ssize_t height, float res, uns
         // Durch Exaktheit keine False Positives aber auch weniger Hits
         bool useSym = sym_y >= 0 && sym_y < top && imag_y == -imag_sym ;
         unsigned char *topRow = NULL;
-        if(useSym && sym_y < y) {
+        if(useSym && sym_y < (ssize_t) y) {
             continue; // Koordinate schon berechnet und eingetragen
         }
-        if (useSym && sym_y != y) {
+
+        if (useSym && sym_y != (ssize_t) y) {
             topRow = img + sym_y * row_size;
         }
+
 
         for (size_t x = 0; x < endIndex; x += 4) {
 
@@ -64,7 +66,7 @@ void tricornV2(float complex start, size_t width, ssize_t height, float res, uns
             const float complex c2 = start + ((float) x + 1) * res + factor * (float) y * res * I;
             const float complex c3 = start + ((float) x + 2) * res + factor * (float) y * res * I;
             const float complex c4 = start + ((float) x + 3) * res + factor * (float) y * res * I;
-            _mm_storeu_si128((__m128i*) iterations, symEscapeTime(n, c1, c2, c3, c4));
+            _mm_storeu_si128((__m128i*) iterations, escapeTimeCircle(n, c1, c2, c3, c4));
 
             for (int i = 0; i < 4; i++){
                 size_t x_offset = (x + i) * 3;
@@ -85,18 +87,18 @@ void tricornV2(float complex start, size_t width, ssize_t height, float res, uns
         // Den Rest von width auch noch fillen (bis zu 3 elemente)
         // Es werden 4 werte in parallel berechnet, aber nur die benötigten eingetragen
         if(endIndex < width) {
-            unsigned rest_iterations[4];
+            unsigned restIterations[4];
             const float complex c1 = start + (float) endIndex * res + factor * (float) y * res * I;
             const float complex c2 = start + ((float) endIndex + 1) * res + factor * (float) y * res * I;
             const float complex c3 = start + ((float) endIndex + 2) * res + factor * (float) y * res * I;
             const float complex c4 = start + ((float) endIndex + 3) * res + factor * (float) y * res * I;
-            _mm_storeu_si128((__m128i*) rest_iterations, symEscapeTime(n, c1, c2, c3, c4));
+            _mm_storeu_si128((__m128i*) restIterations, escapeTimeCircle(n, c1, c2, c3, c4));
 
             size_t range = width - endIndex;
             for (size_t i = 0; i < range; i++){
                 size_t x_offset = (endIndex + i) * 3;
                 unsigned char *bottomOffset = bottomRow + x_offset;
-                RGB_color rgb = colorMap[rest_iterations[i]];
+                RGB_color rgb = colorMap[restIterations[i]];
                 // rgb is reversed on bitmap
                 bottomOffset[0] =  rgb.b;
                 bottomOffset[1] =  rgb.g;

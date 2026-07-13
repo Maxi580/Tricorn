@@ -15,11 +15,11 @@
 #include "Circle/escapetime.h"
 #include "LatencyThroughput/escapetime.h"
 
-#include "NaiveImplementation/tricornV0.h"
-#include "Simd/tricornV1.h"
-#include "Sym/tricornV2.h"
-#include "Circle/tricornV3.h"
-#include "LatencyThroughput/tricornV4.h"
+#include "NaiveImplementation/tricorn_V1.h"
+#include "Simd/tricorn_V2.h"
+#include "Sym/tricorn_V3.h"
+#include "Circle/tricorn_V4.h"
+#include "LatencyThroughput/tricorn_V5.h"
 #include "MultiThreading/tricorn.h"
 
 bool compareCorrectnessTest(float complex start, size_t width, ssize_t height_signed, float res, unsigned n, bool color) {
@@ -45,26 +45,26 @@ bool compareCorrectnessTest(float complex start, size_t width, ssize_t height_si
         return false;
     }
 
-    tricornV0(start, width, height_signed, res, n, color, v0);
-    tricornV1(start, width, height_signed, res, n, color, v1);
+    tricorn_V1(start, width, height_signed, res, n, color, v0);
+    tricorn_V2(start, width, height_signed, res, n, color, v1);
     if (memcmp(v0, v1, pixelArraySize)) {
         printf("SIMD Error on randomized Tests\n");
         all_equal = false;
     }
     memset(v1, 0xAA, pixelArraySize);
-    tricornV2(start, width, height_signed, res, n, color, v1);
+    tricorn_V3(start, width, height_signed, res, n, color, v1);
     if (memcmp(v0, v1, pixelArraySize)) {
         printf("Symmetry Version Error on randomized Tests\n");
         all_equal = false;
     }
     memset(v1, 0xAA, pixelArraySize);
-    tricornV3(start, width, height_signed, res, n, color, v1);
+    tricorn_V4(start, width, height_signed, res, n, color, v1);
     if (memcmp(v0, v1, pixelArraySize)) {
         printf("Circle Version Error on randomized Tests\n");
         all_equal = false;
     }
     memset(v1, 0xAA, pixelArraySize);
-    tricornV4(start, width, height_signed, res, n, color, v1);
+    tricorn_V5(start, width, height_signed, res, n, color, v1);
     if (memcmp(v0, v1, pixelArraySize)) {
         printf("LatencyThroughput Version Error on randomized Tests\n");
         all_equal = false;

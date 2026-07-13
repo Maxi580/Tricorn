@@ -17,7 +17,7 @@
  */
 
 
-void tricornV0(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
+void tricorn_V1(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
     const unsigned naive_color_pallete_size = 4;
     const unsigned naive_color_pallete[4][3] = {
         {128, 0, 0},

@@ -3,6 +3,6 @@
 #include <stdbool.h>
 #include <complex.h>
 
-void tricornV4(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img);
+void tricorn_V5(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img);
 
 #endif
