@@ -8,6 +8,7 @@
 #include <pthread.h>
 
 #include "../LatencyThroughput/escapetime.h"
+#include "../LatencyThroughput/tricorn_V5.h"
 #include "../colormap.h"
 #include "corecalculator.h"
 
@@ -182,19 +183,25 @@ void tricorn(float complex start, size_t width, ssize_t height, float res, unsig
     // Man startet die threads alle mit leichten offset aber geht in gleichen schritten hoch dann ist alles abgedeckt
     size_t max_y = height > 0 ? height : -height;
 
-    int thread_amount = getCoreAmount();
-    pthread_t threads[thread_amount];
-    thread_data data[thread_amount];
+    //  The 200k Value, was approximated by measuring when thread overhead stops mattering
+    if(width * max_y > 200000){
+        int thread_amount = getCoreAmount();
 
-    for (int i = 0; i < thread_amount; i++) {
-        pthread_t thread;
-        // i == bottom_y, max_y = top y, threat_amount = step size
-        data[i] = (thread_data) {start, width, height, i, max_y, thread_amount, res, n, color, img};;
-        pthread_create(&thread, NULL, tricornThreading, &data[i]);
-        threads[i] = thread;
-    }
+        pthread_t threads[thread_amount];
+        thread_data data[thread_amount];
 
-    for (int i = 0; i < thread_amount; i++) {
-        pthread_join(threads[i], NULL);
+        for (int i = 0; i < thread_amount; i++) {
+            pthread_t thread;
+            // i == bottom_y, max_y = top y, threat_amount = step size
+            data[i] = (thread_data) {start, width, height, i, max_y, thread_amount, res, n, color, img};;
+            pthread_create(&thread, NULL, tricornThreading, &data[i]);
+            threads[i] = thread;
+        }
+
+        for (int i = 0; i < thread_amount; i++) {
+            pthread_join(threads[i], NULL);
+        }
+    } else {
+        tricorn_V5(start, width, height, res, n, color, img);
     }
 }
