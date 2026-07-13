@@ -134,9 +134,10 @@ add_executable(gra26capsproject_t105
                 printf("Error: Fehlendes Argument\n");
                 return 1;
             }
+            errno = 0;
             ssize_t tempIteration = benchmarkIterations = strtol(argv[i+1], &end, 10);
             isBenchmark = true;
-            if (*end != '\0' || tempIteration <= 0) {
+            if (*end != '\0' || tempIteration <= 0|| errno != 0) {
                 printf("Error: nach -B ist kein gültiger Int für die Anzahl an Wiederholungen\n");
                 return 1;
             }
@@ -151,8 +152,9 @@ add_executable(gra26capsproject_t105
                 printf("Error: Fehlendes Argument\n");
                 return 1;
             }
+            errno = 0;
             v = strtol(argv[i+1], &end, 10);
-            if (*end != '\0') {
+            if (*end != '\0'||errno != 0) {
                 printf("Error: nach -V ist kein gültiger Int für den realteil\n");
                 return 1;
             }
@@ -165,17 +167,20 @@ add_executable(gra26capsproject_t105
     float imaginaerteil;
     for (int i=0; i<argc; i++) {
         if (strcmp(argv[i], "-s") == 0) {
-            if (i+2>=argc) {
+            if (i+1>=argc) {
                 printf("Error: Fehlendes Argument\n");
                 return 1;
             }
+            char *end;
+            errno = 0;
             realteil = strtof(argv[i+1], &end);
-            if (*end != '\0') {
+            if (*end != ','||errno != 0||argv[i+1]==end) {
                 printf("Error: nach -s ist kein gültiger Float für den realteil\n");
                 return 1;
             }
-            imaginaerteil = strtof(argv[i+2], &end2);
-            if (*end2 != '\0') {
+            errno = 0;
+            imaginaerteil = strtof(end+1, &end2);
+            if (*end2 != '\0'||errno != 0||end+1==end2) {
                 printf("Error: nach -s ist kein gültiger Float für den imaginärteil\n");
                 return 1;
             }
@@ -226,8 +231,9 @@ add_executable(gra26capsproject_t105
                 printf("Error: Fehlendes Argument\n");
                 return 1;
             }
+            errno = 0;
             res = strtof(argv[i+1], &end);
-            if (*end != '\0') {
+            if (*end != '\0'||errno != 0) {
                 printf("Error: nach -r ist keine gültige Zahl für <RESOLUTION>\n");
                 return 1;
             }
@@ -252,8 +258,9 @@ add_executable(gra26capsproject_t105
                 printf("Error: Fehlendes Argument\n");
                 return 1;
             }
+            errno = 0;
             n1 = strtol(argv[i+1], &end, 10);
-            if (*end != '\0') {
+            if (*end != '\0'||errno != 0) {
                 printf("Error: nach -n ist keine gültige Zahl\n");
                 return 1;
             }
