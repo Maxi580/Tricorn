@@ -9,7 +9,8 @@
 #include "../colormap.h"
 
 void tricorn_V5(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
-    size_t row_size = ((width * 3+3)/4)*4; // Größe einer Reihe würde auf 4 Byte aufgefüllt(Padding)
+    int bytesPerPixel = color ? 3 : 1;
+    size_t row_size = ((width * bytesPerPixel+3)/4)*4; // Größe einer Reihe würde auf 4 Byte aufgefüllt(Padding)
 
     /* Wenn heigt kleiner 0 ist, startet man unten links und geht nach oben also addiert man +y und sonst
      * startet man oben links un zieht y ab, das vorzeichen wird über factor kontrolliert*/
@@ -69,19 +70,28 @@ void tricorn_V5(float complex start, size_t width, ssize_t height, float res, un
             _mm_storeu_si128((__m128i*)(iterations + 4), bothIterations.b);
 
             for (int i = 0; i < 8; i++){
-                size_t x_offset = (x + i) * 3;
+                size_t x_offset = (x + i) * bytesPerPixel;
                 unsigned char *bottomOffset = bottomRow + x_offset;
                 RGB_color rgb = getColor(n, iterations[i], color);
 
                 // rgb is reversed on bitmap
-                bottomOffset[0] =  rgb.b;
-                bottomOffset[1] =  rgb.g;
-                bottomOffset[2] =  rgb.r;
-                if(topRow != NULL){
-                    unsigned char *topOffset = topRow + x_offset;
-                    topOffset[0] =  rgb.b;
-                    topOffset[1] =  rgb.g;
-                    topOffset[2] =  rgb.r;
+                if (color) {
+                    bottomOffset[0] =  rgb.b;
+                    bottomOffset[1] =  rgb.g;
+                    bottomOffset[2] =  rgb.r;
+                    if(topRow != NULL){
+                        unsigned char *topOffset = topRow + x_offset;
+                        topOffset[0] =  rgb.b;
+                        topOffset[1] =  rgb.g;
+                        topOffset[2] =  rgb.r;
+                    }
+                }
+                else {
+                    bottomOffset[0] =  rgb.b;
+                    if(topRow != NULL){
+                        unsigned char *topOffset = topRow + x_offset;
+                        topOffset[0] =  rgb.b;
+                    }
                 }
             }
         }
@@ -106,23 +116,32 @@ void tricorn_V5(float complex start, size_t width, ssize_t height, float res, un
             // Nur die Werte eintragen, die tatsächlich noch benötigt werden, Overflow wird ignoiert.
             size_t range = width - endIndex;
             for (size_t i = 0; i < range; i++){
-                size_t x_offset = (endIndex + i) * 3;
+                size_t x_offset = (endIndex + i) * bytesPerPixel;
                 unsigned char *bottomOffset = bottomRow + x_offset;
                 RGB_color rgb = getColor(n, rest_iterations[i], color);
                 // rgb is reversed on bitmap
-                bottomOffset[0] =  rgb.b;
-                bottomOffset[1] =  rgb.g;
-                bottomOffset[2] =  rgb.r;
-                if(topRow != NULL){
-                    unsigned char *topOffset = topRow + x_offset;
-                    topOffset[0] =  rgb.b;
-                    topOffset[1] =  rgb.g;
-                    topOffset[2] =  rgb.r;
+                if (color) {
+                    bottomOffset[0] =  rgb.b;
+                    bottomOffset[1] =  rgb.g;
+                    bottomOffset[2] =  rgb.r;
+                    if(topRow != NULL){
+                        unsigned char *topOffset = topRow + x_offset;
+                        topOffset[0] =  rgb.b;
+                        topOffset[1] =  rgb.g;
+                        topOffset[2] =  rgb.r;
+                    }
+                }
+                else {
+                    bottomOffset[0] =  rgb.b;
+                    if(topRow != NULL){
+                        unsigned char *topOffset = topRow + x_offset;
+                        topOffset[0] =  rgb.b;
+                    }
                 }
             }
         }
 
-        for (size_t i= width*3; i<row_size; i++) {
+        for (size_t i= width*bytesPerPixel; i<row_size; i++) {
             bottomRow[i]=0; // restliche Padding Bits einer Zeile auffüllen
             if (topRow != NULL) {
                 topRow[i]=0;

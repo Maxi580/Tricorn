@@ -25,10 +25,13 @@ void tricorn_V1(float complex start, size_t width, ssize_t height, float res, un
         {255, 100, 0},
         {255, 255, 0},
     };
+    int bytesPerPixel = color ? 3 : 1;
 
     if (height < 0) { // TOP-DOWN
         height = height * (-1);
-        size_t row_size = ((width * 3+3)/4)*4;    //größe einer Reihe würde auf 4 Byte aufgefüllt(Padding)
+        size_t row_size = (((bytesPerPixel*width)+3)/4) * 4;
+
+          //größe einer Reihe würde auf 4 Byte aufgefüllt(Padding)
 
         for (ssize_t y = 0; y < height; y++) {
             unsigned char *row = img + y*row_size; // *row zeigt nun auf den Anfang von Zeile y (0-indexed)
@@ -42,16 +45,20 @@ void tricorn_V1(float complex start, size_t width, ssize_t height, float res, un
 
                 if (n == iterations) { //did not converge
                     //Schwarz (Innere Farbe)
-                    row[x * 3]=0; // Blau
-                    row[x *3+1]=0; // Grün
-                    row[x *3+2]=0; // Rot
+                    if (color) {
+                        row[x * 3]=0; // Blau
+                        row[x *3+1]=0; // Grün
+                        row[x *3+2]=0; // Rot
+                    }
+                    else {
+                        row[x] = 0;
+                    }
                 } else {
                     if (!color) {
                         //Grauton (von Formel aus der Aufgabe)
                         unsigned color_pixel = 255 - 4 * ( iterations % 64 );
-                        row[x * 3]= color_pixel; // Blau
-                        row[x *3+1]= color_pixel; // Grün
-                        row[x *3+2]= color_pixel; // Rot
+                        row[x]= color_pixel; //Grauton
+
                     } else {
                         //Bunt
                         unsigned color_index = iterations % naive_color_pallete_size;
@@ -61,13 +68,14 @@ void tricorn_V1(float complex start, size_t width, ssize_t height, float res, un
                     }
                 }
             }
-            for (size_t i=width*3; i<row_size; i++) {
+            for (size_t i=width*bytesPerPixel; i<row_size; i++) {
                 row[i]=0; //restliche Padding Bits einer Zeile auffüllen
             }
         }
     }
     else{ // BOTTOM-UP
-        size_t row_size = ((width * 3+3)/4)*4;    //größe einer Reihe würde auf 4 Byte aufgefüllt(Padding)
+        bytesPerPixel = color ? 3 : 1;
+        size_t row_size = ((width * bytesPerPixel+3)/4)*4;    //größe einer Reihe würde auf 4 Byte aufgefüllt(Padding)
 
         for (ssize_t y = height-1; y >= 0; y--) {
             unsigned char *row = img + y*row_size; // *row zeigt nun auf den Anfang von Zeile height-1-y (0-indexed)
@@ -81,16 +89,20 @@ void tricorn_V1(float complex start, size_t width, ssize_t height, float res, un
 
                 if (n == iterations) { //did not converge
                     //Schwarz (Innere Farbe)
-                    row[x * 3]=0; // Blau
-                    row[x *3+1]=0; // Grün
-                    row[x *3+2]=0; // Rot
+                    if (color) {
+                        row[x * 3]=0; // Blau
+                        row[x *3+1]=0; // Grün
+                        row[x *3+2]=0; // Rot
+                    }
+                    else {
+                        row[x] = 0;
+                    }
                 } else {
                     if (!color) {
                         //Grauton (von Formel aus der Aufgabe)
                         unsigned color_pixel = 255 - 4 * ( iterations % 64 );
-                        row[x * 3]=color_pixel; // 255 ganzes Bild Blau
-                        row[x *3+1]=color_pixel; // Grün
-                        row[x *3+2]=color_pixel; // Rot
+                        row[x]=color_pixel; // 255 ganzes Bild Blau
+
                     } else {
                         //Bunt
                         unsigned farbIndex = iterations % naive_color_pallete_size;
@@ -100,7 +112,7 @@ void tricorn_V1(float complex start, size_t width, ssize_t height, float res, un
                     }
                 }
             }
-            for (size_t i=width*3; i<row_size; i++) {
+            for (size_t i=width*bytesPerPixel; i<row_size; i++) {
                 row[i]=0; //restliche Padding Bits einer Zeile auffüllen
             }
         }

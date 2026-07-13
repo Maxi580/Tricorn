@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int writeBmp(char *filename, size_t width, ssize_t heightsigned, unsigned char *img) {
+int writeBmp(char *filename, size_t width, ssize_t heightsigned, unsigned char *img, bool color) {
     // Schreibt die Bitmap Datei, gibt 1 bei Fehler und 0 bei Erfolg zurück
     size_t height;
     if (heightsigned < 0) {
@@ -15,9 +15,12 @@ int writeBmp(char *filename, size_t width, ssize_t heightsigned, unsigned char *
     }
 
     int32_t bmp_height = (int32_t) (heightsigned);
-    size_t row_size = ((width * 3+3)/4)*4;
+    int bytesPerPixel = color ? 3 : 1;
+    size_t row_size = ((width * bytesPerPixel+3)/4)*4;
     size_t pixelArraySize = row_size * height;
-    size_t fileSize = 54 + pixelArraySize; // 54 für header der bmp datei
+    size_t paletteSize = color ? 0 : 256 * 4;
+    size_t pixelOffset = 54 + paletteSize;
+    size_t fileSize = pixelOffset + pixelArraySize; // 54 für header der bmp datei
     unsigned char header[54] = {0}; // header deklarieren; initialisieren
 
     //header schreiben
@@ -29,7 +32,10 @@ int writeBmp(char *filename, size_t width, ssize_t heightsigned, unsigned char *
     header[4] = (unsigned char) (fileSize>>16);
     header[5] = (unsigned char) (fileSize>>24);
 
-    header[10] = 54; // 54 Bytes Header
+    header[10] = (unsigned char)(pixelOffset); //header
+    header[11] = (unsigned char)(pixelOffset >> 8);
+    header[12] = (unsigned char)(pixelOffset >> 16);
+    header[13] = (unsigned char)(pixelOffset >> 24);
 
     header[14] = 40; //40-Bit Informationsblock
 
@@ -43,12 +49,21 @@ int writeBmp(char *filename, size_t width, ssize_t heightsigned, unsigned char *
     header[25] = (unsigned char) (bmp_height >> 24);
 
     header[26] = 1; //Farbebened
-    header[28] = 24; // Bit pro Pixel (3*8)
+    header[28] = 8 * bytesPerPixel; // Bit pro Pixel (3*8)
 
     header[34] = (unsigned char) (pixelArraySize);
     header[35] = (unsigned char) (pixelArraySize >> 8);
     header[36] = (unsigned char) (pixelArraySize >> 16);
     header[37] = (unsigned char) (pixelArraySize >> 24);
+
+    if (!color) {
+        const uint32_t colorsUsed = 256;
+
+        header[46] = (unsigned char)(colorsUsed);
+        header[47] = (unsigned char)(colorsUsed >> 8);
+        header[48] = (unsigned char)(colorsUsed >> 16);
+        header[49] = (unsigned char)(colorsUsed >> 24);
+    }
 
     FILE *f = fopen(filename, "wb");
     if (f == NULL) {
@@ -56,10 +71,27 @@ int writeBmp(char *filename, size_t width, ssize_t heightsigned, unsigned char *
         return 1;
     }
 
-    if(fwrite(header, 1, 54, f) != 54) {
+    if(fwrite(header, 1, sizeof(header), f) !=sizeof(header)) {
         fprintf(stderr, "Fehler beim schreiben der Bitmap.\n");
         return 1;
     }
+    if (!color) {
+        unsigned char palette[256][4];
+        //Farbpalette, damit für jeden Grauton(bspw. 128 <128,128,128,0>)das BGR abgerufen werden kann.
+        for (size_t i = 0; i < 256; i++) {
+            palette[i][0] = (unsigned char)i;
+            palette[i][1] = (unsigned char)i;
+            palette[i][2] = (unsigned char)i;
+            palette[i][3] = 0;
+        }
+
+        if (fwrite(palette, 1, sizeof(palette), f) != sizeof(palette)) {
+            fprintf(stderr, "Fehler beim Schreiben der Farbpalette.\n");
+            fclose(f);
+            return 1;
+        }
+    }
+
 
     if(fwrite(img, pixelArraySize, 1, f ) != 1) {
         fprintf(stderr, "Fehler beim schreiben der Bitmap.\n");
