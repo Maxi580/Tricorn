@@ -134,9 +134,10 @@ add_executable(gra26capsproject_t105
                 fprintf(stderr, "Error: Fehlendes Argument\n");
                 return 1;
             }
+            errno = 0;
             ssize_t tempIteration = benchmarkIterations = strtol(argv[i+1], &end, 10);
             isBenchmark = true;
-            if (*end != '\0' || tempIteration <= 0) {
+            if (*end != '\0' || tempIteration <= 0||errno != 0) {
                 fprintf(stderr, "Error: nach -B ist kein gültiger Int für die Anzahl an Wiederholungen\n");
                 return 1;
             }
@@ -233,8 +234,9 @@ add_executable(gra26capsproject_t105
                 fprintf(stderr, "Error: Fehlendes Argument\n");
                 return 1;
             }
+            errno = 0;
             res = strtof(argv[i+1], &end);
-            if (*end != '\0') {
+            if (*end != '\0'||errno != 0) {
                 fprintf(stderr, "Error: nach -r ist keine gültige Zahl für <RESOLUTION>\n");
                 return 1;
             }
@@ -259,8 +261,10 @@ add_executable(gra26capsproject_t105
                 fprintf(stderr, "Error: Fehlendes Argument\n");
                 return 1;
             }
+            errno = 0;
+
             n1 = strtol(argv[i+1], &end, 10);
-            if (*end != '\0') {
+            if (*end != '\0'||errno != 0) {
                 fprintf(stderr, "Error: nach -n ist keine gültige Zahl\n");
                 return 1;
             }
