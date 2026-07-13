@@ -16,12 +16,12 @@ typedef struct{
     ssize_t height;
     size_t from_y;
     size_t to_y;
+    size_t step_size;
     float res;
     unsigned n;
     bool color;
     unsigned char* img;
 } thread_data;
-
 
 static void* tricornThreading(void* arg) {
     thread_data* values  = arg;
@@ -31,6 +31,7 @@ static void* tricornThreading(void* arg) {
     ssize_t height = values->height;
     size_t from_y = values->from_y;
     size_t to_y = values->to_y;
+    size_t step_size = values->step_size;
     float res = values->res;
     unsigned n = values->n;
     bool color = values->color;
@@ -60,7 +61,7 @@ static void* tricornThreading(void* arg) {
         i see no way of using that optimization.
      */
     double center = -(cimag(start) / (double) (factor * res));
-    for (size_t y = from_y; y < to_y; y++) {
+    for (size_t y = from_y; y < to_y; y += step_size) {
         unsigned char *bottomRow = img + y * row_size; // *row zeigt nun auf den Anfang von Zeile y (0-indexed)
 
         // Berechnen vom Imaginärteil von y und des kandidaten, Symmetrie wird nur bei exakter korrektheit verwendet
@@ -159,28 +160,20 @@ static void* tricornThreading(void* arg) {
 
 void tricorn(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color,
     unsigned char* img) {
-    // Thread zu erstellen kostet ca. 0.000005s, lohnt sich also erst bei einer gewissen dauer.
+    // Man startet die threads alle mit leichten offset aber geht in gleichen schritten hoch dann ist alles abgedeckt
     size_t max_y = height > 0 ? height : -height;
 
     int thread_amount = 20;
     pthread_t threads[thread_amount];
     thread_data data[thread_amount];
 
-    int split = max_y / thread_amount;
-    int bottomY = 0;
-    int topY = split;
-    for (int i = 0; i < (thread_amount - 1); i++) {
+    for (int i = 0; i < thread_amount; i++) {
         pthread_t thread;
-        data[i] = (thread_data) {start, width, height, bottomY, topY, res, n, color, img};;
+        // i == bottom_y, max_y = top y, threat_amount = step size
+        data[i] = (thread_data) {start, width, height, i, max_y, thread_amount, res, n, color, img};;
         pthread_create(&thread, NULL, tricornThreading, &data[i]);
-        bottomY += split, topY += split;
         threads[i] = thread;
     }
-    // Finishes all the rest (Integer divison etc.)
-    pthread_t rest_thread;
-    thread_data rest_data = (thread_data) {start, width, height, bottomY, max_y, res, n, color, img};
-    pthread_create(&rest_thread, NULL, tricornThreading, &rest_data);
-    threads[thread_amount - 1] = rest_thread;
 
     for (int i = 0; i < thread_amount; i++) {
         pthread_join(threads[i], NULL);
