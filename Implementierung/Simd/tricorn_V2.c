@@ -6,42 +6,7 @@
 #include <string.h>
 #include <immintrin.h>
 #include "escapetime.h"
-
-#define rgbSize 3
-
-
-const unsigned old_color_pallete[4][rgbSize] = {
-    // We call modulo with the size of this pallete, quite a few times, it would be nicer if this is a multiple of 2 ig
-    // Blue, Green, Red
-    {128, 0, 0},
-    {255, 0, 0},
-    {255, 100, 0},
-    {255, 255, 0},
-};
-const unsigned old_color_pallete_size = sizeof(old_color_pallete) / sizeof(old_color_pallete[0]);
-
-
-__attribute__((hot))
-void colorizeBitmap(unsigned limit, unsigned iterations, unsigned char* row, bool color)  {
-    /* Colors one Pixel in the Bitmap */
-    if (limit == iterations) {
-        // Black (Did Not converge)
-        row[0] = row[1] = row[2] = 0;
-    } else {
-        // Branch Prediction should be correct almost always, so i assume that this doesnt cost anything really
-        if (!color) {
-            // Grey
-            unsigned colorPixel = 255 - 4 * ( iterations % 64 );
-            row[0] = row[1] = row[2] = colorPixel;
-        } else {
-            // Colorized
-            unsigned colorIndex = iterations % old_color_pallete_size;
-            row[0] = old_color_pallete[colorIndex][0];
-            row[1] = old_color_pallete[colorIndex][1];
-            row[2] = old_color_pallete[colorIndex][2];
-        }
-    }
-}
+#include "../colormap.h"
 
 void tricorn_V2(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
     size_t row_size = ((width * 3+3)/4)*4; // Größe einer Reihe würde auf 4 Byte aufgefüllt(Padding)
@@ -65,7 +30,13 @@ void tricorn_V2(float complex start, size_t width, ssize_t height, float res, un
             _mm_storeu_si128((__m128i*) iterations, simdEscapeTime(n, c1, c2, c3, c4));
 
             for (int i = 0; i < 4; i++){
-                colorizeBitmap(n, iterations[i], row + ((x + i) * 3), color);
+                size_t x_offset = (x + i) * 3;
+                unsigned char *bottomOffset = row + x_offset;
+                RGB_color rgb = getColor(n, iterations[i], color);
+                // rgb is reversed on bitmap
+                bottomOffset[0] =  rgb.b;
+                bottomOffset[1] =  rgb.g;
+                bottomOffset[2] =  rgb.r;
             }
         }
         // Den Rest von width auch noch fillen (bis zu 3 elemente)
@@ -78,8 +49,14 @@ void tricorn_V2(float complex start, size_t width, ssize_t height, float res, un
             const float complex c4 = start + ((float) endIndex + 3) * res + factor * (float) y * res * I;
             _mm_storeu_si128((__m128i*) restIterations, simdEscapeTime(n, c1, c2, c3, c4));
 
-            for (size_t i = 0; i < (width - endIndex); i++) {
-                colorizeBitmap(n, restIterations[i], row + ((endIndex + i) * 3), color);
+            for (size_t i = 0; i < (width - endIndex); i++){
+                size_t x_offset = (endIndex + i) * 3;
+                unsigned char *bottomOffset = row + x_offset;
+                RGB_color rgb = getColor(n, restIterations[i], color);
+                // rgb is reversed on bitmap
+                bottomOffset[0] =  rgb.b;
+                bottomOffset[1] =  rgb.g;
+                bottomOffset[2] =  rgb.r;
             }
         }
 
