@@ -17,130 +17,64 @@
 #include "helpMessage.h"
 #include "correctnesTests.h"
 #include <errno.h>
+#include <stdbool.h>
+
+
+
 
 int main(int argc, char *argv[]) {
+    bool isBenchmark = false;
+    ssize_t benchmarkIterations = 1;
+    unsigned v = 0;
+    float complex start = -0 + 0*I; //start parameter
+    float realteil;
+    float imaginaerteil;
+    size_t width = 4000;
+    ssize_t widthsigned = 4000;
+    ssize_t heightsigned = -4000;
+    ssize_t n1 = 256;
+    unsigned n = 256;
+    bool color = false;
+    char *filename = "test";
+    float res = 4.0f/(float)width;
+    bool resWasSet = false;
+
     char *end;
     char *end2;
 
-    /* -V <Zahl> ; Versionnummer der Implementierung
-     * -B <Zahl> ; Laufzeitmessung der angegebenen Implementierung
-     * -s <REALTEIL> <IMAGINÄRTEIL> ; beide in float
-     * -d <WIDTH> <HEIGHT>; width positiver Integer; height auch negativ
-     * -n <MAXITERATIONS> muss Integer sein und positiv
-     * -r <SCHRITTWEITE PRO PIXEL> muss positive float sein
-     * -o <NAME> name ohne .bmp angeben
-     * -h || --help ; Help Message
-     * -C || --color einfach setzen, dann wird bild mit Eintracht Braunschweig Farben ausgegeben
-     * -t || --test ; run time tests
-     * -graph || erstellt eine Tabelle für Graphen
-     * -correct Flag zum Testen der Korrektheit aller Implementierungen, gegen die Naive
-     */
-
-
-    /* CMakeLists.txt falls jmd kopieren will
-    cmake_minimum_required(VERSION 4.2)
-project(gra26capsproject_t105 C)
-
-set(CMAKE_C_STANDARD 11)
-
-add_executable(gra26capsproject_t105
-
-        Implementierung/NaiveImplementation/escapetime.c
-
-        Implementierung/NaiveImplementation/escapetime.h
-
-        Implementierung/Simd/escapetime.c
-
-        Implementierung/Simd/escapetime.h
-        Implementierung/main.c
-        Implementierung/correctnesTests.h
-        Implementierung/correctnesTests.c
-        Implementierung/bitmap.c
-        Implementierung/bitmap.h
-        Implementierung/Sym/escapetime.c
-        Implementierung/Sym/escapetime.h
-
-        Implementierung/LatencyThroughput/escapetime.c
-        Implementierung/LatencyThroughput/escapetime.h
-
-
-        Implementierung/Circle/findCircleRad.c
-
-        Implementierung/Circle/tricorn_V4.c
-        Implementierung/Circle/tricorn_V4.h
-        Implementierung/LatencyThroughput/tricorn_V5.c
-        Implementierung/LatencyThroughput/tricorn_V5.h
-        Implementierung/NaiveImplementation/tricorn_V1.c
-        Implementierung/NaiveImplementation/tricorn_V1.h
-        Implementierung/Simd/tricorn_V2.c
-        Implementierung/Simd/tricorn_V2.h
-        Implementierung/Sym/tricorn_V3.c
-        Implementierung/Sym/tricorn_V3.h
-        Implementierung/testSuite.c
-        Implementierung/testSuite.h
-        Implementierung/Circle/escapetime.c
-        Implementierung/Circle/escapetime.h
-        Implementierung/helpMessage.c
-        Implementierung/helpMessage.h
-        Implementierung/colormap.c
-        Implementierung/colormap.h
-        Implementierung/MultiThreading/tricorn.c
-        Implementierung/MultiThreading/tricorn.h
-)
-
-
-
-     */
-
-    for (int i = 0; i < argc; i++) {
+    for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "-correct") == 0) {
             if (BitmapVergleichTests()) {
                 printf("Alle Bitmaps gleich\n");
-
             }
             else {
                 printf("Fehler Im Code\n");
             }
             return 0;
         }
-
-    }
-
-    // Graph Tabelle erstellen
-    for (int i = 0; i < argc; i++) {
-        if (strcmp(argv[i], "-graph") == 0) {
+        // Graph erstellen
+        else if (strcmp(argv[i], "-graph") == 0) {
             if (genGraphTable() == 1) {
                 fprintf(stderr, "Fehler beim Erstellen des Graphen\n");
                 return 1;
             }
             return 0;
         }
-    }
-
-    // zeit messen
-    for (int i = 0; i < argc; i++) {
-        if (strcmp(argv[i], "--test") == 0 || strcmp(argv[i], "-t") == 0) {
+        // Zeit messen
+        else if (strcmp(argv[i], "--test") == 0 || strcmp(argv[i], "-t") == 0) {
             if (testSuite() == 1) {
                 fprintf(stderr, "Fehler beim Ausführen der Testsuite\n");
                 return 1;
             }
             return 0;
         }
-    }
-
-    // Help Message
-    for (int i = 0; i < argc; i++) {
-        if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
+        // Help Message
+        else if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
             helpMessage();
             return 0;
         }
-    }
-
-    // B
-    bool isBenchmark = false;
-    ssize_t benchmarkIterations = 1;
-    for (int i=0; i<argc; i++) {
-        if (strcmp(argv[i], "-B") == 0) {
+        // B
+        else if (strcmp(argv[i], "-B") == 0) {
             if (i+1>=argc) {
                 fprintf(stderr, "Error: Fehlendes Argument\n");
                 return 1;
@@ -152,36 +86,30 @@ add_executable(gra26capsproject_t105
                 fprintf(stderr, "Error: nach -B ist kein gültiger Int für die Anzahl an Wiederholungen\n");
                 return 1;
             }
+            i++;
         }
-    }
-
-    // v
-    unsigned v = 0;
-    for (int i=0; i<argc; i++) {
-        if (strcmp(argv[i], "-V") == 0) {
+        // v
+        else if (strcmp(argv[i], "-V") == 0) {
+            long tempV;
             if (i+1>=argc) {
                 fprintf(stderr, "Error: Fehlendes Argument\n");
                 return 1;
             }
-            v = strtol(argv[i+1], &end, 10);
-            if (*end != '\0') {
-                fprintf(stderr, "Error: nach -V ist kein gültiger Int für den realteil\n");
+            errno = 0;
+            tempV = strtol(argv[i+1], &end, 10);
+            if (*end != '\0'||argv[i+1]==end||errno!=0||tempV<0||tempV>5) {
+                fprintf(stderr, "Error: nach -V muss eine Zahl zwischen 0 und 5 sein\n");
                 return 1;
             }
+            v = (unsigned)tempV;
+            i++;
         }
-    }
-
-    //start parameter; bestimmen durch -s <REALTEIL> <IMAGINAERTEIL>; beide müssen hierbei gültige floats sein
-    float complex start = -0 + 0*I; //start parameter
-    float realteil;
-    float imaginaerteil;
-    for (int i=0; i<argc; i++) {
-        if (strcmp(argv[i], "-s") == 0) {
+        //start parameter; bestimmen durch -s <REALTEIL> <IMAGINAERTEIL>; beide müssen hierbei gültige floats sein
+        else if (strcmp(argv[i], "-s") == 0) {
             if (i+1>=argc) {
                 fprintf(stderr, "Error: Fehlendes Argument\n");
                 return 1;
             }
-            char *end;
             errno = 0;
 
             realteil = strtof(argv[i+1], &end);
@@ -196,23 +124,14 @@ add_executable(gra26capsproject_t105
                 return 1;
             }
             start = realteil + imaginaerteil* I;
+            i++;
         }
-
-    }
-
-
-
-    //breite+höhe mit -d <BREITE> <HÖHE>, breite muss hierbei ssize_t folgen und höhe ssize_t
-    size_t width;
-    ssize_t widthsigned = 4000;
-    ssize_t heightsigned = -4000;
-    for (int i=0; i<argc; i++) {
-        if (strcmp(argv[i], "-d") == 0) {
+        //breite+höhe mit -d <BREITE> <HÖHE>, breite muss hierbei ssize_t folgen und höhe ssize_t
+        else if (strcmp(argv[i], "-d") == 0) {
             if (i+1>=argc) {
                 printf("Error: Fehlendes Argument\n");
                 return 1;
             }
-            char *end;
             errno = 0;
             widthsigned = strtol(argv[i+1], &end, 10);
             if (errno != 0 || *end != ','||argv[i+1]==end) {
@@ -225,49 +144,37 @@ add_executable(gra26capsproject_t105
                 printf("Ungültiges Format\n");
                 return 1;
             }
+            if (widthsigned <= 0) {
+                fprintf(stderr, "Error: width nicht positiv\n");
+                return 1;
+            }
+            if (heightsigned == 0) {
+                fprintf(stderr, "height = 0\n");
+                return 1;
+            }
+            width = widthsigned ;
+            i++;
         }
-    }
-    if (widthsigned <= 0) {
-        fprintf(stderr, "Error: width nicht positiv\n");
-        return 1;
-    }
-    if (heightsigned == 0) {
-        fprintf(stderr, "height = 0\n");
-    }
-    width = widthsigned ;
+        //resolution (auch frei wählbar) mit -r <FLOAT>; <FLOAT> muss hierbei ein Float sein
+        else if (strcmp(argv[i], "-r") == 0) {
 
-
-    //resolution (auch frei wählbar) mit -r <FLOAT>; <FLOAT> muss hierbei ein Float sein
-    float res = 4.0f/(float)width;
-    for (int i=0; i<argc; i++) {
-        if (strcmp(argv[i], "-r") == 0) {
             if (i+1>=argc) {
                 fprintf(stderr, "Error: Fehlendes Argument\n");
                 return 1;
             }
             errno = 0;
-            res = strtof(argv[i+1], &end);
-            if (*end != '\0'||errno != 0) {
+            float tempRes = strtof(argv[i+1], &end);
+
+            if (*end != '\0'||errno != 0||argv[i+1]==end||tempRes<=0.0f) {
                 fprintf(stderr, "Error: nach -r ist keine gültige Zahl für <RESOLUTION>\n");
                 return 1;
             }
-            if (res<0) {
-                fprintf(stderr, "Error: res negativ\n");
-                return 1;
-            }
-            if (res == 0) {
-                fprintf(stderr, "Error: res zero\n");
-                return 1;
-
-            }
+            res = tempRes;
+            resWasSet = true;
+            i++;
         }
-    }
-
-    //n bestimmen durch -n <ZAHL> Flag; <ZAHL> muss hierbei gültige, nicht negative Zahl sein
-    ssize_t n1 = 256;
-
-    for (int i=0; i<argc; i++) {
-        if (strcmp(argv[i], "-n") == 0) {
+        //n bestimmen durch -n <ZAHL> Flag; <ZAHL> muss hierbei gültige, nicht negative Zahl sein
+        else if (strcmp(argv[i], "-n") == 0) {
             if (i+1>=argc) {
                 fprintf(stderr, "Error: Fehlendes Argument\n");
                 return 1;
@@ -275,39 +182,39 @@ add_executable(gra26capsproject_t105
             errno = 0;
 
             n1 = strtol(argv[i+1], &end, 10);
-            if (*end != '\0'||errno != 0) {
+            if (*end != '\0'||errno != 0||argv[i+1]==end) {
                 fprintf(stderr, "Error: nach -n ist keine gültige Zahl\n");
                 return 1;
             }
+            if (n1<0) {
+                fprintf(stderr, "Error: n negativ\n");
+                return 1;
+            }
+            n = (unsigned)n1;
+            i++;
         }
-    }
-    if (n1<0) {
-        fprintf(stderr, "Error: n negativ\n");
-        return 1;
-    }
-    unsigned n = n1;
-
-
-
-    //color setzen per -C oder --color flag
-    //false = Grauton berechnen durch Formel / true = Farbpalette
-    bool color = false;
-    for (int i = 0; i < argc; i++) {
-        if (strcmp(argv[i], "--color") == 0 || strcmp(argv[i], "-C") == 0) {
+        //color setzen per -C oder --color flag
+        //false = Grauton berechnen durch Formel / true = Farbpalette
+        else if (strcmp(argv[i], "--color") == 0 || strcmp(argv[i], "-C") == 0) {
             color = true;
         }
-    }
-
-    //Dateiname angeben, falls gegeben
-    char *filename = "test";
-    for (int i=0; i<argc; i++) {
-        if (strcmp(argv[i], "-o") == 0) {
+        //Dateiname angeben, falls gegeben
+        else if (strcmp(argv[i], "-o") == 0) {
             if (i+1>=argc) {
                 fprintf(stderr, "Error: Fehlendes Argument\n");
                 return 1;
             }
             filename = argv[i+1];
+            i++;
         }
+        else {
+            fprintf(stderr, "Error: Unbekannte Flags %s\n", argv[i]);
+            return 1;
+        }
+    }
+    //Nun sind alle Parameter aus den Flags gesetzt
+    if (!resWasSet) {
+        res = 4.0f / (float)width;
     }
     char new_filename[256];
     snprintf(new_filename, 256, "%s.bmp", filename);
@@ -319,7 +226,6 @@ add_executable(gra26capsproject_t105
     else {
         height = (size_t)heightsigned ;
     }
-
     size_t row_size = ((width * 3+3)/4)*4;
     size_t pixelArraySize = row_size * height;
 
@@ -382,9 +288,3 @@ add_executable(gra26capsproject_t105
     free(img);
     return 0;
 }
-
-/* Betriebsanleitung:
- * gcc Implementierung/NaiveImplementation/main.c Implementierung/NaiveImplementation/tricorn_V4.c Implementierung/NaiveImplementation/escapetime.c -o test
- * ./test
- * explorer.exe test.bmp
- */
