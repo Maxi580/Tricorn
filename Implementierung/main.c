@@ -16,6 +16,7 @@
 #include "testSuite.h"
 #include "helpMessage.h"
 #include "correctnesTests.h"
+#include <errno.h>
 
 int main(int argc, char *argv[]) {
     char *end;
@@ -164,22 +165,27 @@ add_executable(gra26capsproject_t105
     float imaginaerteil;
     for (int i=0; i<argc; i++) {
         if (strcmp(argv[i], "-s") == 0) {
-            if (i+2>=argc) {
+            if (i+1>=argc) {
                 fprintf(stderr, "Error: Fehlendes Argument\n");
                 return 1;
             }
+            char *end;
+            errno = 0;
+
             realteil = strtof(argv[i+1], &end);
-            if (*end != '\0') {
+            if (*end != ','||errno != 0||argv[i+1]==end) {
                 fprintf(stderr, "Error: nach -s ist kein gültiger Float für den realteil\n");
                 return 1;
             }
-            imaginaerteil = strtof(argv[i+2], &end2);
-            if (*end2 != '\0') {
+            errno = 0;
+            imaginaerteil = strtof(end+1, &end2);
+            if (*end2 != '\0'||errno != 0||end+1==end2) {
                 fprintf(stderr, "Error: nach -s ist kein gültiger Float für den imaginärteil\n");
                 return 1;
             }
             start = realteil + imaginaerteil* I;
         }
+
     }
 
 
@@ -197,21 +203,24 @@ add_executable(gra26capsproject_t105
             char *end;
             errno = 0;
             widthsigned = strtol(argv[i+1], &end, 10);
-            if (errno != 0 || *end != ',') {
+            if (errno != 0 || *end != ','||argv[i+1]==end) {
                 printf("ungültiges Format\n");
                 return 1;
             }
             errno = 0;
-            heightsigned = strtol(end+1, &end, 10);
-            if (errno != 0 || *end != '\0') {
+            heightsigned = strtol(end+1, &end2, 10);
+            if (errno != 0 || *end2 != '\0'||end+1==end2) {
                 printf("Ungültiges Format\n");
                 return 1;
             }
         }
     }
-    if (widthsigned < 0) {
-        fprintf(stderr, "Error: width negativ\n");
+    if (widthsigned <= 0) {
+        fprintf(stderr, "Error: width nicht positiv\n");
         return 1;
+    }
+    if (heightsigned == 0) {
+        fprintf(stderr, "height = 0\n");
     }
     width = widthsigned ;
 
