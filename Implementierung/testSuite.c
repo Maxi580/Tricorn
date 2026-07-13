@@ -50,7 +50,8 @@ double measureTime(void (*fn)(float complex, size_t, ssize_t, float,  unsigned, 
         else {
             height = (size_t)height_signed ;
         }
-        const size_t row_size = ((width * 3+3)/4)*4;
+        const int bytesPerPixel = color ? 3 : 1;
+        const size_t row_size = ((width * bytesPerPixel+3)/4)*4;
         const size_t pixelArraySize = row_size * height;
 
         img = malloc(pixelArraySize);
@@ -204,8 +205,8 @@ int testSuite() {
         else {
             height = (size_t)tc.height ;
         }
-
-        const size_t row_size = ((tc.width * 3+3)/4)*4;
+        const int bytesPerPixel = tc.color ? 3 : 1;
+        const size_t row_size = ((tc.width * bytesPerPixel+3)/4)*4;
         const size_t pixelArraySize = row_size * height;
 
         unsigned char *imgNaive = malloc(pixelArraySize);

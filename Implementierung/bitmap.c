@@ -51,6 +51,8 @@ int writeBmp(char *filename, size_t width, ssize_t heightsigned, unsigned char *
     header[26] = 1; //Farbebened
     header[28] = 8 * bytesPerPixel; // Bit pro Pixel (3*8)
 
+    
+
     header[34] = (unsigned char) (pixelArraySize);
     header[35] = (unsigned char) (pixelArraySize >> 8);
     header[36] = (unsigned char) (pixelArraySize >> 16);
