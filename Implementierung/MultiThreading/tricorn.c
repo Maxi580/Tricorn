@@ -16,12 +16,12 @@ typedef struct{
     ssize_t height;
     size_t from_y;
     size_t to_y;
+    size_t step_size;
     float res;
     unsigned n;
     bool color;
     unsigned char* img;
 } thread_data;
-
 
 static void* tricornThreading(void* arg) {
     thread_data* values  = arg;
@@ -31,16 +31,11 @@ static void* tricornThreading(void* arg) {
     ssize_t height = values->height;
     size_t from_y = values->from_y;
     size_t to_y = values->to_y;
+    size_t step_size = values->step_size;
     float res = values->res;
     unsigned n = values->n;
     bool color = values->color;
     unsigned char* img = values->img;
-
-    RGB_color* colorMap = createColorMap(n, color);
-    if (colorMap == NULL) {
-        printf("Error allocating memory\n");
-        return NULL;
-    }
 
     size_t row_size = ((width * 3+3)/4)*4; // Größe einer Reihe würde auf 4 Byte aufgefüllt(Padding)
 
@@ -66,7 +61,7 @@ static void* tricornThreading(void* arg) {
         i see no way of using that optimization.
      */
     double center = -(cimag(start) / (double) (factor * res));
-    for (size_t y = from_y; y < to_y; y++) {
+    for (size_t y = from_y; y < to_y; y += step_size) {
         unsigned char *bottomRow = img + y * row_size; // *row zeigt nun auf den Anfang von Zeile y (0-indexed)
 
         // Berechnen vom Imaginärteil von y und des kandidaten, Symmetrie wird nur bei exakter korrektheit verwendet
@@ -103,7 +98,7 @@ static void* tricornThreading(void* arg) {
             for (int i = 0; i < 8; i++){
                 size_t x_offset = (x + i) * 3;
                 unsigned char *bottomOffset = bottomRow + x_offset;
-                RGB_color rgb = colorMap[iterations[i]];
+                RGB_color rgb = getColor(n, iterations[i], color);
                 // rgb is reversed on bitmap
                 bottomOffset[0] =  rgb.b;
                 bottomOffset[1] =  rgb.g;
@@ -119,7 +114,7 @@ static void* tricornThreading(void* arg) {
         // Den Rest von width auch noch fillen (bis zu (ParallelElemente - 1) elemente)
         // Es werden 4 werte in parallel berechnet, aber nur die benötigten eingetragen
         if(endIndex < width) {
-            unsigned restIterations[8];
+            unsigned rest_iterations[8];
             float complex imag_part = factor * (float) y * res * I;
             const float complex a1 = start + (float) endIndex * res + imag_part;
             const float complex a2 = start + ((float) endIndex + 1) * res + imag_part;
@@ -131,15 +126,15 @@ static void* tricornThreading(void* arg) {
             const float complex b4 = start + ((float) endIndex + 7) * res + imag_part;
 
             twoIntegerLanes bothIterations = escapeTimeLatencyThroughputTwo(n, a1, a2, a3, a4, b1, b2, b3, b4);
-            _mm_storeu_si128((__m128i*)restIterations,       bothIterations.a);
-            _mm_storeu_si128((__m128i*)(restIterations + 4), bothIterations.b);
+            _mm_storeu_si128((__m128i*)rest_iterations,       bothIterations.a);
+            _mm_storeu_si128((__m128i*)(rest_iterations + 4), bothIterations.b);
 
             // Nur die Werte eintragen, die tatsächlich noch benötigt werden, Overflow wird ignoiert.
             size_t range = width - endIndex;
             for (size_t i = 0; i < range; i++){
                 size_t x_offset = (endIndex + i) * 3;
                 unsigned char *bottomOffset = bottomRow + x_offset;
-                RGB_color rgb = colorMap[restIterations[i]];
+                RGB_color rgb = getColor(n, rest_iterations[i], color);
                 // rgb is reversed on bitmap
                 bottomOffset[0] =  rgb.b;
                 bottomOffset[1] =  rgb.g;
@@ -160,34 +155,25 @@ static void* tricornThreading(void* arg) {
             }
         }
     }
-    free(colorMap);
     return NULL;
 }
 
 void tricorn(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color,
     unsigned char* img) {
-    // Thread zu erstellen kostet ca. 0.000005s, lohnt sich also erst bei einer gewissen dauer.
+    // Man startet die threads alle mit leichten offset aber geht in gleichen schritten hoch dann ist alles abgedeckt
     size_t max_y = height > 0 ? height : -height;
 
     int thread_amount = 20;
     pthread_t threads[thread_amount];
     thread_data data[thread_amount];
 
-    int split = max_y / thread_amount;
-    int bottomY = 0;
-    int topY = split;
-    for (int i = 0; i < (thread_amount - 1); i++) {
+    for (int i = 0; i < thread_amount; i++) {
         pthread_t thread;
-        data[i] = (thread_data) {start, width, height, bottomY, topY, res, n, color, img};;
+        // i == bottom_y, max_y = top y, threat_amount = step size
+        data[i] = (thread_data) {start, width, height, i, max_y, thread_amount, res, n, color, img};;
         pthread_create(&thread, NULL, tricornThreading, &data[i]);
-        bottomY += split, topY += split;
         threads[i] = thread;
     }
-    // Finishes all the rest (Integer divison etc.)
-    pthread_t rest_thread;
-    thread_data rest_data = (thread_data) {start, width, height, bottomY, max_y, res, n, color, img};
-    pthread_create(&rest_thread, NULL, tricornThreading, &rest_data);
-    threads[thread_amount - 1] = rest_thread;
 
     for (int i = 0; i < thread_amount; i++) {
         pthread_join(threads[i], NULL);

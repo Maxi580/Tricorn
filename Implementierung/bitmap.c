@@ -4,7 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void writeBmp(char *filename, size_t width, ssize_t heightsigned, unsigned char *img) {
+int writeBmp(char *filename, size_t width, ssize_t heightsigned, unsigned char *img) {
+    // Schreibt die Bitmap Datei, gibt 1 bei Fehler und 0 bei Erfolg zurück
     size_t height;
     if (heightsigned < 0) {
         height = heightsigned * (-1);
@@ -16,7 +17,7 @@ void writeBmp(char *filename, size_t width, ssize_t heightsigned, unsigned char 
     int32_t bmp_height = (int32_t) (heightsigned);
     size_t row_size = ((width * 3+3)/4)*4;
     size_t pixelArraySize = row_size * height;
-    size_t fileSize = 54 + pixelArraySize; //54 für header der bmp datei
+    size_t fileSize = 54 + pixelArraySize; // 54 für header der bmp datei
     unsigned char header[54] = {0}; // header deklarieren; initialisieren
 
     //header schreiben
@@ -49,13 +50,26 @@ void writeBmp(char *filename, size_t width, ssize_t heightsigned, unsigned char 
     header[36] = (unsigned char) (pixelArraySize >> 16);
     header[37] = (unsigned char) (pixelArraySize >> 24);
 
-
-
     FILE *f = fopen(filename, "wb");
-    if (f == NULL) {return;}
-    fwrite(header, 1, 54, f);
-    fwrite(img, pixelArraySize, 1, f );
+    if (f == NULL) {
+        fprintf(stderr, "Fehler beim erstellen der Bitmap Datei.\n");
+        return 1;
+    }
 
-    fclose(f);
+    if(fwrite(header, 1, 54, f) != 54) {
+        fprintf(stderr, "Fehler beim schreiben der Bitmap.\n");
+        return 1;
+    }
 
+    if(fwrite(img, pixelArraySize, 1, f ) != 1) {
+        fprintf(stderr, "Fehler beim schreiben der Bitmap.\n");
+        return 1;
+    }
+
+    if(fclose(f) != 0) {
+        fprintf(stderr, "Fehler beim schließen der Bitmap Datei.\n");
+        return 1;
+    }
+
+    return 0;
 }
