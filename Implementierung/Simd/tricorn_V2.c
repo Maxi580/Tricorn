@@ -9,7 +9,8 @@
 #include "../colormap.h"
 
 void tricorn_V2(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
-    size_t row_size = ((width * 3+3)/4)*4; // Größe einer Reihe würde auf 4 Byte aufgefüllt(Padding)
+    int bytesPerPixel = color ? 3 : 1;
+    size_t row_size = ((width * bytesPerPixel+3)/4)*4; // Größe einer Reihe würde auf 4 Byte aufgefüllt(Padding)
 
     /* Wenn heigt kleiner 0 ist, startet man unten links und geht nach oben also addiert man +y und sonst
      * startet man oben links un zieht y ab, das vorzeichen wird über factor kontrolliert*/
@@ -30,13 +31,19 @@ void tricorn_V2(float complex start, size_t width, ssize_t height, float res, un
             _mm_storeu_si128((__m128i*) iterations, simdEscapeTime(n, c1, c2, c3, c4));
 
             for (int i = 0; i < 4; i++){
-                size_t x_offset = (x + i) * 3;
+                size_t x_offset = (x + i) * bytesPerPixel;
                 unsigned char *bottomOffset = row + x_offset;
                 RGB_color rgb = getColor(n, iterations[i], color);
                 // rgb is reversed on bitmap
-                bottomOffset[0] =  rgb.b;
-                bottomOffset[1] =  rgb.g;
-                bottomOffset[2] =  rgb.r;
+                if (!color) {
+                    bottomOffset[0] =  rgb.b;
+                }
+                else {
+                    bottomOffset[0] =  rgb.b;
+                    bottomOffset[1] =  rgb.g;
+                    bottomOffset[2] =  rgb.r;
+                }
+
             }
         }
         // Den Rest von width auch noch fillen (bis zu 3 elemente)
@@ -50,17 +57,23 @@ void tricorn_V2(float complex start, size_t width, ssize_t height, float res, un
             _mm_storeu_si128((__m128i*) restIterations, simdEscapeTime(n, c1, c2, c3, c4));
 
             for (size_t i = 0; i < (width - endIndex); i++){
-                size_t x_offset = (endIndex + i) * 3;
+                size_t x_offset = (endIndex + i) * bytesPerPixel;
                 unsigned char *bottomOffset = row + x_offset;
                 RGB_color rgb = getColor(n, restIterations[i], color);
                 // rgb is reversed on bitmap
-                bottomOffset[0] =  rgb.b;
-                bottomOffset[1] =  rgb.g;
-                bottomOffset[2] =  rgb.r;
+                if (!color) {
+                    bottomOffset[0] =  rgb.b;
+                }
+                else {
+                    bottomOffset[0] =  rgb.b;
+                    bottomOffset[1] =  rgb.g;
+                    bottomOffset[2] =  rgb.r;
+                }
+
             }
         }
 
-        for (size_t i= width*3; i<row_size; i++) {
+        for (size_t i= width*bytesPerPixel; i<row_size; i++) {
             row[i]=0; //restliche Padding Bits einer Zeile auffüllen
         }
     }

@@ -226,7 +226,8 @@ int main(int argc, char *argv[]) {
     else {
         height = (size_t)heightsigned ;
     }
-    size_t row_size = ((width * 3+3)/4)*4;
+    const size_t bytesPerPixel = color ? 3 : 1;
+    size_t row_size = ((width * bytesPerPixel+3)/4)*4;
     size_t pixelArraySize = row_size * height;
 
     unsigned char *img = malloc(pixelArraySize);
@@ -240,27 +241,27 @@ int main(int argc, char *argv[]) {
         clock_gettime(CLOCK_MONOTONIC, &time_start);
     }
 
-    if (v == 0) {
+    if (v == 1) {
         for (ssize_t i=0; i < benchmarkIterations; i++) { // Ohne Benchmarking nur eine Iteration
             tricorn_V1(start, width, heightsigned, res, n, color, img);
         }
-    } else if (v == 1) {
+    } else if (v == 2) {
         for (ssize_t i=0; i < benchmarkIterations; i++) {
             tricorn_V2(start, width, heightsigned, res, n, color, img);
         }
-    } else if (v == 2) {
+    } else if (v == 3) {
         for (ssize_t i=0; i < benchmarkIterations; i++) {
             tricorn_V3(start, width, heightsigned, res, n, color, img);
         }
-    } else if (v == 3) {
+    } else if (v == 4) {
         for (ssize_t i=0; i < benchmarkIterations; i++) {
             tricorn_V4(start, width, heightsigned, res, n, color, img);
         }
-    } else if (v == 4) {
+    } else if (v == 5) {
         for (ssize_t i=0; i < benchmarkIterations; i++) {
             tricorn_V5(start, width, heightsigned, res, n, color, img);
         }
-    } else if (v == 5) {
+    } else if (v == 0) {
             for (ssize_t i=0; i < benchmarkIterations; i++) {
                 tricorn(start, width, heightsigned, res, n, color, img);
             }
@@ -283,8 +284,8 @@ int main(int argc, char *argv[]) {
         printf("Dauer pro Iteration: %fs\n", avg_time); //%g für ganz kleine Zahlen?
     }
 
-    int result = writeBmp(new_filename, width, heightsigned, img);
+    int ret = writeBmp(new_filename, width, heightsigned, img, color);
 
     free(img);
-    return result;
+    return ret;
 }

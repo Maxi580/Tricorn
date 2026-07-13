@@ -31,8 +31,8 @@ bool compareCorrectnessTest(float complex start, size_t width, ssize_t height_si
     else {
         height = (size_t)height_signed ;
     }
-
-    size_t row_size = ((width * 3+3)/4)*4;
+    int bytesPerPixel = color ? 3 : 1;
+    size_t row_size = ((width * bytesPerPixel+3)/4)*4;
     size_t pixelArraySize = row_size * height;
 
     unsigned char *v0 = malloc(pixelArraySize);
@@ -162,6 +162,8 @@ bool BitmapVergleichTests() {
 
     struct TestCase testCases[] = {
         {-2.0 +1.5f * I, 800, -600, 0.005f, 100 ,false, "topDownGray"},
+
+        {-2.0 +1.5f * I, 1, 1, 0.005f, 100 ,false, "topDownGray2"},
         {-2.0 -1.5f * I, 800, +600, 0.005f, 100 ,false, "BottomUpGray"},
         {-2.0 +1.5f * I, 800, -600, 0.005f, 100 ,false, "TopDownGray"},
         {-2.0 -1.5f * I, 800, +600, 0.005f, 100 ,false, "BottomUpGray"},
