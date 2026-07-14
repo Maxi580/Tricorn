@@ -209,7 +209,6 @@ int main(int argc, char *argv[]) {
             i++;
             size_t nameLength = strlen(filename);
 
-
             if (nameLength < 4 || strcmp(filename+nameLength-4, ".bmp") != 0) {
 
                 snprintf(new_filename, 256, "%s.bmp", filename);
