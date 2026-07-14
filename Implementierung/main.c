@@ -129,19 +129,19 @@ int main(int argc, char *argv[]) {
         //breite+höhe mit -d <BREITE> <HÖHE>, breite muss hierbei ssize_t folgen und höhe ssize_t
         else if (strcmp(argv[i], "-d") == 0) {
             if (i+1>=argc) {
-                printf("Error: Fehlendes Argument\n");
+                fprintf(stderr,"Error: Fehlendes Argument\n");
                 return 1;
             }
             errno = 0;
             widthsigned = strtol(argv[i+1], &end, 10);
             if (errno != 0 || *end != ','||argv[i+1]==end) {
-                printf("ungültiges Format\n");
+                fprintf(stderr,"ungültiges Format\n");
                 return 1;
             }
             errno = 0;
             heightsigned = strtol(end+1, &end2, 10);
             if (errno != 0 || *end2 != '\0'||end+1==end2) {
-                printf("Ungültiges Format\n");
+                fprintf(stderr,"Ungültiges Format\n");
                 return 1;
             }
             if (widthsigned <= 0) {
