@@ -75,6 +75,7 @@ int writeBmp(char *filename, size_t width, ssize_t heightsigned, unsigned char *
 
     if(fwrite(header, 1, sizeof(header), f) !=sizeof(header)) {
         fprintf(stderr, "Fehler beim schreiben der Bitmap.\n");
+        fclose(f);
         return 1;
     }
     if (!color) {
@@ -97,6 +98,7 @@ int writeBmp(char *filename, size_t width, ssize_t heightsigned, unsigned char *
 
     if(fwrite(img, pixelArraySize, 1, f ) != 1) {
         fprintf(stderr, "Fehler beim schreiben der Bitmap.\n");
+        fclose(f);
         return 1;
     }
 
