@@ -11,6 +11,8 @@
 #include "../LatencyThroughput/tricorn_V5.h"
 #include "../utils.h"
 #include "corecalculator.h"
+#include "../colormap.h"
+
 
 typedef struct{
     float complex start;
@@ -44,7 +46,7 @@ static void* tricornThreading(void* arg) {
     /* Wenn heigt kleiner 0 ist, startet man unten links und geht nach oben also addiert man +y und sonst
      * startet man oben links un zieht y ab, das vorzeichen wird über factor kontrolliert*/
     float factor = height < 0 ? -1.0f : 1.0f;
-    ssize_t top = abs_size(height);
+    size_t top = abs_size(height);
 
     /* Width muss nicht durch die Anzahl der gleichzeitig berechnet Elemente teilbar sein. Deswegen machen wir
        x koordinaten in parallel so lange das geht und dann am Ende den Rest*/
@@ -71,7 +73,7 @@ static void* tricornThreading(void* arg) {
         float imag_y = cimagf(start) + factor * (float) y * res;
         float imag_sym = cimagf(start) + factor * (float) sym_y * res;
         // Durch Exaktheit keine False Positives aber auch weniger Hits
-        bool useSym = sym_y >= 0 && sym_y < top && imag_y == -imag_sym ;
+        bool useSym = sym_y >= 0 && sym_y < (ssize_t) top && imag_y == -imag_sym ;
         unsigned char *topRow = NULL;
         if(useSym && sym_y < (ssize_t) y) {
             continue; // Koordinate schon berechnet und eingetragen

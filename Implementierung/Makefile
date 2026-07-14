@@ -9,7 +9,7 @@ all: main
 main: main.c NaiveImplementation/escapetime.c NaiveImplementation/tricorn_V1.c Simd/escapetime.c Simd/tricorn_V2.c \
 	Sym/escapetime.c Sym/tricorn_V3.c Circle/tricorn_V4.c Circle/escapetime.c LatencyThroughput/escapetime.c \
 	LatencyThroughput/tricorn_V5.c bitmap.c bitmap.h testSuite.c correctnesTests.c correctnesTests.h \
-	MultiThreading/tricorn.c MultiThreading/tricorn.h utils.h helpMessage.c helpMessage.h MultiThreading/corecalculator.h
+	MultiThreading/tricorn.c MultiThreading/tricorn.h colormap.h utils.h helpMessage.c helpMessage.h MultiThreading/corecalculator.h
 	$(CC) $(CFLAGS) -o $@ $^ -lm
 
 

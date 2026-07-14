@@ -7,6 +7,8 @@
 #include <immintrin.h>
 #include "escapetime.h"
 #include "../utils.h"
+#include "../colormap.h"
+
 
 void tricorn_V2(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
     int bytesPerPixel = color ? 3 : 1;

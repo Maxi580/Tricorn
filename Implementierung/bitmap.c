@@ -18,10 +18,17 @@ int writeBmp(char *filename, size_t width, ssize_t heightsigned, unsigned char *
     int bytesPerPixel = color ? 3 : 1;
     size_t row_size = ((width * bytesPerPixel+3)/4)*4;
     size_t pixelArraySize = row_size * height;
-    size_t paletteSize = color ? 0 : 256 * 4;
+    size_t paletteSize = color ? 0 : 1024;
     size_t pixelOffset = 54 + paletteSize;
     size_t fileSize = pixelOffset + pixelArraySize; // 54 für header der bmp datei
     unsigned char header[54] = {0}; // header deklarieren; initialisieren
+
+    // Bitmap darf nicht größer als 4GB (UINT 32 MAX) sein, Dateigröße sind bytes für farben, header, farbpallete
+    size_t bitmap_file_size = pixelArraySize + paletteSize + 54;
+    if (bitmap_file_size > UINT32_MAX) {
+        fprintf(stderr, "Error: Bitmap Größe out of Range (maximal 4 GB)\n");
+        return 1;
+    }
 
     //header schreiben
     header[0] = 'B';
@@ -51,8 +58,6 @@ int writeBmp(char *filename, size_t width, ssize_t heightsigned, unsigned char *
     header[26] = 1; //Farbebened
     header[28] = 8 * bytesPerPixel; // Bit pro Pixel (3*8)
 
-    
-
     header[34] = (unsigned char) (pixelArraySize);
     header[35] = (unsigned char) (pixelArraySize >> 8);
     header[36] = (unsigned char) (pixelArraySize >> 16);
@@ -60,7 +65,6 @@ int writeBmp(char *filename, size_t width, ssize_t heightsigned, unsigned char *
 
     if (!color) {
         const uint32_t colorsUsed = 256;
-
         header[46] = (unsigned char)(colorsUsed);
         header[47] = (unsigned char)(colorsUsed >> 8);
         header[48] = (unsigned char)(colorsUsed >> 16);

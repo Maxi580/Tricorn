@@ -19,13 +19,14 @@
 #include "testSuite.h"
 #include "helpMessage.h"
 #include "correctnesTests.h"
+#include "utils.h"
 
 
 int main(int argc, char *argv[]) {
     bool isBenchmark = false;
     ssize_t benchmark_iterations = 1;
     unsigned v = 0;
-    float complex start = -2 + 2*I; //start parameter
+    float complex start = -2 + 2 * I;
     float real;
     float imag;
     size_t width = 4000;
@@ -149,12 +150,16 @@ int main(int argc, char *argv[]) {
                 fprintf(stderr, "Error: Width muss positiv sein\n");
                 return 1;
             }
+            if (width_signed > INT32_MAX) {
+                fprintf(stderr, "Error: Breite out of Range ]-2.147.483.648, 2.147.483.647[\n");
+                return 1;
+            }
             if (height_signed == 0) {
                 fprintf(stderr, "Error: Height darf nicht 0 sein\n");
                 return 1;
             }
-            if (height_signed < -SSIZE_MAX) { //Abfangen von (-SSIZE_MAX -1)
-                fprintf(stderr, "Error: Height muss größer als -%zu sein\n", (ssize_t) SSIZE_MAX);
+            if (height_signed > INT32_MAX || height_signed < INT32_MIN) {
+                fprintf(stderr, "Error: Höhe out of Range ]-2.147.483.648, 2.147.483.647[\n");
                 return 1;
             }
             width = width_signed ;
@@ -177,7 +182,7 @@ int main(int argc, char *argv[]) {
             resWasSet = true;
             i++;
         }
-        //n bestimmen durch -n <ZAHL> Flag; <ZAHL> muss hierbei gültige, nicht negative Zahl sein
+        // n bestimmen durch -n <ZAHL> Flag; <ZAHL> muss hierbei gültige, nicht negative Zahl sein
         else if (strcmp(argv[i], "-n") == 0) {
             if (i+1>=argc) {
                 fprintf(stderr, "Error: Fehlendes Argument hinter -n\n");
@@ -234,7 +239,7 @@ int main(int argc, char *argv[]) {
 
     const size_t bytesPerPixel = color ? 3 : 1;
     size_t row_size = ((width * bytesPerPixel+3)/4)*4;
-    size_t pixelArraySize = row_size * height;
+    size_t pixelArraySize = row_size * height; // Overflow kann nicht passieren beide signed zahlen < 32Bit
 
     unsigned char *img = malloc(pixelArraySize);
     if (img == NULL) {
@@ -287,7 +292,7 @@ int main(int argc, char *argv[]) {
         }
         double avg_time = time / (double)benchmark_iterations;
         printf("Gesamtlaufzeit: %fs bei %zu Wiederholungen\n", time, benchmark_iterations);
-        printf("Dauer pro Iteration: %fs\n", avg_time); //%g für ganz kleine Zahlen?
+        printf("Dauer pro Iteration: %fs\n", avg_time); // %g für ganz kleine Zahlen?
     }
 
     int ret = writeBmp(new_filename, width, height_signed, img, color);

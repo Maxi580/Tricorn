@@ -7,6 +7,8 @@
 #include "escapetime.h"
 #include <math.h>
 #include "../utils.h"
+#include "../colormap.h"
+
 
 void tricorn_V5(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
     int bytesPerPixel = color ? 3 : 1;
@@ -15,7 +17,7 @@ void tricorn_V5(float complex start, size_t width, ssize_t height, float res, un
     /* Wenn heigt kleiner 0 ist, startet man unten links und geht nach oben also addiert man +y und sonst
      * startet man oben links un zieht y ab, das vorzeichen wird über factor kontrolliert*/
     float factor = height < 0 ? -1.0f : 1.0f;
-    ssize_t top = abs_size(height);
+    size_t top = abs_size(height);
 
     /* Width muss nicht durch die Anzahl der gleichzeitig berechnet Elemente teilbar sein. Deswegen machen wir
        x koordinaten in parallel so lange das geht und dann am Ende den Rest*/
@@ -34,7 +36,7 @@ void tricorn_V5(float complex start, size_t width, ssize_t height, float res, un
         i see no way of using that optimization.
      */
     double center = -(cimag(start) / (double) (factor * res));
-    for (ssize_t y = 0; y < top; y++) {
+    for (size_t y = 0; y < top; y++) {
         unsigned char *bottomRow = img + y * row_size; // *row zeigt nun auf den Anfang von Zeile y (0-indexed)
 
         // Berechnen vom Imaginärteil von y und des kandidaten, Symmetrie wird nur bei exakter korrektheit verwendet
@@ -42,13 +44,13 @@ void tricorn_V5(float complex start, size_t width, ssize_t height, float res, un
         float imag_y = cimagf(start) + factor * (float) y * res;
         float imag_sym = cimagf(start) + factor * (float) sym_y * res;
         // Durch Exaktheit keine False Positives aber auch weniger Hits
-        bool useSym = sym_y >= 0 && sym_y < top && imag_y == -imag_sym ;
+        bool useSym = sym_y >= 0 && sym_y < (ssize_t) top && imag_y == -imag_sym ;
         unsigned char *topRow = NULL;
-        if(useSym && sym_y < y) {
+        if(useSym && sym_y < (ssize_t) y) {
             continue; // Koordinate schon berechnet und eingetragen
         }
 
-        if (useSym && sym_y != y) {
+        if (useSym && sym_y != (ssize_t) y) {
             topRow = img + sym_y * row_size;
         }
 
