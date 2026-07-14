@@ -180,7 +180,7 @@ int main(int argc, char *argv[]) {
             }
             errno = 0;
 
-            n1 = strtol(argv[i+1], &end, 10);
+            n1 = strtoul(argv[i+1], &end, 10);
             if (*end != '\0'||errno != 0||argv[i+1]==end) {
                 fprintf(stderr, "Error: nach -n ist keine gültige Zahl\n");
                 return 1;
