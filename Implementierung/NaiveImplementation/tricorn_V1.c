@@ -30,8 +30,7 @@ void tricorn_V1(float complex start, size_t width, ssize_t height, float res, un
     if (height < 0) { // TOP-DOWN
         height = height * (-1);
         size_t row_size = (((bytesPerPixel*width)+3)/4) * 4;
-
-          //größe einer Reihe würde auf 4 Byte aufgefüllt(Padding)
+        //größe einer Reihe würde auf 4 Byte aufgefüllt(Padding)
 
         for (ssize_t y = 0; y < height; y++) {
             unsigned char *row = img + y*row_size; // *row zeigt nun auf den Anfang von Zeile y (0-indexed)

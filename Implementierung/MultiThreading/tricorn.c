@@ -9,7 +9,7 @@
 
 #include "../LatencyThroughput/escapetime.h"
 #include "../LatencyThroughput/tricorn_V5.h"
-#include "../colormap.h"
+#include "../utils.h"
 #include "corecalculator.h"
 
 typedef struct{
@@ -44,7 +44,7 @@ static void* tricornThreading(void* arg) {
     /* Wenn heigt kleiner 0 ist, startet man unten links und geht nach oben also addiert man +y und sonst
      * startet man oben links un zieht y ab, das vorzeichen wird über factor kontrolliert*/
     float factor = height < 0 ? -1.0f : 1.0f;
-    ssize_t top = height < 0 ? -height : height;
+    ssize_t top = abs_size(height);
 
     /* Width muss nicht durch die Anzahl der gleichzeitig berechnet Elemente teilbar sein. Deswegen machen wir
        x koordinaten in parallel so lange das geht und dann am Ende den Rest*/
