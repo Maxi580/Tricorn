@@ -4,6 +4,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <stdbool.h>
+#include <errno.h>
+#include <limits.h>
 
 #include "NaiveImplementation/tricorn_V1.h"
 #include "Simd/tricorn_V2.h"
@@ -16,8 +19,6 @@
 #include "testSuite.h"
 #include "helpMessage.h"
 #include "correctnesTests.h"
-#include <errno.h>
-#include <stdbool.h>
 
 
 int main(int argc, char *argv[]) {
@@ -76,7 +77,7 @@ int main(int argc, char *argv[]) {
         // B
         else if (strcmp(argv[i], "-B") == 0) {
             if (i+1>=argc) {
-                fprintf(stderr, "Error: Fehlendes Argument\n");
+                fprintf(stderr, "Error: Fehlendes Argument hinter -B\n");
                 return 1;
             }
             errno = 0;
@@ -92,7 +93,7 @@ int main(int argc, char *argv[]) {
         else if (strcmp(argv[i], "-V") == 0) {
             long tempV;
             if (i+1>=argc) {
-                fprintf(stderr, "Error: Fehlendes Argument\n");
+                fprintf(stderr, "Error: Fehlendes Argument hinter -V\n");
                 return 1;
             }
             errno = 0;
@@ -104,23 +105,23 @@ int main(int argc, char *argv[]) {
             v = (unsigned)tempV;
             i++;
         }
-        //start parameter; bestimmen durch -s <REALTEIL> <IMAGINAERTEIL>; beide müssen hierbei gültige floats sein
+        //start parameter; bestimmen durch -s <REALTEIL>,<IMAGINAERTEIL>; beide müssen hierbei gültige floats sein
         else if (strcmp(argv[i], "-s") == 0) {
             if (i+1>=argc) {
-                fprintf(stderr, "Error: Fehlendes Argument\n");
+                fprintf(stderr, "Error: Fehlendes Argument hinter -s\n");
                 return 1;
             }
             errno = 0;
 
             real = strtof(argv[i+1], &end);
             if (*end != ','||errno != 0||argv[i+1]==end) {
-                fprintf(stderr, "Error: nach -s ist kein gültiger Float für den realteil\n");
+                fprintf(stderr, "Error: Nach -s ist kein gültiger Float für den Realteil\n");
                 return 1;
             }
             errno = 0;
             imag = strtof(end+1, &end2);
             if (*end2 != '\0'||errno != 0||end+1==end2) {
-                fprintf(stderr, "Error: nach -s ist kein gültiger Float für den imaginärteil\n");
+                fprintf(stderr, "Error: Nach -s ist kein gültiger Float für den Imaginärteil\n");
                 return 1;
             }
             start = real + imag * I;
@@ -129,27 +130,27 @@ int main(int argc, char *argv[]) {
         //breite+höhe mit -d <BREITE> <HÖHE>, breite muss hierbei ssize_t folgen und höhe ssize_t
         else if (strcmp(argv[i], "-d") == 0) {
             if (i+1>=argc) {
-                fprintf(stderr,"Error: Fehlendes Argument\n");
+                fprintf(stderr, "Error: Fehlendes Argument hinter -d\n");
                 return 1;
             }
             errno = 0;
             width_signed = strtol(argv[i+1], &end, 10);
             if (errno != 0 || *end != ','||argv[i+1]==end) {
-                fprintf(stderr,"ungültiges Format\n");
+                fprintf(stderr, "Error: Ungültiges Format hinter -d\n");
                 return 1;
             }
             errno = 0;
             height_signed = strtol(end+1, &end2, 10);
             if (errno != 0 || *end2 != '\0'||end+1==end2) {
-                fprintf(stderr,"Ungültiges Format\n");
+                fprintf(stderr, "Error: Ungültiges Format hinter -d\n");
                 return 1;
             }
             if (width_signed <= 0) {
-                fprintf(stderr, "Error: width nicht positiv\n");
+                fprintf(stderr, "Error: Width muss positiv sein\n");
                 return 1;
             }
             if (height_signed == 0) {
-                fprintf(stderr, "height = 0\n");
+                fprintf(stderr, "Error: Height darf nicht 0 sein\n");
                 return 1;
             }
             width = width_signed ;
@@ -158,7 +159,7 @@ int main(int argc, char *argv[]) {
         //resolution (auch frei wählbar) mit -r <FLOAT>; <FLOAT> muss hierbei ein Float sein
         else if (strcmp(argv[i], "-r") == 0) {
             if (i+1>=argc) {
-                fprintf(stderr, "Error: Fehlendes Argument\n");
+                fprintf(stderr, "Error: Fehlendes Argument hinter -r\n");
                 return 1;
             }
             errno = 0;
@@ -175,7 +176,7 @@ int main(int argc, char *argv[]) {
         //n bestimmen durch -n <ZAHL> Flag; <ZAHL> muss hierbei gültige, nicht negative Zahl sein
         else if (strcmp(argv[i], "-n") == 0) {
             if (i+1>=argc) {
-                fprintf(stderr, "Error: Fehlendes Argument\n");
+                fprintf(stderr, "Error: Fehlendes Argument hinter -n\n");
                 return 1;
             }
             errno = 0;
@@ -186,7 +187,7 @@ int main(int argc, char *argv[]) {
                 return 1;
             }
             if (n1<0) {
-                fprintf(stderr, "Error: n negativ\n");
+                fprintf(stderr, "Error: n muss positiv sein\n");
                 return 1;
             }
             n = (unsigned)n1;
@@ -200,7 +201,7 @@ int main(int argc, char *argv[]) {
         //Dateiname angeben, falls gegeben
         else if (strcmp(argv[i], "-o") == 0) {
             if (i+1>=argc) {
-                fprintf(stderr, "Error: Fehlendes Argument\n");
+                fprintf(stderr, "Error: Fehlendes Argument hinter -o\n");
                 return 1;
             }
             filename = argv[i+1];
@@ -224,7 +225,10 @@ int main(int argc, char *argv[]) {
     if (!resWasSet) {
         res = 4.0f / (float)width;
     }
-
+    if (height_signed < -SSIZE_MAX) { //Abfangen von (-SSIZE_MAX -1)
+        fprintf(stderr, "Error: Height muss größer als -%zu sein\n", (ssize_t) SSIZE_MAX);
+        return 1;
+    }
 
     size_t height = height_signed < 0 ? -(size_t) height_signed : (size_t) height_signed;;
 
@@ -279,7 +283,7 @@ int main(int argc, char *argv[]) {
         clock_gettime(CLOCK_MONOTONIC, &time_end);
         const double time = (double)(time_end.tv_sec - time_start.tv_sec) + 1e-9 * (time_end.tv_nsec - time_start.tv_nsec);
         if (time < 1) { // unter 1 Sekunde getestet (ungültig)
-            fprintf(stderr, "Warnung: Gesamtlaufzeit liegt unter 1sek. Erhöhe die Iterationen! (%fs < 1s)\n", time);
+            fprintf(stderr, "Warnung: Gesamtlaufzeit liegt unter 1s. Erhöhe die Iterationen! (%fs < 1s)\n", time);
         }
         double avg_time = time / (double)benchmark_iterations;
         printf("Gesamtlaufzeit: %fs bei %zu Wiederholungen\n", time, benchmark_iterations);
