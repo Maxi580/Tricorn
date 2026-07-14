@@ -127,7 +127,7 @@ int main(int argc, char *argv[]) {
             start = real + imag * I;
             i++;
         }
-        //breite+höhe mit -d <BREITE> <HÖHE>, breite muss hierbei ssize_t folgen und höhe ssize_t
+        //breite+höhe mit -d <BREITE>,<HÖHE>, breite muss hierbei ssize_t folgen und höhe ssize_t
         else if (strcmp(argv[i], "-d") == 0) {
             if (i+1>=argc) {
                 fprintf(stderr, "Error: Fehlendes Argument hinter -d\n");
@@ -151,6 +151,10 @@ int main(int argc, char *argv[]) {
             }
             if (height_signed == 0) {
                 fprintf(stderr, "Error: Height darf nicht 0 sein\n");
+                return 1;
+            }
+            if (height_signed < -SSIZE_MAX) { //Abfangen von (-SSIZE_MAX -1)
+                fprintf(stderr, "Error: Height muss größer als -%zu sein\n", (ssize_t) SSIZE_MAX);
                 return 1;
             }
             width = width_signed ;
@@ -224,10 +228,6 @@ int main(int argc, char *argv[]) {
     //Nun sind alle Parameter aus den Flags gesetzt
     if (!resWasSet) {
         res = 4.0f / (float)width;
-    }
-    if (height_signed < -SSIZE_MAX) { //Abfangen von (-SSIZE_MAX -1)
-        fprintf(stderr, "Error: Height muss größer als -%zu sein\n", (ssize_t) SSIZE_MAX);
-        return 1;
     }
 
     size_t height = height_signed < 0 ? -(size_t) height_signed : (size_t) height_signed;;
