@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
     bool isBenchmark = false;
     ssize_t benchmarkIterations = 1;
     unsigned v = 0;
-    float complex start = -0 + 0*I; //start parameter
+    float complex start = -2 + 2*I; //start parameter
     float realteil;
     float imaginaerteil;
     size_t width = 4000;
