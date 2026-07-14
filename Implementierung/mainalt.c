@@ -83,7 +83,7 @@ add_executable(gra26capsproject_t105
         Implementierung/helpMessage.c
         Implementierung/helpMessage.h
         Implementierung/colormap.c
-        Implementierung/colormap.h
+        Implementierung/utils.h
         Implementierung/MultiThreading/tricorn.c
         Implementierung/MultiThreading/tricorn.h
 )

@@ -6,7 +6,7 @@
 #include <immintrin.h>
 #include "escapetime.h"
 #include <math.h>
-#include "../colormap.h"
+#include "../utils.h"
 
 
 void tricorn_V4(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
@@ -16,7 +16,7 @@ void tricorn_V4(float complex start, size_t width, ssize_t height, float res, un
     /* Wenn heigt kleiner 0 ist, startet man unten links und geht nach oben also addiert man +y und sonst
      * startet man oben links un zieht y ab, das vorzeichen wird über factor kontrolliert*/
     float factor = height < 0 ? -1.0f : 1.0f;
-    ssize_t top = height < 0 ? -height : height;
+    ssize_t top = abs_size(height);
 
     /* Width muss nicht durch 4 teilbar sein. Deswegen machen wir 4 koordinaten in parallel so lange das geht und
      * dann am Ende den Rest (also 0 - 3 Elemente) sequenziell*/

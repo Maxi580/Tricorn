@@ -10,8 +10,8 @@
 #include "Sym/tricorn_V3.h"
 #include "Circle/tricorn_V4.h"
 #include "LatencyThroughput/tricorn_V5.h"
-
 #include "bitmap.h"
+
 #include "MultiThreading/tricorn.h"
 #include "testSuite.h"
 #include "helpMessage.h"
@@ -20,18 +20,16 @@
 #include <stdbool.h>
 
 
-
-
 int main(int argc, char *argv[]) {
     bool isBenchmark = false;
-    ssize_t benchmarkIterations = 1;
+    ssize_t benchmark_iterations = 1;
     unsigned v = 0;
     float complex start = -2 + 2*I; //start parameter
-    float realteil;
-    float imaginaerteil;
+    float real;
+    float imag;
     size_t width = 4000;
-    ssize_t widthsigned = 4000;
-    ssize_t heightsigned = -4000;
+    ssize_t width_signed = 4000;
+    ssize_t height_signed = -4000;
     ssize_t n1 = 256;
     unsigned n = 256;
     bool color = false;
@@ -82,7 +80,7 @@ int main(int argc, char *argv[]) {
                 return 1;
             }
             errno = 0;
-            ssize_t tempIteration = benchmarkIterations = strtol(argv[i+1], &end, 10);
+            ssize_t tempIteration = benchmark_iterations = strtol(argv[i+1], &end, 10);
             isBenchmark = true;
             if (*end != '\0' || tempIteration <= 0||errno != 0) {
                 fprintf(stderr, "Error: nach -B ist kein gültiger Int für die Anzahl an Wiederholungen\n");
@@ -114,18 +112,18 @@ int main(int argc, char *argv[]) {
             }
             errno = 0;
 
-            realteil = strtof(argv[i+1], &end);
+            real = strtof(argv[i+1], &end);
             if (*end != ','||errno != 0||argv[i+1]==end) {
                 fprintf(stderr, "Error: nach -s ist kein gültiger Float für den realteil\n");
                 return 1;
             }
             errno = 0;
-            imaginaerteil = strtof(end+1, &end2);
+            imag = strtof(end+1, &end2);
             if (*end2 != '\0'||errno != 0||end+1==end2) {
                 fprintf(stderr, "Error: nach -s ist kein gültiger Float für den imaginärteil\n");
                 return 1;
             }
-            start = realteil + imaginaerteil* I;
+            start = real + imag * I;
             i++;
         }
         //breite+höhe mit -d <BREITE> <HÖHE>, breite muss hierbei ssize_t folgen und höhe ssize_t
@@ -135,26 +133,26 @@ int main(int argc, char *argv[]) {
                 return 1;
             }
             errno = 0;
-            widthsigned = strtol(argv[i+1], &end, 10);
+            width_signed = strtol(argv[i+1], &end, 10);
             if (errno != 0 || *end != ','||argv[i+1]==end) {
                 fprintf(stderr,"ungültiges Format\n");
                 return 1;
             }
             errno = 0;
-            heightsigned = strtol(end+1, &end2, 10);
+            height_signed = strtol(end+1, &end2, 10);
             if (errno != 0 || *end2 != '\0'||end+1==end2) {
                 fprintf(stderr,"Ungültiges Format\n");
                 return 1;
             }
-            if (widthsigned <= 0) {
+            if (width_signed <= 0) {
                 fprintf(stderr, "Error: width nicht positiv\n");
                 return 1;
             }
-            if (heightsigned == 0) {
+            if (height_signed == 0) {
                 fprintf(stderr, "height = 0\n");
                 return 1;
             }
-            width = widthsigned ;
+            width = width_signed ;
             i++;
         }
         //resolution (auch frei wählbar) mit -r <FLOAT>; <FLOAT> muss hierbei ein Float sein
@@ -228,13 +226,8 @@ int main(int argc, char *argv[]) {
     }
 
 
-    size_t height;
-    if (heightsigned < 0) {
-        height = (size_t)(-heightsigned);
-    }
-    else {
-        height = (size_t)heightsigned ;
-    }
+    size_t height = height_signed < 0 ? -(size_t) height_signed : (size_t) height_signed;;
+
     const size_t bytesPerPixel = color ? 3 : 1;
     size_t row_size = ((width * bytesPerPixel+3)/4)*4;
     size_t pixelArraySize = row_size * height;
@@ -251,28 +244,28 @@ int main(int argc, char *argv[]) {
     }
 
     if (v == 1) {
-        for (ssize_t i=0; i < benchmarkIterations; i++) { // Ohne Benchmarking nur eine Iteration
-            tricorn_V1(start, width, heightsigned, res, n, color, img);
+        for (ssize_t i=0; i < benchmark_iterations; i++) { // Ohne Benchmarking nur eine Iteration
+            tricorn_V1(start, width, height_signed, res, n, color, img);
         }
     } else if (v == 2) {
-        for (ssize_t i=0; i < benchmarkIterations; i++) {
-            tricorn_V2(start, width, heightsigned, res, n, color, img);
+        for (ssize_t i=0; i < benchmark_iterations; i++) {
+            tricorn_V2(start, width, height_signed, res, n, color, img);
         }
     } else if (v == 3) {
-        for (ssize_t i=0; i < benchmarkIterations; i++) {
-            tricorn_V3(start, width, heightsigned, res, n, color, img);
+        for (ssize_t i=0; i < benchmark_iterations; i++) {
+            tricorn_V3(start, width, height_signed, res, n, color, img);
         }
     } else if (v == 4) {
-        for (ssize_t i=0; i < benchmarkIterations; i++) {
-            tricorn_V4(start, width, heightsigned, res, n, color, img);
+        for (ssize_t i=0; i < benchmark_iterations; i++) {
+            tricorn_V4(start, width, height_signed, res, n, color, img);
         }
     } else if (v == 5) {
-        for (ssize_t i=0; i < benchmarkIterations; i++) {
-            tricorn_V5(start, width, heightsigned, res, n, color, img);
+        for (ssize_t i=0; i < benchmark_iterations; i++) {
+            tricorn_V5(start, width, height_signed, res, n, color, img);
         }
     } else if (v == 0) {
-            for (ssize_t i=0; i < benchmarkIterations; i++) {
-                tricorn(start, width, heightsigned, res, n, color, img);
+            for (ssize_t i=0; i < benchmark_iterations; i++) {
+                tricorn(start, width, height_signed, res, n, color, img);
             }
     } else {
         fprintf(stderr, "Error: V muss in [0;5] sein\n");
@@ -288,12 +281,12 @@ int main(int argc, char *argv[]) {
         if (time < 1) { // unter 1 Sekunde getestet (ungültig)
             fprintf(stderr, "Warnung: Gesamtlaufzeit liegt unter 1sek. Erhöhe die Iterationen! (%fs < 1s)\n", time);
         }
-        double avg_time = time / (double)benchmarkIterations;
-        printf("Gesamtlaufzeit: %fs bei %zu Wiederholungen\n", time, benchmarkIterations);
+        double avg_time = time / (double)benchmark_iterations;
+        printf("Gesamtlaufzeit: %fs bei %zu Wiederholungen\n", time, benchmark_iterations);
         printf("Dauer pro Iteration: %fs\n", avg_time); //%g für ganz kleine Zahlen?
     }
 
-    int ret = writeBmp(new_filename, width, heightsigned, img, color);
+    int ret = writeBmp(new_filename, width, height_signed, img, color);
 
     free(img);
     return ret;
