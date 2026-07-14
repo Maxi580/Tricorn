@@ -35,9 +35,11 @@ int main(int argc, char *argv[]) {
     ssize_t n1 = 256;
     unsigned n = 256;
     bool color = false;
-    char *filename = "test";
+    char *filename;
     float res = 4.0f/(float)width;
     bool resWasSet = false;
+    char new_filename[256];
+    snprintf(new_filename, 256, "%s.bmp", "test");
 
     char *end;
     char *end2;
@@ -205,6 +207,16 @@ int main(int argc, char *argv[]) {
             }
             filename = argv[i+1];
             i++;
+            size_t nameLength = strlen(filename);
+
+
+            if (nameLength < 4 || strcmp(filename+nameLength-4, ".bmp") != 0) {
+
+                snprintf(new_filename, 256, "%s.bmp", filename);
+            }
+            else {
+                snprintf(new_filename, 256, "%s", filename);
+            }
         }
         else {
             fprintf(stderr, "Error: Unbekannte Flags %s\n", argv[i]);
@@ -215,8 +227,7 @@ int main(int argc, char *argv[]) {
     if (!resWasSet) {
         res = 4.0f / (float)width;
     }
-    char new_filename[256];
-    snprintf(new_filename, 256, "%s.bmp", filename);
+
 
     size_t height;
     if (heightsigned < 0) {
