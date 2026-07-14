@@ -133,7 +133,7 @@ void printTable(const timeMeasurement* r, size_t steps) {
     }
 }
 
-int genGraphTable() {
+int generatePlottableTable() {
     printf("Starte Performance Test für Graphen:\n");
 
     printf("Starting test against changing width and scale res:\n");

@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
         }
         // Graph erstellen
         else if (strcmp(argv[i], "-graph") == 0) {
-            if (genGraphTable() == 1) {
+            if (generatePlottableTable() == 1) {
                 fprintf(stderr, "Fehler beim Erstellen des Graphen\n");
                 return 1;
             }
