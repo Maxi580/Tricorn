@@ -23,9 +23,7 @@ int writeBmp(char *filename, size_t width, ssize_t heightsigned, unsigned char *
     size_t fileSize = pixelOffset + pixelArraySize; // 54 für header der bmp datei
     unsigned char header[54] = {0}; // header deklarieren; initialisieren
 
-    // Bitmap darf nicht größer als 4GB (UINT 32 MAX) sein, Dateigröße sind bytes für farben, header, farbpallete
-    size_t bitmap_file_size = pixelArraySize + paletteSize + 54;
-    if (bitmap_file_size > UINT32_MAX) {
+    if (fileSize > UINT32_MAX) {
         fprintf(stderr, "Error: Bitmap Größe out of Range (maximal 4 GB)\n");
         return 1;
     }
