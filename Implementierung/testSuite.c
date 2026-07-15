@@ -56,7 +56,16 @@ double performanceTest(void (*fn)(float complex, size_t, ssize_t, float,  unsign
     return time / (double) iterations;
 }
 
-bool correctnessTest(TestCase tc) {
+void printDebug(unsigned char *base, unsigned char *test, size_t pixel_array_size) {
+    for (size_t i = 0; i < pixel_array_size; i++) {
+        if (base[i] != test[i]) {
+            printf("Erster Unterschied bei Byte %zu: %u vs %u\n", i, base[i], test[i]);
+            break;
+        }
+    }
+}
+
+bool correctnessTest(TestCase tc, bool print_debug) {
     // Vergleicht die Ausgaben aller optimierten Implementierungen mit der naiven Implementierung
     bool all_passed = true;
 
@@ -64,9 +73,9 @@ bool correctnessTest(TestCase tc) {
     int bytesPerPixel = tc.color ? 3 : 1;
     size_t height = abs_size(tc.height_signed);
     size_t row_size = ((tc.width * bytesPerPixel+3)/4)*4;
-    size_t pixelArraySize = row_size * height;
-    unsigned char *v0 = malloc(pixelArraySize);
-    unsigned char *v1 = malloc(pixelArraySize);
+    size_t pixel_array_size = row_size * height;
+    unsigned char *v0 = malloc(pixel_array_size);
+    unsigned char *v1 = malloc(pixel_array_size);
     if (v0 == NULL || v1 == NULL) {
         fprintf(stderr, "malloc() returned NULL\n");
         free(v0);
@@ -77,30 +86,42 @@ bool correctnessTest(TestCase tc) {
     tricorn_V1(tc.start, tc.width, tc.height_signed, tc.res, tc.n, tc.color, v0);
 
     tricorn_V2(tc.start, tc.width, tc.height_signed, tc.res, tc.n, tc.color, v1);
-    if (memcmp(v0, v1, pixelArraySize)) {
-        printf("SIMD Error\n");
+    if (memcmp(v0, v1, pixel_array_size)) {
+        if (print_debug) {
+            printf("SIMD Error\n");
+            printDebug(v0, v1, pixel_array_size);
+        }
         all_passed = false;
     }
     // v1 mit auffälligen Werten füllen, damit nicht beschriebende Bereiche bemerkt werden
-    memset(v1, 0xAA, pixelArraySize);
+    memset(v1, 0xAA, pixel_array_size);
 
     tricorn_V3(tc.start, tc.width, tc.height_signed, tc.res, tc.n, tc.color, v1);
-    if (memcmp(v0, v1, pixelArraySize)) {
-        printf("Symmetry Version Error\n");
+    if (memcmp(v0, v1, pixel_array_size)) {
+        if (print_debug) {
+            printf("Circle Version Error\n");
+            printDebug(v0, v1, pixel_array_size);
+        }
         all_passed = false;
     }
-    memset(v1, 0xAA, pixelArraySize);
+    memset(v1, 0xAA, pixel_array_size);
 
     tricorn_V4(tc.start, tc.width, tc.height_signed, tc.res, tc.n, tc.color, v1);
-    if (memcmp(v0, v1, pixelArraySize)) {
-        printf("Circle Version Error\n");
+    if (memcmp(v0, v1, pixel_array_size)) {
+        if (print_debug) {
+            printf("Latency Throughput Version Error\n");
+            printDebug(v0, v1, pixel_array_size);
+        }
         all_passed = false;
     }
-    memset(v1, 0xAA, pixelArraySize);
+    memset(v1, 0xAA, pixel_array_size);
 
     tricorn(tc.start, tc.width, tc.height_signed, tc.res, tc.n, tc.color, v1);
-    if (memcmp(v0, v1, pixelArraySize) != 0) {
-        printf("Multithreading Version Error\n");
+    if (memcmp(v0, v1, pixel_array_size) != 0) {
+        if (print_debug) {
+            printf("Multithreading Version Error\n");
+            printDebug(v0, v1, pixel_array_size);
+        }
         all_passed = false;
     }
 
