@@ -10,16 +10,9 @@
 #include <sys/types.h>
 
 #include "escapetime.h"
+#include "../colormap.h"
 
 void tricorn_V1(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
-    const unsigned naive_color_pallete_size = 4;
-    const unsigned naive_color_pallete[4][3] = {
-        {128, 0, 0},
-        {255, 0, 0},
-        {255, 100, 0},
-        {255, 255, 0},
-    };
-
     // BGR-Bilder brauchen 3 Bytes pro Pixel, Graustufenbilder nur ein Byte.
     int bytesPerPixel = color ? 3 : 1;
 
@@ -70,10 +63,10 @@ void tricorn_V1(float complex start, size_t width, ssize_t height, float res, un
 
                     } else {
                         //Bunt
-                        unsigned color_index = iterations % naive_color_pallete_size;
-                        row[x * 3]= naive_color_pallete[color_index][0]; // Blau
-                        row[x *3+1]= naive_color_pallete[color_index][1]; // Grün
-                        row[x *3+2]= naive_color_pallete[color_index][2]; // Rot
+                        RGB_color colorize = getColor(iterations, n, color);
+                        row[x * 3]= colorize.b; // Blau
+                        row[x *3+1]= colorize.g; // Grün
+                        row[x *3+2]= colorize.r; // Rot
                     }
                 }
             }
@@ -129,10 +122,10 @@ void tricorn_V1(float complex start, size_t width, ssize_t height, float res, un
 
                     } else {
                         //Bunt
-                        unsigned farbIndex = iterations % naive_color_pallete_size;
-                        row[x * 3]= naive_color_pallete[farbIndex][0]; // 255 ganzes Bild Blau
-                        row[x *3+1]= naive_color_pallete[farbIndex][1]; // Grün
-                        row[x *3+2]= naive_color_pallete[farbIndex][2]; // Rot
+                        RGB_color colorize = getColor(iterations, n, color);
+                        row[x * 3]= colorize.b; // 255 ganzes Bild Blau
+                        row[x *3+1]= colorize.g; // Grün
+                        row[x *3+2]= colorize.r; // Rot
                     }
                 }
             }
