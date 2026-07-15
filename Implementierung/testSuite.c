@@ -27,7 +27,7 @@ double performanceTest(void (*fn)(float complex, size_t, ssize_t, float,  unsign
     size_t pixelArraySize = row_size * height;
     unsigned char *img = malloc(pixelArraySize);
     if (img == NULL) {
-        fprintf(stderr, "malloc() returned NULL\n");
+        fprintf(stderr, "Error allocating memory\n");
         exit(EXIT_FAILURE);
     }
 
@@ -68,7 +68,7 @@ bool correctnessTest(TestCase tc) {
     unsigned char *v0 = malloc(pixelArraySize);
     unsigned char *v1 = malloc(pixelArraySize);
     if (v0 == NULL || v1 == NULL) {
-        fprintf(stderr, "malloc() returned NULL\n");
+        fprintf(stderr, "Error allocating memory\n");
         free(v0);
         free(v1);
         exit(EXIT_FAILURE);
@@ -167,7 +167,7 @@ bool individualTests() {
                    "V0: %f V1: %f V2: %f V3: %f V4: %f\n\n", time, time_V1, time_V2, time_V3, time_V4);
             passed++;
         } else {
-            printf("UNGÜLTIG\n\n");
+            printf("UNGÜLTIGER TEST\n\n");
             all_passed = false;
         }
     }
@@ -176,8 +176,8 @@ bool individualTests() {
 }
 
 bool randomizedTest(size_t width, ssize_t height_signed, int trials){
-    // Führt viele randomisierte tests aus, variert startwerte und resolution
-    printf("Starte bruteforce tests\n\n");
+    // Führt viele randomisierte tests aus, variiert startwerte und resolution
+    printf("Starte bruteforce Tests\n\n");
     bool all_passed = true;
     int passed = 0;
 
@@ -198,15 +198,15 @@ bool randomizedTest(size_t width, ssize_t height_signed, int trials){
             all_passed = false;
         }
     }
-    printf("Bruteforce tests sind fertig. Erfolg bei %d/%d\n", passed, trials);
+    printf("Bruteforce Tests sind fertig. Erfolg bei %d/%d\n", passed, trials);
     return all_passed;
 }
 
 bool symmetryTest(size_t width, ssize_t height_signed, int trials) {
-    /* Führt viele randomisierte tests aus, die gezielt das center auf einem geraden y setzen, da dann symmetrie
+    /* Führt viele randomisierte Tests aus, die gezielt das center auf einem geraden y setzen, da dann symmetrie
      * funktionieren muss. Dann wählen wir zufällig sehr kleine resolutions, da dabei unter Symmetrie immer
      * Probleme aufgetreten sind*/
-    printf("Starte Symmetrie tests\n\n");
+    printf("Starte Symmetrie Tests\n\n");
     bool all_passed = true;
     int passed = 0;
 
@@ -241,7 +241,7 @@ bool symmetryTest(size_t width, ssize_t height_signed, int trials) {
             all_passed = false;
         }
     }
-    printf("Symmetrie tests sind fertig. Erfolg bei %d/%d\n", passed, trials);
+    printf("Symmetrie Tests sind fertig. Erfolg bei %d/%d\n", passed, trials);
     return all_passed;
 }
 
