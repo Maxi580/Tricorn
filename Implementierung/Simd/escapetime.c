@@ -5,13 +5,17 @@
 __attribute__((hot))
 __m128i simdEscapeTime(const unsigned n, const float complex c1, const float complex c2, const float complex c3,
                         const float complex c4) {
-    /* Returns 4 Integer Lanes, mit den Anzahl der Runden nach dem die Koordinate divergiert oder
-        falls der Punkt nie divergiert das Limit */
+	/*
+	 * Berechnet die Escape-Time für 4 komplexe Punkte gleichzeitig mit SIMD.
+	 * Jede Lane erhält am Ende die Iterationszahl, bei der der entsprechende Punkt divergiert.
+	 * Divergiert ein Punkt in n Iteration nicht, wird n zurückgegeben.
+	 */
 
-    /* Da wir zn nie berechnen, wurde die Distanzberechnung und Inkrementierung aus der Schleife gezogen,
-     * dass bedeutet aber, dass wir das auch für z0 machen, da bei z0 die Distanz 0 ist und der Punkt damit
-     * noch nicht divergiert ist, würde allerdings jede lane inkrementiert werden, was allerdings falsch ist.
-     * (Man könnte auch n = 1 abfangen, und dann gleich 1er lanes zurückgeben, das ist aber unclean)*/
+	/*
+	 * Sonderfälle:
+	 * z0 divergiert nie. Deshalb:
+	 * - n = 0: 0
+	 */
     if(n == 0){
     	return _mm_setzero_si128();
     }
@@ -33,15 +37,36 @@ __m128i simdEscapeTime(const unsigned n, const float complex c1, const float com
 	 * bis alles divergiert), da i = 1 ist.
 	 */
     while (i++ < n) {
-        // Rounds inkrementieren, falls z noch nicht divergiert (also Betrag <= 4 ist)
+    	// (Betrag)^2 der aktuellen vier Punkte berechnen
         __m128 distance = _mm_add_ps(realSquared, imagSquared);
-        __m128 mask = _mm_cmple_ps(distance, squaredEscapeDistance); // FFFFFFFF wo distance <= 4, 0 sonst
-        if (_mm_movemask_ps(mask) == 0) break; // Wenn die Maske 0 ist schon alles escaped und man kann aufhören.
-        // Setzt 1nsen genau da, wo die maske nicht 0 ist (Castet mask floats als int)
+
+    	/*
+		 * Maske:
+		 *
+		 * FFFFFFFF wo distance <= 4, also noch innerhalb des Fluchtkreises
+		 * 00000000 sonst, also wenn bereits divergiert
+		 */
+        __m128 mask = _mm_cmple_ps(distance, squaredEscapeDistance);
+
+    	// Wenn die Maske 0 ist schon alles escaped und man kann aufhören
+        if (_mm_movemask_ps(mask) == 0) break;
+
+    	// Setzt Einsen genau da, wo die maske nicht 0 ist (Castet mask floats als int)
         __m128i inc  = _mm_and_si128(one, _mm_castps_si128(mask));
+
+    	// Escape-Time dieser Punkte inkrementieren.
         rounds  = _mm_add_epi32(rounds, inc);
 
-        // Zi+1 berechnen: z = realSquared - imagSquared - 2 * crealf(z) * cimagf(z) * I;
+    	/*
+		 * Nächste Tricorn Iteration:
+		 *
+		 * z = conj(z^2) + c
+		 *
+		 * mit
+		 *
+		 * Re(z^2) = a^2 - b^2
+		 * Im(conj(z^2)) = -2ab
+		 */
         z_imagine = _mm_add_ps(c_imagine, _mm_mul_ps(minus_two, _mm_mul_ps(z_real, z_imagine)));
         z_real = _mm_add_ps(c_real, _mm_sub_ps(realSquared, imagSquared));
 

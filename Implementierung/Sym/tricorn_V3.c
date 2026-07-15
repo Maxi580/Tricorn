@@ -128,7 +128,7 @@ void tricorn_V3(float complex start, size_t width, ssize_t height, float res, un
                 size_t x_offset = (endIndex + i) * bytesPerPixel;
                 unsigned char *bottomOffset = bottomRow + x_offset;
                 RGB_color rgb = getColor(n, rest_iterations[i], color);
-                // rgb is reversed on bitmap
+                // BMP speichert im BGR-Format
                 if (color) {
                     bottomOffset[0] =  rgb.b;
                     bottomOffset[1] =  rgb.g;
