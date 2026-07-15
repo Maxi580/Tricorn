@@ -81,7 +81,7 @@ bool correctnessTest(TestCase tc) {
         printf("SIMD Error\n");
         all_passed = false;
     }
-    // v1 mit auffälligen Werten füllen, damit nicht beschriebende Bereiche bemerkt werden
+    // v1 mit auffälligen Werten füllen, damit nicht beschriebene Bereiche bemerkt werden
     memset(v1, 0xAA, pixelArraySize);
 
     tricorn_V3(tc.start, tc.width, tc.height_signed, tc.res, tc.n, tc.color, v1);
@@ -146,22 +146,30 @@ bool individualTests() {
 
     for (size_t i = 0; i < test_case_count; i++) {
         bool correct = correctnessTest(test_cases[i]);
+        printf("Test %zu/%zu: %s\n", i+1, test_case_count, test_cases[i].name);
+        printf("Start:\t\t%f + %2fi\n", crealf(test_cases[i].start), cimagf(test_cases[i].start));
+        printf("Breite:\t\t%zu\n", test_cases[i].width);
+        printf("Höhe:\t\t%zd\n", test_cases[i].height_signed);
+
+        printf("Auflösung\t%f\n", test_cases[i].res);
+        printf("Iterationen n:\t%u\n", test_cases[i].n);
+        printf("Farbe:\t\t%s\n", test_cases[i].color ? "true" : "false");
+
         if (correct) {
             double time = performanceTest(tricorn, test_cases[i], iterations);
             double time_V1 = performanceTest(tricorn_V1, test_cases[i], iterations);
             double time_V2 = performanceTest(tricorn_V2, test_cases[i], iterations);
             double time_V3 = performanceTest(tricorn_V3, test_cases[i], iterations);
             double time_V4 = performanceTest(tricorn_V4, test_cases[i], iterations);
-            printf("Test %zu/%zu BESTANDEN: %s\n", i+1, test_case_count, test_cases[i].name);
-            printf("Zeiten (pro Iteration) - "
-                   "V0: %f V1: %f V2: %f V3: %f V4: %f\n", time, time_V1, time_V2, time_V3, time_V4);
+            printf("BESTANDEN: Zeiten (pro Iteration) - "
+                   "V0: %f V1: %f V2: %f V3: %f V4: %f\n\n", time, time_V1, time_V2, time_V3, time_V4);
             passed++;
         } else {
-            printf("\nTest %zu/%zu UNGÜLTIG: %s\n", i+1, test_case_count, test_cases[i].name);
+            printf("UNGÜLTIG\n\n");
             all_passed = false;
         }
     }
-    printf("Manuelle tests %zu/%zu bestanden.\n", passed, test_case_count);
+    printf("Manuelle Tests %zu/%zu bestanden.\n\n", passed, test_case_count);
     return all_passed;
 }
 
