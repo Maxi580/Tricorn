@@ -18,8 +18,9 @@
 #include "MultiThreading/tricorn.h"
 #include "testSuite.h"
 #include "helpMessage.h"
-#include "correctnesTests.h"
+#include "testSuite.h"
 #include "utils.h"
+#include "graph.h"
 
 
 int main(int argc, char *argv[]) {
@@ -45,8 +46,8 @@ int main(int argc, char *argv[]) {
     char *end2;
 
     for (int i = 1; i < argc; i++) {
-        if (strcmp(argv[i], "-correct") == 0) {
-            if (BitmapVergleichTests()) {
+        if (strcmp(argv[i], "-test") == 0) {
+            if (testSuite()) {
                 printf("Alle Bitmaps gleich\n");
             }
             else {
