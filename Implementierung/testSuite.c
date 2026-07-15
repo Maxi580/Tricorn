@@ -147,7 +147,6 @@ bool individualTests() {
     size_t passed = 0;
 
     for (size_t i = 0; i < test_case_count; i++) {
-        bool correct = correctnessTest(test_cases[i]);
         printf("Test %zu/%zu: %s\n", i+1, test_case_count, test_cases[i].name);
         printf("Start:\t\t%f + %2fi\n", crealf(test_cases[i].start), cimagf(test_cases[i].start));
         printf("Breite:\t\t%zu\n", test_cases[i].width);
@@ -156,6 +155,7 @@ bool individualTests() {
         printf("Auflösung\t%f\n", test_cases[i].res);
         printf("Iterationen n:\t%u\n", test_cases[i].n);
         printf("Farbe:\t\t%s\n", test_cases[i].color ? "true" : "false");
+        bool correct = correctnessTest(test_cases[i]);
 
         if (correct) {
             double time = performanceTest(tricorn, test_cases[i], iterations);
