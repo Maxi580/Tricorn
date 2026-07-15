@@ -119,7 +119,7 @@ bool correctnessTest(TestCase tc) {
 
 bool individualTests() {
     bool all_passed = true;
-    unsigned n = 256;
+    unsigned iterations = 100;
 
     TestCase test_cases[] = {
         {-2.0 + 1.5f * I, 800, -600, 0.005f, 100, false, "topDownGray"},
@@ -155,12 +155,12 @@ bool individualTests() {
     for (size_t i = 0; i < test_case_count; i++) {
         bool correct = correctnessTest(test_cases[i]);
         if (correct) {
-            double time = performanceTest(tricorn, test_cases[i], n);
-            double time_V1 = performanceTest(tricorn_V1, test_cases[i], n);
-            double time_V2 = performanceTest(tricorn_V2, test_cases[i], n);
-            double time_V3 = performanceTest(tricorn_V3, test_cases[i], n);
-            double time_V4 = performanceTest(tricorn_V4, test_cases[i], n);
-            double time_V5 = performanceTest(tricorn_V5, test_cases[i], n);
+            double time = performanceTest(tricorn, test_cases[i], iterations);
+            double time_V1 = performanceTest(tricorn_V1, test_cases[i], iterations);
+            double time_V2 = performanceTest(tricorn_V2, test_cases[i], iterations);
+            double time_V3 = performanceTest(tricorn_V3, test_cases[i], iterations);
+            double time_V4 = performanceTest(tricorn_V4, test_cases[i], iterations);
+            double time_V5 = performanceTest(tricorn_V5, test_cases[i], iterations);
             printf("Test %zu/%zu BESTANDEN: %s\n", i+1, test_case_count, test_cases[i].name);
             printf("Zeiten (pro Iteration) - "
                    "V0: %f V1: %f V2: %f V3: %f V4: %f V5: %f\n", time, time_V1, time_V2, time_V3,
