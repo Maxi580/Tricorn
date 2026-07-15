@@ -52,41 +52,41 @@ int main(int argc, char *argv[]) {
             else {
                 printf("Fehler Im Code\n");
             }
-            return 0;
+            return EXIT_SUCCESS;
         }
         // Graph erstellen
         else if (strcmp(argv[i], "-graph") == 0) {
             if (generatePlottableTable() == 1) {
                 fprintf(stderr, "Fehler beim Erstellen des Graphen\n");
-                return 1;
+                return EXIT_FAILURE;
             }
-            return 0;
+            return EXIT_SUCCESS;
         }
         // Zeit messen
         else if (strcmp(argv[i], "--test") == 0 || strcmp(argv[i], "-t") == 0) {
             if (testSuite() == 1) {
                 fprintf(stderr, "Fehler beim Ausführen der Testsuite\n");
-                return 1;
+                return EXIT_FAILURE;
             }
-            return 0;
+            return EXIT_SUCCESS;
         }
         // Help Message
         else if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "-h") == 0) {
             helpMessage();
-            return 0;
+            return EXIT_SUCCESS;
         }
         // B
         else if (strcmp(argv[i], "-B") == 0) {
             if (i+1>=argc) {
                 fprintf(stderr, "Error: Fehlendes Argument hinter -B\n");
-                return 1;
+                return EXIT_FAILURE;
             }
             errno = 0;
             ssize_t tempIteration = benchmark_iterations = strtol(argv[i+1], &end, 10);
             isBenchmark = true;
             if (*end != '\0' || tempIteration <= 0||errno != 0) {
                 fprintf(stderr, "Error: nach -B ist kein gültiger Int für die Anzahl an Wiederholungen\n");
-                return 1;
+                return EXIT_FAILURE;
             }
             i++;
         }
@@ -95,13 +95,13 @@ int main(int argc, char *argv[]) {
             long tempV;
             if (i+1>=argc) {
                 fprintf(stderr, "Error: Fehlendes Argument hinter -V\n");
-                return 1;
+                return EXIT_FAILURE;
             }
             errno = 0;
             tempV = strtol(argv[i+1], &end, 10);
             if (*end != '\0'||argv[i+1]==end||errno!=0||tempV<0||tempV>5) {
                 fprintf(stderr, "Error: nach -V muss eine Zahl zwischen 0 und 5 sein\n");
-                return 1;
+                return EXIT_FAILURE;
             }
             v = (unsigned)tempV;
             i++;
@@ -110,20 +110,20 @@ int main(int argc, char *argv[]) {
         else if (strcmp(argv[i], "-s") == 0) {
             if (i+1>=argc) {
                 fprintf(stderr, "Error: Fehlendes Argument hinter -s\n");
-                return 1;
+                return EXIT_FAILURE;
             }
 
             errno = 0;
             real = strtof(argv[i+1], &end);
             if (*end != ','|| errno != 0 || argv[i+1] == end) {
                 fprintf(stderr, "Error: Nach -s ist kein gültiger Float für den Realteil\n");
-                return 1;
+                return EXIT_FAILURE;
             }
             errno = 0;
             imag = strtof(end+1, &end2);
             if (*end2 != '\0'|| errno != 0 ||end+1==end2) {
                 fprintf(stderr, "Error: Nach -s ist kein gültiger Float für den Imaginärteil\n");
-                return 1;
+                return EXIT_FAILURE;
             }
             start = real + imag * I;
             i++;
@@ -132,28 +132,28 @@ int main(int argc, char *argv[]) {
         else if (strcmp(argv[i], "-d") == 0) {
             if (i+1>=argc) {
                 fprintf(stderr, "Error: Fehlendes Argument hinter -d\n");
-                return 1;
+                return EXIT_FAILURE;
             }
             errno = 0;
             width_signed = strtol(argv[i+1], &end, 10);
             if (errno != 0 || *end != ','||argv[i+1]==end) {
                 fprintf(stderr, "Error: Ungültiges Format hinter -d\n");
-                return 1;
+                return EXIT_FAILURE;
             }
             errno = 0;
             height_signed = strtol(end+1, &end2, 10);
             if (errno != 0 || *end2 != '\0'||end+1==end2) {
                 fprintf(stderr, "Error: Ungültiges Format hinter -d\n");
-                return 1;
+                return EXIT_FAILURE;
             }
             if (width_signed <= 0 || width_signed > BMP_MAX_RANGE) {
                 fprintf(stderr, "Error: Width muss positiv sein und in ]0,  2.147.483.647] liegen. \n");
-                return 1;
+                return EXIT_FAILURE;
             }
             if (height_signed == 0 || height_signed > BMP_MAX_RANGE || height_signed < BMP_MIN_RANGE) {
                 fprintf(stderr, "Error: Height darf nicht 0 sein und muss in [-2.147.483.648, 2.147.483.647] "
                                 "liegen\n");
-                return 1;
+                return EXIT_FAILURE;
             }
             width = width_signed; // Overflow wird abgefangen
             i++;
@@ -162,14 +162,14 @@ int main(int argc, char *argv[]) {
         else if (strcmp(argv[i], "-r") == 0) {
             if (i+1>=argc) {
                 fprintf(stderr, "Error: Fehlendes Argument hinter -r\n");
-                return 1;
+                return EXIT_FAILURE;
             }
             errno = 0;
             float tempRes = strtof(argv[i+1], &end);
 
             if (*end != '\0'||errno != 0||argv[i+1]==end||tempRes<=0.0f) {
                 fprintf(stderr, "Error: nach -r ist keine gültige Zahl für <RESOLUTION>\n");
-                return 1;
+                return EXIT_FAILURE;
             }
             res = tempRes;
             resWasSet = true;
@@ -179,23 +179,23 @@ int main(int argc, char *argv[]) {
         else if (strcmp(argv[i], "-n") == 0) {
             if (i+1>=argc) {
                 fprintf(stderr, "Error: Fehlendes Argument hinter -n\n");
-                return 1;
+                return EXIT_FAILURE;
             }
             errno = 0;
 
             n1 = strtol(argv[i+1], &end, 10);
             if (*end != '\0'|| errno != 0|| argv[i+1]==end) {
                 fprintf(stderr, "Error: nach -n ist keine gültige Zahl\n");
-                return 1;
+                return EXIT_FAILURE;
             }
             if (n1 < 0) {
                 fprintf(stderr, "Error: n muss positiv sein\n");
-                return 1;
+                return EXIT_FAILURE;
             }
 
             if (n1 > UINT_MAX) {
                 fprintf(stderr, "Error: n zu groß (maximal %u)\n", UINT_MAX);
-                return 1;
+                return EXIT_FAILURE;
             }
 
             n = (unsigned) n1;
@@ -210,7 +210,7 @@ int main(int argc, char *argv[]) {
         else if (strcmp(argv[i], "-o") == 0) {
             if (i+1>=argc) {
                 fprintf(stderr, "Error: Fehlendes Argument hinter -o\n");
-                return 1;
+                return EXIT_FAILURE;
             }
             filename = argv[i+1];
             i++;
@@ -226,7 +226,7 @@ int main(int argc, char *argv[]) {
         }
         else {
             fprintf(stderr, "Error: Unbekannte Flags %s\n", argv[i]);
-            return 1;
+            return EXIT_FAILURE;
         }
     }
     //Nun sind alle Parameter aus den Flags gesetzt
@@ -246,13 +246,13 @@ int main(int argc, char *argv[]) {
     size_t fileSize = pixelOffset + pixelArraySize;
     if (fileSize > BMP_MAX_FILE_SIZE) {
         fprintf(stderr, "Error: Bitmap datei zu groß (maximal 4 GB)\n");
-        return 1;
+        return EXIT_FAILURE;
     }
 
     unsigned char *img = malloc(pixelArraySize);
     if (img == NULL) {
         fprintf(stderr, "Error allocating memory\n");
-        return 1;
+        return EXIT_FAILURE;
     }
 
     struct timespec time_start; // Zeitmessung (siehe Folien Benchmarking)
@@ -283,7 +283,7 @@ int main(int argc, char *argv[]) {
     } else {
         fprintf(stderr, "Error: V muss in [0;4] sein\n");
         free(img);
-        return 1;
+        return EXIT_FAILURE;
     }
 
 
@@ -302,5 +302,8 @@ int main(int argc, char *argv[]) {
     int ret = writeBmp(new_filename, width_signed, height_signed, img, color);
 
     free(img);
-    return ret;
+    if (ret == 0) {
+        return EXIT_SUCCESS;
+    }
+    return EXIT_FAILURE;
 }
