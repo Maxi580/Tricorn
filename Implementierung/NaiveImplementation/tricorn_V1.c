@@ -56,18 +56,10 @@ void tricorn_V1(float complex start, size_t width, ssize_t height, float res, un
                         row[x] = 0;
                     }
                 } else {
-                    if (!color) {
-                        //Grauton (von Formel aus der Aufgabe)
-                        unsigned color_pixel = 255 - 4 * ( iterations % 64 );
-                        row[x]= color_pixel;
-
-                    } else {
-                        //Bunt
-                        RGB_color colorize = getColor(iterations, n, color);
-                        row[x * 3]= colorize.b; // Blau
-                        row[x *3+1]= colorize.g; // Grün
-                        row[x *3+2]= colorize.r; // Rot
-                    }
+                    RGB_color colorize = getColor(n, iterations, color);
+                    row[x * 3]= colorize.b; // 255 ganzes Bild Blau
+                    row[x *3+1]= colorize.g; // Grün
+                    row[x *3+2]= colorize.r; // Rot
                 }
             }
             //restliche Padding-Bytes einer Zeile mit 0 auffüllen
@@ -115,18 +107,10 @@ void tricorn_V1(float complex start, size_t width, ssize_t height, float res, un
                         row[x] = 0;
                     }
                 } else {
-                    if (!color) {
-                        //Grauton (von Formel aus der Aufgabe)
-                        unsigned color_pixel = 255 - 4 * ( iterations % 64 );
-                        row[x]=color_pixel;
-
-                    } else {
-                        //Bunt
-                        RGB_color colorize = getColor(iterations, n, color);
-                        row[x * 3]= colorize.b; // 255 ganzes Bild Blau
-                        row[x *3+1]= colorize.g; // Grün
-                        row[x *3+2]= colorize.r; // Rot
-                    }
+                    RGB_color colorize = getColor(n, iterations, color);
+                    row[x * 3]= colorize.b; // 255 ganzes Bild Blau
+                    row[x *3+1]= colorize.g; // Grün
+                    row[x *3+2]= colorize.r; // Rot
                 }
             }
 
