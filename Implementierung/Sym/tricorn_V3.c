@@ -25,13 +25,13 @@ void tricorn_V3(float complex start, size_t width, ssize_t height, float res, un
     size_t top = abs_size(height);
 
     // SIMD verarbeitet immer 4 Pixel gleichzeitig.
-    // endIndex ist die größte Spalte, welche durch 4 teilbar ist
-    // Restpixel in einer Reihe müssen somit seperat (ohne SIMD) berechnet werden
+    // endIndex ist die größte Spalte, welche durch 4 teilbar ist.
+    // Verbleibende 1 bis 3 Pixel werden am Ende aufgefüllt.
     size_t endIndex = width - (width % 4);
 
     /* SYMMETRIEOPTIMIERUNG:
      *
-     * Die Symmetrieoptimierung wird nur verwendet, wenn die Spiegelung an der x-Achse exakt auf einer Bildzeile liegt.
+     * Die Symmetrie kann nur verwendet werden, wenn die gespiegelte Position exakt einer gültigen Bildposition entspricht.
      * Dadurch entstehen keine falschen Zuordnungen, aber die Symmetrie kann nicht für alle Auflösungen genutzt werden.
      *
      * Das Fraktal ist bezüglich der x(reellen)-Achse symmetrisch. Somit besitzen (x,y) und (x,-y) dieselbe Escape-Time.
