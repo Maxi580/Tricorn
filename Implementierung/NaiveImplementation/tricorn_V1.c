@@ -10,12 +10,6 @@
 #include <sys/types.h>
 
 #include "escapetime.h"
-/*  betriebsanleitung für timon
- *  gcc Implementierung/BasicTestImplementation.c -o test
- *  ./test
- *  explorer.exe test.bmp
- */
-
 
 void tricorn_V1(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
     const unsigned naive_color_pallete_size = 4;
@@ -30,7 +24,7 @@ void tricorn_V1(float complex start, size_t width, ssize_t height, float res, un
     int bytesPerPixel = color ? 3 : 1;
 
     /*
-     * Ist 'height' negativ, wird ein eine Top-Down Bitmap erstellt
+     * Ist 'height' negativ, wird eine Top-Down Bitmap erstellt
      * Die erste gespeicherte Bildzeile ist dabei die oberste Bildzeile.
      */
     if (height < 0) {
