@@ -20,8 +20,12 @@ void helpMessage() {
     printf("  Sollte eines der Flags --help, --test, -graph oder -correct\n"
            "  gesetzt sein, werden alle Eingaben davor und danach ignoriert.\n\n");
 
-    printf("  -V <Versionnummer>           Versionnummer der Implementierung von 0 bis 4.\n"
-           "                               (Standard: 0)\n\n");
+    printf("  -V <Versionnummer>           Versionnummer der Implementierung von 0 bis 4. (Standard: 0)\n"
+           "                                     -V 0: Hauptimplementation mit Multithreading\n"
+           "                                     -V 1: Naive Implementation\n"
+           "                                     -V 2: Verbesserung durch Nutzung von SIMD\n"
+           "                                     -V 3: Verbesserung durch finden von Kreisen\n"
+           "                                     -V 4: Verbesserung durch Latency Throughput\n\n");
 
     printf("  -B <Anzahl Wiederholungen>   Laufzeitmessung (Benchmarking) der angegebenen Implementierung.\n"
            "                               Sollte die Gesamtlaufzeit unter einer Sekunde sein,\n"
@@ -60,10 +64,6 @@ void helpMessage() {
     printf("  -graph                       Es wird eine vordefinierte Testsuite ausgeführt,\n"
            "                               welche Werte in Tabellenform zum Erstellen\n"
            "                               von Graphen ausgibt.\n\n");
-
-    printf("  -correct                     Flag zum Testen der Korrektheit aller\n"
-           "                               Implementierungen gegenüber der Hauptimplementation.\n\n");
-
 
     printf("Beispiele:\n");
 
