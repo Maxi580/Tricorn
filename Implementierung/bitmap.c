@@ -104,7 +104,7 @@ int writeBmp(char *filename, ssize_t width, ssize_t height_signed, unsigned char
     }
 
 
-    if(fwrite(img, pixelArraySize, 1, f ) != pixelArraySize) {
+    if(fwrite(img, pixelArraySize, 1, f ) != 1) {
         fprintf(stderr, "Fehler beim schreiben der Bitmap.\n");
         fclose(f);
         return 1;
