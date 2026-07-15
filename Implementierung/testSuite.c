@@ -213,7 +213,7 @@ bool randomizedTest(size_t width, ssize_t height_signed, int trials){
         float res = 0.0001f + 100.0f * ((float) rand()/ (float) RAND_MAX);
 
         TestCase tc = {start, width, height_signed, res, n, color, "bruteforce"};
-        if (correctnessTest(tc)) {
+        if (correctnessTest(tc, false)) {
             passed++;
         } else {
             all_passed = false;
@@ -256,7 +256,7 @@ bool symmetryTest(size_t width, ssize_t height_signed, int trials) {
         float complex start = start_real + start_imag * I;
 
         TestCase tc = {start, width, height_signed, res, n, color, "symmetrie"};
-        if (correctnessTest(tc)) {
+        if (correctnessTest(tc, false)) {
             passed++;
         } else {
             all_passed = false;
