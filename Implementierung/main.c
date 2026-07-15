@@ -10,9 +10,8 @@
 
 #include "NaiveImplementation/tricorn_V1.h"
 #include "Simd/tricorn_V2.h"
-#include "Sym/tricorn_V3.h"
-#include "Circle/tricorn_V4.h"
-#include "LatencyThroughput/tricorn_V5.h"
+#include "Circle/tricorn_V3.h"
+#include "LatencyThroughput/tricorn_V4.h"
 #include "bitmap.h"
 
 #include "MultiThreading/tricorn.h"
@@ -113,16 +112,16 @@ int main(int argc, char *argv[]) {
                 fprintf(stderr, "Error: Fehlendes Argument hinter -s\n");
                 return 1;
             }
-            errno = 0;
 
+            errno = 0;
             real = strtof(argv[i+1], &end);
-            if (*end != ','||errno != 0||argv[i+1]==end) {
+            if (*end != ','|| errno != 0 || argv[i+1] == end) {
                 fprintf(stderr, "Error: Nach -s ist kein gültiger Float für den Realteil\n");
                 return 1;
             }
             errno = 0;
             imag = strtof(end+1, &end2);
-            if (*end2 != '\0'||errno != 0||end+1==end2) {
+            if (*end2 != '\0'|| errno != 0 ||end+1==end2) {
                 fprintf(stderr, "Error: Nach -s ist kein gültiger Float für den Imaginärteil\n");
                 return 1;
             }
@@ -277,16 +276,12 @@ int main(int argc, char *argv[]) {
         for (ssize_t i=0; i < benchmark_iterations; i++) {
             tricorn_V4(start, width, height_signed, res, n, color, img);
         }
-    } else if (v == 5) {
-        for (ssize_t i=0; i < benchmark_iterations; i++) {
-            tricorn_V5(start, width, height_signed, res, n, color, img);
-        }
     } else if (v == 0) {
             for (ssize_t i=0; i < benchmark_iterations; i++) {
                 tricorn(start, width, height_signed, res, n, color, img);
             }
     } else {
-        fprintf(stderr, "Error: V muss in [0;5] sein\n");
+        fprintf(stderr, "Error: V muss in [0;4] sein\n");
         free(img);
         return 1;
     }

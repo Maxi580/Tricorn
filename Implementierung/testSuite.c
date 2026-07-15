@@ -9,9 +9,8 @@
 
 #include "NaiveImplementation/tricorn_V1.h"
 #include "Simd/tricorn_V2.h"
-#include "Sym/tricorn_V3.h"
-#include "Circle/tricorn_V4.h"
-#include "LatencyThroughput/tricorn_V5.h"
+#include "Circle/tricorn_V3.h"
+#include "LatencyThroughput/tricorn_V4.h"
 #include "MultiThreading/tricorn.h"
 #include "utils.h"
 #include "testSuite.h"
@@ -99,13 +98,6 @@ bool correctnessTest(TestCase tc) {
     }
     memset(v1, 0xAA, pixelArraySize);
 
-    tricorn_V5(tc.start, tc.width, tc.height_signed, tc.res, tc.n, tc.color, v1);
-    if (memcmp(v0, v1, pixelArraySize)) {
-        printf("LatencyThroughput Version Error\n");
-        all_passed = false;
-    }
-    memset(v1, 0xAA, pixelArraySize);
-
     tricorn(tc.start, tc.width, tc.height_signed, tc.res, tc.n, tc.color, v1);
     if (memcmp(v0, v1, pixelArraySize) != 0) {
         printf("Multithreading Version Error\n");
@@ -160,11 +152,9 @@ bool individualTests() {
             double time_V2 = performanceTest(tricorn_V2, test_cases[i], iterations);
             double time_V3 = performanceTest(tricorn_V3, test_cases[i], iterations);
             double time_V4 = performanceTest(tricorn_V4, test_cases[i], iterations);
-            double time_V5 = performanceTest(tricorn_V5, test_cases[i], iterations);
             printf("Test %zu/%zu BESTANDEN: %s\n", i+1, test_case_count, test_cases[i].name);
             printf("Zeiten (pro Iteration) - "
-                   "V0: %f V1: %f V2: %f V3: %f V4: %f V5: %f\n", time, time_V1, time_V2, time_V3,
-                time_V4, time_V5);
+                   "V0: %f V1: %f V2: %f V3: %f V4: %f\n", time, time_V1, time_V2, time_V3, time_V4);
             passed++;
         } else {
             printf("\nTest %zu/%zu UNGÜLTIG: %s\n", i+1, test_case_count, test_cases[i].name);

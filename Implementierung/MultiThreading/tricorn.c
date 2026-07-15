@@ -8,10 +8,11 @@
 #include <pthread.h>
 
 #include "../LatencyThroughput/escapetime.h"
-#include "../LatencyThroughput/tricorn_V5.h"
+#include "../LatencyThroughput/tricorn_V4.h"
 #include "../utils.h"
 #include "corecalculator.h"
 #include "../colormap.h"
+#include "../utils.h"
 
 
 typedef struct{
@@ -46,7 +47,6 @@ static void* tricornThreading(void* arg) {
     /* Wenn heigt kleiner 0 ist, startet man unten links und geht nach oben also addiert man +y und sonst
      * startet man oben links un zieht y ab, das vorzeichen wird über factor kontrolliert*/
     float factor = height < 0 ? -1.0f : 1.0f;
-    size_t top = abs_size(height);
 
     /* Width muss nicht durch die Anzahl der gleichzeitig berechnet Elemente teilbar sein. Deswegen machen wir
        x koordinaten in parallel so lange das geht und dann am Ende den Rest*/
@@ -64,24 +64,8 @@ static void* tricornThreading(void* arg) {
         HOWEVER. If due to weird resolutions etc the center is not at a clean y but at like 2.4 or something
         i see no way of using that optimization.
      */
-    double center = -(cimag(start) / (double) (factor * res));
     for (size_t y = from_y; y < to_y; y += step_size) {
         unsigned char *bottomRow = img + y * row_size; // *row zeigt nun auf den Anfang von Zeile y (0-indexed)
-
-        // Berechnen vom Imaginärteil von y und des kandidaten, Symmetrie wird nur bei exakter korrektheit verwendet
-        ssize_t sym_y = lround(2.0 * center - (double) y);
-        float imag_y = cimagf(start) + factor * (float) y * res;
-        float imag_sym = cimagf(start) + factor * (float) sym_y * res;
-        // Durch Exaktheit keine False Positives aber auch weniger Hits
-        bool useSym = sym_y >= 0 && sym_y < (ssize_t) top && imag_y == -imag_sym ;
-        unsigned char *topRow = NULL;
-        if(useSym && sym_y < (ssize_t) y) {
-            continue; // Koordinate schon berechnet und eingetragen
-        }
-
-        if (useSym && sym_y != (ssize_t) y) {
-            topRow = img + sym_y * row_size;
-        }
 
         for (size_t x = 0; x < endIndex; x += 8) {
             unsigned iterations[8];
@@ -108,19 +92,9 @@ static void* tricornThreading(void* arg) {
                     bottomOffset[0] =  rgb.b;
                     bottomOffset[1] =  rgb.g;
                     bottomOffset[2] =  rgb.r;
-                    if(topRow != NULL){
-                        unsigned char *topOffset = topRow + x_offset;
-                        topOffset[0] =  rgb.b;
-                        topOffset[1] =  rgb.g;
-                        topOffset[2] =  rgb.r;
-                    }
                 }
                 else {
                     bottomOffset[0] =  rgb.b;
-                    if(topRow != NULL){
-                        unsigned char *topOffset = topRow + x_offset;
-                        topOffset[0] =  rgb.b;
-                    }
                 }
             }
         }
@@ -153,28 +127,15 @@ static void* tricornThreading(void* arg) {
                     bottomOffset[0] =  rgb.b;
                     bottomOffset[1] =  rgb.g;
                     bottomOffset[2] =  rgb.r;
-                    if(topRow != NULL){
-                        unsigned char *topOffset = topRow + x_offset;
-                        topOffset[0] =  rgb.b;
-                        topOffset[1] =  rgb.g;
-                        topOffset[2] =  rgb.r;
-                    }
                 }
                 else {
                     bottomOffset[0] =  rgb.b;
-                    if(topRow != NULL){
-                        unsigned char *topOffset = topRow + x_offset;
-                        topOffset[0] =  rgb.b;
-                    }
                 }
             }
         }
 
         for (size_t i= width*bytesPerPixel; i<row_size; i++) {
-            bottomRow[i]=0; // restliche Padding Bits einer Zeile auffüllen
-            if (topRow != NULL) {
-                topRow[i]=0;
-            }
+            bottomRow[i] = 0; // restliche Padding Bits einer Zeile auffüllen
         }
     }
     return NULL;
@@ -204,16 +165,15 @@ void tricorn(float complex start, size_t width, ssize_t height, float res, unsig
             pthread_join(threads[i], NULL);
         }
     } else {
-        tricorn_V5(start, width, height, res, n, color, img);
+        tricorn_V4(start, width, height, res, n, color, img);
     }
 }
 
-void tricornThreadPlot(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color,
+/* void tricornThreadPlot(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color,
     unsigned char* img, int thread_amount) {
-    /* Multithreaded entlang der Y-Achse */
     size_t max_y = height > 0 ? height : -height;
     if (thread_amount < 1) {
-        fprintf(stderr, "ALARM");
+        fprintf(stderr, "Threads cant be smaller than 1");
     }
 
     //  The 200k Value, was approximated by measuring when thread overhead stops mattering
@@ -235,4 +195,4 @@ void tricornThreadPlot(float complex start, size_t width, ssize_t height, float 
     } else {
         tricorn_V5(start, width, height, res, n, color, img);
     }
-}
+} */
