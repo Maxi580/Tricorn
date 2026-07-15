@@ -182,13 +182,42 @@ static void* tricornThreading(void* arg) {
 
 void tricorn(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color,
     unsigned char* img) {
-    // Man startet die threads alle mit leichten offset aber geht in gleichen schritten hoch dann ist alles abgedeckt
+    /* Multithreaded entlang der Y-Achse */
     size_t max_y = height > 0 ? height : -height;
 
     //  The 200k Value, was approximated by measuring when thread overhead stops mattering
     if(width * max_y > 200000){
         int thread_amount = getCoreAmount();
 
+        pthread_t threads[thread_amount];
+        thread_data data[thread_amount];
+
+        for (int i = 0; i < thread_amount; i++) {
+            pthread_t thread;
+            // i == bottom_y, max_y = top y, threat_amount = step size
+            data[i] = (thread_data) {start, width, height, i, max_y, thread_amount, res, n, color, img};;
+            pthread_create(&thread, NULL, tricornThreading, &data[i]);
+            threads[i] = thread;
+        }
+
+        for (int i = 0; i < thread_amount; i++) {
+            pthread_join(threads[i], NULL);
+        }
+    } else {
+        tricorn_V5(start, width, height, res, n, color, img);
+    }
+}
+
+void tricornThreadPlot(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color,
+    unsigned char* img, int thread_amount) {
+    /* Multithreaded entlang der Y-Achse */
+    size_t max_y = height > 0 ? height : -height;
+    if (thread_amount < 1) {
+        fprintf(stderr, "ALARM");
+    }
+
+    //  The 200k Value, was approximated by measuring when thread overhead stops mattering
+    if(width * max_y > 200000){
         pthread_t threads[thread_amount];
         thread_data data[thread_amount];
 
