@@ -21,7 +21,7 @@ twoIntegerLanes  escapeTimeLatencyThroughputTwo(const unsigned n, const float co
     }
 
 	/* i ist 2 (und nicht 0), weil wir Z1 außerhalb berechnen (um die Konvergenz von Z0 nicht zu checken)
-	 * und wir Zn nicht berechnen. Dadurch haben wir exakt zwei schleifendurhcläufe weniger.*/
+	 * und wir Zn nicht berechnen. Dadurch haben wir exakt zwei Schleifendurchläufe weniger.*/
     unsigned i = 2;
 	// Rounds startet bei 1, da Z1 und Z0 bereits abgefangen worden sind. Jetzt wird für n>1 geprüft ob Z1 konvergiert.
     twoIntegerLanes rounds = (twoIntegerLanes) {_mm_set1_epi32(1), _mm_set1_epi32(1)};
@@ -129,7 +129,7 @@ fourIntegerLanes  escapeTimeLatencyThroughputFour(const unsigned n, const float 
     }
 
 	/* i ist 2 (und nicht 0), weil wir Z1 außerhalb berechnen (um die Konvergenz von Z0 nicht zu checken)
-	 * und wir Zn nicht berechnen. Dadurch haben wir exakt zwei schleifendurhcläufe weniger.*/
+	 * und wir Zn nicht berechnen. Dadurch haben wir exakt zwei Schleifendurchläufe weniger.*/
     unsigned i = 2;
 	// Rounds startet bei 1, da Z1 und Z0 bereits abgefangen worden sind. Jetzt wird für n>1 geprüft ob Z1 konvergiert.
     fourIntegerLanes rounds = (fourIntegerLanes) {_mm_set1_epi32(1), _mm_set1_epi32(1),
@@ -160,7 +160,7 @@ fourIntegerLanes  escapeTimeLatencyThroughputFour(const unsigned n, const float 
 	fourFloatLanes imag_squared = (fourFloatLanes) {_mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps(),
 			_mm_setzero_ps(),};
 
-	// Circle Check, für beide Punkte checken ob sie im Kreis liegen
+	// Circle Check, für beide Punkte checken, ob sie im Kreis liegen
 	__m128 a_amount = _mm_add_ps(_mm_mul_ps(c_real.a, c_real.a), _mm_mul_ps(c_imagine.a, c_imagine.a));
 	__m128 b_amount = _mm_add_ps(_mm_mul_ps(c_real.b, c_real.b), _mm_mul_ps(c_imagine.b, c_imagine.b));
 	__m128 c_amount = _mm_add_ps(_mm_mul_ps(c_real.c, c_real.c), _mm_mul_ps(c_imagine.c, c_imagine.c));

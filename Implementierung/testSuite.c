@@ -27,7 +27,7 @@ double performanceTest(void (*fn)(float complex, size_t, ssize_t, float,  unsign
     size_t pixelArraySize = row_size * height;
     unsigned char *img = malloc(pixelArraySize);
     if (img == NULL) {
-        fprintf(stderr, "malloc() returned NULL\n");
+        fprintf(stderr, "Error allocating memory\n");
         exit(EXIT_FAILURE);
     }
 
@@ -77,7 +77,7 @@ bool correctnessTest(TestCase tc, bool print_debug) {
     unsigned char *v0 = malloc(pixel_array_size);
     unsigned char *v1 = malloc(pixel_array_size);
     if (v0 == NULL || v1 == NULL) {
-        fprintf(stderr, "malloc() returned NULL\n");
+        fprintf(stderr, "Error allocating memory\n");
         free(v0);
         free(v1);
         exit(EXIT_FAILURE);
@@ -168,29 +168,37 @@ bool individualTests() {
     size_t passed = 0;
 
     for (size_t i = 0; i < test_case_count; i++) {
-        bool correct = correctnessTest(test_cases[i]);
+        printf("Test %zu/%zu: %s\n", i+1, test_case_count, test_cases[i].name);
+        printf("Start:\t\t%f + %2fi\n", crealf(test_cases[i].start), cimagf(test_cases[i].start));
+        printf("Breite:\t\t%zu\n", test_cases[i].width);
+        printf("Höhe:\t\t%zd\n", test_cases[i].height_signed);
+
+        printf("Auflösung\t%f\n", test_cases[i].res);
+        printf("Iterationen n:\t%u\n", test_cases[i].n);
+        printf("Farbe:\t\t%s\n", test_cases[i].color ? "true" : "false");
+        bool correct = correctnessTest(test_cases[i], false);
+
         if (correct) {
             double time = performanceTest(tricorn, test_cases[i], iterations);
             double time_V1 = performanceTest(tricorn_V1, test_cases[i], iterations);
             double time_V2 = performanceTest(tricorn_V2, test_cases[i], iterations);
             double time_V3 = performanceTest(tricorn_V3, test_cases[i], iterations);
             double time_V4 = performanceTest(tricorn_V4, test_cases[i], iterations);
-            printf("Test %zu/%zu BESTANDEN: %s\n", i+1, test_case_count, test_cases[i].name);
-            printf("Zeiten (pro Iteration) - "
-                   "V0: %f V1: %f V2: %f V3: %f V4: %f\n", time, time_V1, time_V2, time_V3, time_V4);
+            printf("BESTANDEN: Zeiten (pro Iteration) - "
+                   "V0: %f V1: %f V2: %f V3: %f V4: %f\n\n", time, time_V1, time_V2, time_V3, time_V4);
             passed++;
         } else {
-            printf("\nTest %zu/%zu UNGÜLTIG: %s\n", i+1, test_case_count, test_cases[i].name);
+            printf("UNGÜLTIGER TEST\n\n");
             all_passed = false;
         }
     }
-    printf("Manuelle tests %zu/%zu bestanden.\n", passed, test_case_count);
+    printf("Manuelle Tests %zu/%zu bestanden.\n\n", passed, test_case_count);
     return all_passed;
 }
 
 bool randomizedTest(size_t width, ssize_t height_signed, int trials){
-    // Führt viele randomisierte tests aus, variert startwerte und resolution
-    printf("Starte bruteforce tests\n\n");
+    // Führt viele randomisierte tests aus, variiert startwerte und resolution
+    printf("Starte bruteforce Tests\n\n");
     bool all_passed = true;
     int passed = 0;
 
@@ -211,15 +219,15 @@ bool randomizedTest(size_t width, ssize_t height_signed, int trials){
             all_passed = false;
         }
     }
-    printf("Bruteforce tests sind fertig. Erfolg bei %d/%d\n", passed, trials);
+    printf("Bruteforce Tests sind fertig. Erfolg bei %d/%d\n", passed, trials);
     return all_passed;
 }
 
 bool symmetryTest(size_t width, ssize_t height_signed, int trials) {
-    /* Führt viele randomisierte tests aus, die gezielt das center auf einem geraden y setzen, da dann symmetrie
+    /* Führt viele randomisierte Tests aus, die gezielt das center auf einem geraden y setzen, da dann symmetrie
      * funktionieren muss. Dann wählen wir zufällig sehr kleine resolutions, da dabei unter Symmetrie immer
      * Probleme aufgetreten sind*/
-    printf("Starte Symmetrie tests\n\n");
+    printf("Starte Symmetrie Tests\n\n");
     bool all_passed = true;
     int passed = 0;
 
@@ -254,7 +262,7 @@ bool symmetryTest(size_t width, ssize_t height_signed, int trials) {
             all_passed = false;
         }
     }
-    printf("Symmetrie tests sind fertig. Erfolg bei %d/%d\n", passed, trials);
+    printf("Symmetrie Tests sind fertig. Erfolg bei %d/%d\n", passed, trials);
     return all_passed;
 }
 

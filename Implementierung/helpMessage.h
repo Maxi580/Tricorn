@@ -3,4 +3,4 @@
 
 void helpMessage();
 
-#endif //GRA26CAPSPROJECT_T105_helpMessage_H
+#endif

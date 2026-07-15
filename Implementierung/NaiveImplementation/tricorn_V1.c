@@ -17,7 +17,7 @@ void tricorn_V1(float complex start, size_t width, ssize_t height, float res, un
     int bytesPerPixel = color ? 3 : 1;
 
     /*
-     * Ist 'height' negativ, wird ein eine Top-Down Bitmap erstellt
+     * Ist 'height' negativ, wird eine Top-Down Bitmap erstellt
      * Die erste gespeicherte Bildzeile ist dabei die oberste Bildzeile.
      */
     if (height < 0) {
