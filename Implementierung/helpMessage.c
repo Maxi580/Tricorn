@@ -6,8 +6,8 @@ void helpMessage() {
 
     printf("Beschreibung:\n");
     printf("  Erstellt ein Tricorn-Fraktal anhand der gesetzten Flags. Dabei kann\n"
-           "  zwischen verschiedenen Implementationen gewählt werden. Wenn ein\n"
-           "  Flag fehlt, wird dieses mit Standardwerten vervollständigt.\n\n");
+           "  zwischen verschiedenen Implementationen gewählt werden. Wenn\n"
+           "  Flags fehlen, werden diese mit Standardwerten vervollständigt.\n\n");
 
     printf("Verwendung:\n");
     printf("  ./main [-V <Versionnummer>] [-B <Anzahl Wiederholungen>]\n"
@@ -20,22 +20,22 @@ void helpMessage() {
     printf("  Sollte eines der Flags --help, --test, -graph oder -correct\n"
            "  gesetzt sein, werden alle Eingaben davor und danach ignoriert.\n\n");
 
-    printf("  -V <Versionnummer>           Versionnummer der Implementierung von 0 bis 5.\n"
+    printf("  -V <Versionnummer>           Versionnummer der Implementierung von 0 bis 4.\n"
            "                               (Standard: 0)\n\n");
 
     printf("  -B <Anzahl Wiederholungen>   Laufzeitmessung (Benchmarking) der angegebenen Implementierung.\n"
-           "                               Sollte die Gesamtlaufzeit unter 1 Sekunde sein,\n"
+           "                               Sollte die Gesamtlaufzeit unter einer Sekunde sein,\n"
            "                               wird eine Fehlermeldung mit ausgegeben.\n\n");
 
     printf("  -s <Realteil>,<Imaginärteil> Startwert der Berechnung in float.\n"
-           "                               (Standard: 0,0)\n\n");
+           "                               (Standard: -2,2)\n\n");
 
     printf("  -d <Breite>,<Höhe>           Anzahl der Pixel des Bildes. Die Breite muss positiv\n"
            "                               und ganzzahlig sein. Die Höhe kann auch negativ sein.\n"
            "                               (Standard: 4000,-4000)\n\n");
 
     printf("  -n <Maximale Iterationen>    Gibt die Anzahl an maximalen Iterationen pro\n"
-           "                               Bildpixel aus. Muss ganzzahlig und positiv sein.\n"
+           "                               Bildpixel an. Muss ganzzahlig und positiv sein.\n"
            "                               (Standard: 256)\n\n");
 
     printf("  -r <Schrittweite pro Pixel>  Resolution gibt die Schrittweite pro Bildpixel an.\n"
