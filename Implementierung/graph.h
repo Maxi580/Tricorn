@@ -8,7 +8,6 @@
 typedef struct {
     double naive;
     double simd;
-    double sym;
     double circle;
     double latency;
     double multithreading;
