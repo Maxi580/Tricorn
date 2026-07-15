@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
     size_t width = 4000;
     ssize_t width_signed = 4000;
     ssize_t height_signed = -4000;
-    ssize_t n1 = 256;
+    ssize_t n1;
     unsigned n = 256;
     bool color = false;
     char *filename;
