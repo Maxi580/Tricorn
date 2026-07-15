@@ -11,7 +11,7 @@
 #include "../colormap.h"
 
 
-void tricorn_V3(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
+void tricorn_sym_legacy(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
 
     int bytesPerPixel = color ? 3 : 1;
 

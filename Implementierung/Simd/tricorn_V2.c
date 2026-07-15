@@ -29,7 +29,6 @@ void tricorn_V2(float complex start, size_t width, ssize_t height, float res, un
 
 
     for (ssize_t y = 0; y < top; y++) {
-
         // *row zeigt nun auf den Anfang von Zeile y (0-indexed)
         unsigned char *row = img + y*row_size;
 

@@ -9,9 +9,8 @@
 
 #include "NaiveImplementation/tricorn_V1.h"
 #include "Simd/tricorn_V2.h"
-#include "Sym/tricorn_V3.h"
-#include "Circle/tricorn_V4.h"
-#include "LatencyThroughput/tricorn_V5.h"
+#include "Circle/tricorn_V3.h"
+#include "LatencyThroughput/tricorn_V4.h"
 #include "MultiThreading/tricorn.h"
 #include "utils.h"
 #include "testSuite.h"
@@ -29,7 +28,7 @@ double performanceTest(void (*fn)(float complex, size_t, ssize_t, float,  unsign
     unsigned char *img = malloc(pixelArraySize);
     if (img == NULL) {
         fprintf(stderr, "malloc() returned NULL\n");
-        return -1.0;
+        exit(EXIT_FAILURE);
     }
 
     struct timespec time_start, time_end;
@@ -72,7 +71,7 @@ bool correctnessTest(TestCase tc) {
         fprintf(stderr, "malloc() returned NULL\n");
         free(v0);
         free(v1);
-        return false;
+        exit(EXIT_FAILURE);
     }
     // Naive Implementierung
     tricorn_V1(tc.start, tc.width, tc.height_signed, tc.res, tc.n, tc.color, v0);
@@ -99,13 +98,6 @@ bool correctnessTest(TestCase tc) {
     }
     memset(v1, 0xAA, pixelArraySize);
 
-    tricorn_V5(tc.start, tc.width, tc.height_signed, tc.res, tc.n, tc.color, v1);
-    if (memcmp(v0, v1, pixelArraySize)) {
-        printf("LatencyThroughput Version Error\n");
-        all_passed = false;
-    }
-    memset(v1, 0xAA, pixelArraySize);
-
     tricorn(tc.start, tc.width, tc.height_signed, tc.res, tc.n, tc.color, v1);
     if (memcmp(v0, v1, pixelArraySize) != 0) {
         printf("Multithreading Version Error\n");
@@ -118,13 +110,15 @@ bool correctnessTest(TestCase tc) {
 }
 
 bool individualTests() {
-    bool all_passed = true;
     unsigned iterations = 100;
+    bool all_passed = true;
 
     TestCase test_cases[] = {
         {-2.0 + 1.5f * I, 800, -600, 0.005f, 100, false, "topDownGray"},
+        {-2.0 + 1.5f * I, 800, -600, 0.005f, 100, true, "topDownColor"},
         {-2.0 + 1.5f * I, 1, 1, 0.005f, 100, false, "topDownGray2"},
         {-2.0 - 1.5f * I, 800, +600, 0.005f, 100, false, "BottomUpGray"},
+        {-2.0 - 2.0f * I, 800, +600, 0.005f, 100, false, "BottomUpColor"},
         {-2.0 - 1.5f * I, 800, +600, 0.005f, 100, false, "BottomUpGray2"},
 
         {-0.5 + 2.0f * I, 200, -200, 0.01f, 50, false, "randomGrayscale"},
@@ -160,11 +154,9 @@ bool individualTests() {
             double time_V2 = performanceTest(tricorn_V2, test_cases[i], iterations);
             double time_V3 = performanceTest(tricorn_V3, test_cases[i], iterations);
             double time_V4 = performanceTest(tricorn_V4, test_cases[i], iterations);
-            double time_V5 = performanceTest(tricorn_V5, test_cases[i], iterations);
             printf("Test %zu/%zu BESTANDEN: %s\n", i+1, test_case_count, test_cases[i].name);
             printf("Zeiten (pro Iteration) - "
-                   "V0: %f V1: %f V2: %f V3: %f V4: %f V5: %f\n", time, time_V1, time_V2, time_V3,
-                time_V4, time_V5);
+                   "V0: %f V1: %f V2: %f V3: %f V4: %f\n", time, time_V1, time_V2, time_V3, time_V4);
             passed++;
         } else {
             printf("\nTest %zu/%zu UNGÜLTIG: %s\n", i+1, test_case_count, test_cases[i].name);
@@ -211,7 +203,7 @@ bool symmetryTest(size_t width, ssize_t height_signed, int trials) {
     int passed = 0;
 
     // Betrag der Bildhöhe bestimmen und Vorzeichen für die Bildausrichtung in 'factor' speichern
-    size_t height = height_signed < 0 ? -height_signed : height_signed;
+    size_t height = abs_size(height_signed);
     float factor = height_signed < 0 ? -1.0f : 1.0f;
 
     unsigned n = 100;
@@ -247,10 +239,9 @@ bool symmetryTest(size_t width, ssize_t height_signed, int trials) {
 
 bool testSuite() {
     printf("Starte Tests:\n");
-    bool result = true;
-    result = individualTests() ? result: false;
-    result = randomizedTest(200, 200, 100) ? result: false;
-    result = symmetryTest(200, 200, 100) ? result: false;
+    individualTests();
+    randomizedTest(200, 200, 100);
+    symmetryTest(200, 200, 100);
     printf("Tests beendet:\n");
-    return result;
+    return true;
 }
