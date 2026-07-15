@@ -12,48 +12,67 @@
 
 
 void tricorn_V3(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
-    int bytesPerPixel = color ? 3 : 1;
-    size_t row_size = ((width * bytesPerPixel+3)/4)*4; // Größe einer Reihe würde auf 4 Byte aufgefüllt(Padding)
 
-    /* Wenn heigt größer 0 ist, startet man unten links und geht nach oben also addiert man +y und sonst
-     * startet man oben links un zieht y ab, das vorzeichen wird über factor kontrolliert*/
+    int bytesPerPixel = color ? 3 : 1;
+
+    // Größe einer Reihe wird durch Padding ein Vielfaches von 4
+    size_t row_size = ((width * bytesPerPixel+3)/4)*4;
+
+    // Die Richtung der y-Achse hängt vom Vorzeichen von 'height' ab:
+    // height > 0: Start unten links, y wird nach oben größer
+    // height < 0: Start oben links, y wird nach unten größer
     float factor = height < 0 ? -1.0f : 1.0f;
     size_t top = abs_size(height);
 
-    /* Width muss nicht durch 4 teilbar sein. Deswegen machen wir 4 koordinaten in parallel so lange das geht und
-     * dann am Ende den Rest (also 0 - 3 Elemente) sequenziell*/
+    // SIMD verarbeitet immer 4 Pixel gleichzeitig.
+    // endIndex ist die größte Spalte, welche durch 4 teilbar ist
+    // Restpixel in einer Reihe müssen somit seperat (ohne SIMD) berechnet werden
     size_t endIndex = width - (width % 4);
 
-    /* For Symmetre we first find the center which is the y where imag is 0, then knowing that,
-       we for every y can calculate the corresponding mirrored y which is 2 * center - y (makes sense)
-       Now we calculate the same stuff as before, however if we find a partner, that is smaller than the current y
-       this must mean that it already was computed, as we go from 0 to top i guess. The only issue is now that
-       if the center is out of bounds. When it is below the image with our formula this would mean that we already
-       have calculated everything. So we only skip if the partner is larger than 0. If it is above the image, we dont
-       skip anything, but we obviously cant save anyhting either. We must consider that we can only draw pixels in bound
-       so we check both later.
-
-        HOWEVER. If due to weird resolutions etc the center is not at a clean y but at like 2.4 or something
-        i see no way of using that optimization.
+    /* SYMMETRIEOPTIMIERUNG:
+     *
+     * Die Symmetrieoptimierung wird nur verwendet, wenn die Spiegelung an der x-Achse exakt auf einer Bildzeile liegt.
+     * Dadurch entstehen keine falschen Zuordnungen, aber die Symmetrie kann nicht für alle Auflösungen genutzt werden.
+     *
+     * Das Fraktal ist bezüglich der x(reellen)-Achse symmetrisch. Somit besitzen (x,y) und (x,-y) dieselbe Escape-Time.
+     * Zunächst wird die Bildzeile bestimmt, in der der Imaginärteil 0 ist.
+     * Für jede Zeile y wird dann ihre gespiegelte Zeile berechnet.
+     *
+     * Liegt diese oberhalb der aktuellen Zeile, wird später das Ergebnis gleichzeitig in beide
+     * Zeilen geschrieben.
+     *
+     * Liegt sie unterhalb, wurde sie bereits berechnet/beschrieben und die Zeile kann übersprungen
+     * werden.
      */
+
     double center = -(cimag(start) / (double) (factor * res));
     for (size_t y = 0; y < top; y++) {
-        unsigned char *bottomRow = img + y * row_size; // *row zeigt nun auf den Anfang von Zeile y (0-indexed)
+        // *row zeigt nun auf den Anfang von Zeile y (0-indexed)
+        unsigned char *bottomRow = img + y * row_size;
 
-        // Berechnen vom Imaginärteil von y und des kandidaten, Symmetrie wird nur bei exakter korrektheit verwendet
+        // Berechnung der gespiegelten Zeile
         ssize_t sym_y = lround(2.0 * center - (double) y);
+
+        // Imaginärteile der beiden Zeilen
         float imag_y = cimagf(start) + factor * (float) y * res;
         float imag_sym = cimagf(start) + factor * (float) sym_y * res;
-        // Durch Exaktheit keine False Positives aber auch weniger Hits
+
+        // Symmetrie wird nur verwendet, wenn die Spiegelung exakt ist
+        // und die gespiegelte Zeile innerhalb des Bildes liegt.
         bool useSym = sym_y >= 0 && sym_y < (ssize_t) top && imag_y == -imag_sym ;
         unsigned char *topRow = NULL;
+
+        // Koordinate schon berechnet und eingetragen.
         if(useSym && sym_y < (ssize_t) y) {
-            continue; // Koordinate schon berechnet und eingetragen
+            continue;
         }
+
+        // Ergebnis zusätzlich in gespiegelte Zeile schreiben.
         if (useSym && sym_y != (ssize_t) y) {
             topRow = img + sym_y * row_size;
         }
 
+        // Verarbeitung der Pixel in 4er-Blöcken mittels SIMD
         for (size_t x = 0; x < endIndex; x += 4) {
 
             unsigned iterations[4];
@@ -61,17 +80,22 @@ void tricorn_V3(float complex start, size_t width, ssize_t height, float res, un
             const float complex c2 = start + ((float) x + 1) * res + factor * (float) y * res * I;
             const float complex c3 = start + ((float) x + 2) * res + factor * (float) y * res * I;
             const float complex c4 = start + ((float) x + 3) * res + factor * (float) y * res * I;
+
+            // Escape Time für alle 4 Punkte gleichzeitig berechnen
             _mm_storeu_si128((__m128i*) iterations, symEscapeTime(n, c1, c2, c3, c4));
 
+            // Ergebnisse ins Bild schreiben
             for (int i = 0; i < 4; i++){
                 size_t x_offset = (x + i) * bytesPerPixel;
                 unsigned char *bottomOffset = bottomRow + x_offset;
                 RGB_color rgb = getColor(n, iterations[i], color);
-                // rgb is reversed on bitmap
+                // BMP speichert im BGR-Format
                 if (color) {
                     bottomOffset[0] =  rgb.b;
                     bottomOffset[1] =  rgb.g;
                     bottomOffset[2] =  rgb.r;
+
+                    // Falls vorhanden, wird auch das gespiegelte Pixel gesetzt.
                     if(topRow != NULL){
                         unsigned char *topOffset = topRow + x_offset;
                         topOffset[0] =  rgb.b;
@@ -88,8 +112,9 @@ void tricorn_V3(float complex start, size_t width, ssize_t height, float res, un
                 }
             }
         }
-        // Den Rest von width auch noch fillen (bis zu 3 elemente)
-        // Es werden 4 werte in parallel berechnet, aber nur die benötigten eingetragen
+        // Den Rest von width auch noch fillen (bis zu 3 elemente).
+        // Es wird weiterhin SIMD genutzt, wobei nur die tatsächlich in der Bitmap
+        // vorkommenden Pixel übernommen werden
         if(endIndex < width) {
             unsigned rest_iterations[4];
             const float complex c1 = start + (float) endIndex * res + factor * (float) y * res * I;
@@ -124,9 +149,9 @@ void tricorn_V3(float complex start, size_t width, ssize_t height, float res, un
                 }
             }
         }
-
+        //restliche Padding Bits einer Zeile auffüllen
         for (size_t i= width*bytesPerPixel; i<row_size; i++) {
-            bottomRow[i]=0; //restliche Padding Bits einer Zeile auffüllen
+            bottomRow[i]=0;
             if (topRow != NULL) {
                 topRow[i]=0;
             }
