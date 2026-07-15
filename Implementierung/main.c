@@ -146,23 +146,16 @@ int main(int argc, char *argv[]) {
                 fprintf(stderr, "Error: Ungültiges Format hinter -d\n");
                 return 1;
             }
-            if (width_signed <= 0) {
-                fprintf(stderr, "Error: Width muss positiv sein\n");
+            if (width_signed <= 0 || width_signed > BMP_MAX_RANGE) {
+                fprintf(stderr, "Error: Width muss positiv sein und in ]0,  2.147.483.647] liegen. \n");
                 return 1;
             }
-            if (width_signed > INT32_MAX) {
-                fprintf(stderr, "Error: Breite out of Range ]-2.147.483.648, 2.147.483.647[\n");
+            if (height_signed == 0 || height_signed > BMP_MAX_RANGE || height_signed < BMP_MIN_RANGE) {
+                fprintf(stderr, "Error: Height darf nicht 0 sein und muss in [-2.147.483.648, 2.147.483.647] "
+                                "liegen\n");
                 return 1;
             }
-            if (height_signed == 0) {
-                fprintf(stderr, "Error: Height darf nicht 0 sein\n");
-                return 1;
-            }
-            if (height_signed > INT32_MAX || height_signed < INT32_MIN) {
-                fprintf(stderr, "Error: Höhe out of Range ]-2.147.483.648, 2.147.483.647[\n");
-                return 1;
-            }
-            width = width_signed ;
+            width = width_signed; // Overflow wird abgefangen
             i++;
         }
         //resolution (auch frei wählbar) mit -r <FLOAT>; <FLOAT> muss hierbei ein Float sein
@@ -190,16 +183,22 @@ int main(int argc, char *argv[]) {
             }
             errno = 0;
 
-            n1 = strtoul(argv[i+1], &end, 10);
-            if (*end != '\0'||errno != 0||argv[i+1]==end) {
+            n1 = strtol(argv[i+1], &end, 10);
+            if (*end != '\0'|| errno != 0|| argv[i+1]==end) {
                 fprintf(stderr, "Error: nach -n ist keine gültige Zahl\n");
                 return 1;
             }
-            if (n1<0) {
+            if (n1 < 0) {
                 fprintf(stderr, "Error: n muss positiv sein\n");
                 return 1;
             }
-            n = (unsigned)n1;
+
+            if (n1 > UINT_MAX) {
+                fprintf(stderr, "Error: n zu groß (maximal %u)\n", UINT_MAX);
+                return 1;
+            }
+
+            n = (unsigned) n1;
             i++;
         }
         //color setzen per -C oder --color flag
@@ -239,7 +238,16 @@ int main(int argc, char *argv[]) {
 
     const size_t bytesPerPixel = color ? 3 : 1;
     size_t row_size = ((width * bytesPerPixel+3)/4)*4;
-    size_t pixelArraySize = row_size * height; // Overflow kann nicht passieren beide signed zahlen < 32Bit
+    // Kein Überlauf, da die Größe von width und height bereits überprüft worden sind
+    size_t pixelArraySize = row_size * height;
+
+    size_t paletteSize = color ? COLOR_PALETTE_SIZE : GREY_PALETTE_SIZE;
+    size_t pixelOffset = BMP_HEADER_SIZE + paletteSize;
+    size_t fileSize = pixelOffset + pixelArraySize;
+    if (fileSize > BMP_MAX_FILE_SIZE) {
+        fprintf(stderr, "Error: Bitmap datei zu groß (maximal 4 GB)\n");
+        return 1;
+    }
 
     unsigned char *img = malloc(pixelArraySize);
     if (img == NULL) {
@@ -291,11 +299,11 @@ int main(int argc, char *argv[]) {
             fprintf(stderr, "Warnung: Gesamtlaufzeit liegt unter 1s. Erhöhe die Iterationen! (%fs < 1s)\n", time);
         }
         double avg_time = time / (double)benchmark_iterations;
-        printf("Gesamtlaufzeit: %fs bei %zu Wiederholungen\n", time, benchmark_iterations);
+        printf("Gesamtlaufzeit: %fs bei %zd Wiederholungen\n", time, benchmark_iterations);
         printf("Dauer pro Iteration: %fs\n", avg_time); // %g für ganz kleine Zahlen?
     }
 
-    int ret = writeBmp(new_filename, width, height_signed, img, color);
+    int ret = writeBmp(new_filename, width_signed, height_signed, img, color);
 
     free(img);
     return ret;

@@ -3,27 +3,33 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "utils.h"
 
-int writeBmp(char *filename, size_t width, ssize_t heightsigned, unsigned char *img, bool color) {
+int writeBmp(char *filename, ssize_t width, ssize_t height_signed, unsigned char *img, bool color) {
     // Schreibt die Bitmap Datei, gibt 1 bei Fehler und 0 bei Erfolg zurück
-    size_t height;
-    if (heightsigned < 0) {
-        height = heightsigned * (-1);
+    /* Die range checks sind auch schon in der main, sodass das img nicht unnötig generiert wird, aber sollten
+     * trotzdem in der Funktion selbst auch geprüft werden*/
+    if (width <= 0 || width > BMP_MAX_RANGE) {
+        fprintf(stderr, "Error: Width out of Range ]0, 2.147.483.647]\n");
+        return 1;
     }
-    else {
-        height = heightsigned ;
+    if (height_signed > BMP_MAX_RANGE || height_signed < BMP_MIN_RANGE || height_signed == 0) {
+        fprintf(stderr, "Error: Height out of Range [-2.147.483.648, 0[ / ] 0, 2.147.483.647]\n");
+        return 1;
     }
 
-    int32_t bmp_height = (int32_t) (heightsigned);
+    size_t height = abs_size(height_signed);
+
+    int32_t bmp_height = (int32_t) (height_signed);
     int bytesPerPixel = color ? 3 : 1;
     size_t row_size = ((width * bytesPerPixel+3)/4)*4;
     size_t pixelArraySize = row_size * height;
-    size_t paletteSize = color ? 0 : 1024;
-    size_t pixelOffset = 54 + paletteSize;
+    size_t paletteSize = color ? COLOR_PALETTE_SIZE : GREY_PALETTE_SIZE;
+    size_t pixelOffset = BMP_HEADER_SIZE + paletteSize;
     size_t fileSize = pixelOffset + pixelArraySize; // 54 für header der bmp datei
     unsigned char header[54] = {0}; // header deklarieren; initialisieren
 
-    if (fileSize > UINT32_MAX) {
+    if (fileSize > BMP_MAX_FILE_SIZE) {
         fprintf(stderr, "Error: Bitmap Größe out of Range (maximal 4 GB)\n");
         return 1;
     }
@@ -75,7 +81,7 @@ int writeBmp(char *filename, size_t width, ssize_t heightsigned, unsigned char *
         return 1;
     }
 
-    if(fwrite(header, 1, sizeof(header), f) !=sizeof(header)) {
+    if(fwrite(header, 1, sizeof(header), f) != sizeof(header)) {
         fprintf(stderr, "Fehler beim schreiben der Bitmap.\n");
         fclose(f);
         return 1;
@@ -98,7 +104,7 @@ int writeBmp(char *filename, size_t width, ssize_t heightsigned, unsigned char *
     }
 
 
-    if(fwrite(img, pixelArraySize, 1, f ) != 1) {
+    if(fwrite(img, pixelArraySize, 1, f ) != pixelArraySize) {
         fprintf(stderr, "Fehler beim schreiben der Bitmap.\n");
         fclose(f);
         return 1;
