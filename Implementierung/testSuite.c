@@ -130,7 +130,7 @@ bool correctnessTest(TestCase tc, bool print_debug) {
     return all_passed;
 }
 
-bool individualTests() {
+bool individualTests(bool print_debug) {
     unsigned iterations = 100;
     bool all_passed = true;
 
@@ -176,7 +176,7 @@ bool individualTests() {
         printf("Auflösung\t%f\n", test_cases[i].res);
         printf("Iterationen n:\t%u\n", test_cases[i].n);
         printf("Farbe:\t\t%s\n", test_cases[i].color ? "true" : "false");
-        bool correct = correctnessTest(test_cases[i], false);
+        bool correct = correctnessTest(test_cases[i], print_debug);
 
         if (correct) {
             double time = performanceTest(tricorn, test_cases[i], iterations);
@@ -268,7 +268,7 @@ bool symmetryTest(size_t width, ssize_t height_signed, int trials) {
 
 bool testSuite() {
     printf("Starte Tests:\n");
-    individualTests();
+    individualTests(true);
     randomizedTest(200, 200, 100);
     symmetryTest(200, 200, 100);
     printf("Tests beendet:\n");
