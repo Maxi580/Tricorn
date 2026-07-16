@@ -45,27 +45,15 @@ int main(int argc, char *argv[]) {
     char *end2;
 
     for (int i = 1; i < argc; i++) {
-        if (strcmp(argv[i], "-test") == 0) {
-            if (testSuite()) {
-                printf("Alle Bitmaps gleich\n");
-            }
-            else {
-                printf("Fehler Im Code\n");
-            }
+        //Zeit/Implementationen Testen
+        if (strcmp(argv[i], "--test") == 0 || strcmp(argv[i], "-t") == 0) {
+            testSuite();
             return EXIT_SUCCESS;
         }
         // Graph erstellen
         else if (strcmp(argv[i], "-graph") == 0) {
             if (generatePlottableTable() == 1) {
                 fprintf(stderr, "Fehler beim Erstellen des Graphen\n");
-                return EXIT_FAILURE;
-            }
-            return EXIT_SUCCESS;
-        }
-        // Zeit messen
-        else if (strcmp(argv[i], "--test") == 0 || strcmp(argv[i], "-t") == 0) {
-            if (testSuite() == 1) {
-                fprintf(stderr, "Fehler beim Ausführen der Testsuite\n");
                 return EXIT_FAILURE;
             }
             return EXIT_SUCCESS;
