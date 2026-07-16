@@ -11,8 +11,8 @@
 
 
 void tricorn_V3(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
-    int bytesPerPixel = color ? 3 : 1;
-    size_t row_size = ((width * bytesPerPixel+3)/4)*4; // Größe einer Reihe würde auf 4 Byte aufgefüllt(Padding)
+    int bytes_per_pixel = color ? 3 : 1;
+    size_t row_size = ((width * bytes_per_pixel+3)/4)*4; // Größe einer Reihe würde auf 4 Byte aufgefüllt(Padding)
 
     /* Wenn heigt kleiner 0 ist, startet man unten links und geht nach oben also addiert man +y und sonst
      * startet man oben links un zieht y ab, das vorzeichen wird über factor kontrolliert*/
@@ -21,7 +21,7 @@ void tricorn_V3(float complex start, size_t width, ssize_t height, float res, un
 
     /* Width muss nicht durch 4 teilbar sein. Deswegen machen wir 4 koordinaten in parallel so lange das geht und
      * dann am Ende den Rest (also 0 - 3 Elemente) sequenziell*/
-    size_t endIndex = width - (width % 4);
+    size_t end_index = width - (width % 4);
 
     /* For Symmetre we first find the center which is the y where imag is 0, then knowing that,
        we for every y can calculate the corresponding mirrored y which is 2 * center - y (makes sense)
@@ -36,9 +36,9 @@ void tricorn_V3(float complex start, size_t width, ssize_t height, float res, un
         i see no way of using that optimization.
      */
     for (size_t y = 0; y < top; y++) {
-        unsigned char *bottomRow = img + y * row_size; // *row zeigt nun auf den Anfang von Zeile y (0-indexed)
+        unsigned char *bottom_row = img + y * row_size; // *row zeigt nun auf den Anfang von Zeile y (0-indexed)
 
-        for (size_t x = 0; x < endIndex; x += 4) {
+        for (size_t x = 0; x < end_index; x += 4) {
             unsigned iterations[4];
             const float complex c1 = start + (float) x * res + factor * (float) y * res * I;
             const float complex c2 = start + ((float) x + 1) * res + factor * (float) y * res * I;
@@ -47,50 +47,50 @@ void tricorn_V3(float complex start, size_t width, ssize_t height, float res, un
             _mm_storeu_si128((__m128i*) iterations, escapeTimeCircle(n, c1, c2, c3, c4));
 
             for (int i = 0; i < 4; i++){
-                size_t x_offset = (x + i) * bytesPerPixel;
-                unsigned char *bottomOffset = bottomRow + x_offset;
+                size_t x_offset = (x + i) * bytes_per_pixel;
+                unsigned char *bottom_offset = bottom_row + x_offset;
                 RGB_color rgb = getColor(n, iterations[i], color);
 
                 // rgb is reversed on bitmap
                 if (color) {
-                    bottomOffset[0] =  rgb.b;
-                    bottomOffset[1] =  rgb.g;
-                    bottomOffset[2] =  rgb.r;
+                    bottom_offset[0] =  rgb.b;
+                    bottom_offset[1] =  rgb.g;
+                    bottom_offset[2] =  rgb.r;
                 }
                 else {
-                    bottomOffset[0] =  rgb.b;
+                    bottom_offset[0] =  rgb.b;
                 }
             }
         }
         // Den Rest von width auch noch fillen (bis zu 3 elemente)
         // Es werden 4 werte in parallel berechnet, aber nur die benötigten eingetragen
-        if(endIndex < width) {
+        if(end_index < width) {
             unsigned rest_iterations[4];
-            const float complex c1 = start + (float) endIndex * res + factor * (float) y * res * I;
-            const float complex c2 = start + ((float) endIndex + 1) * res + factor * (float) y * res * I;
-            const float complex c3 = start + ((float) endIndex + 2) * res + factor * (float) y * res * I;
-            const float complex c4 = start + ((float) endIndex + 3) * res + factor * (float) y * res * I;
+            const float complex c1 = start + (float) end_index * res + factor * (float) y * res * I;
+            const float complex c2 = start + ((float) end_index + 1) * res + factor * (float) y * res * I;
+            const float complex c3 = start + ((float) end_index + 2) * res + factor * (float) y * res * I;
+            const float complex c4 = start + ((float) end_index + 3) * res + factor * (float) y * res * I;
             _mm_storeu_si128((__m128i*) rest_iterations, escapeTimeCircle(n, c1, c2, c3, c4));
 
-            size_t range = width - endIndex;
+            size_t range = width - end_index;
             for (size_t i = 0; i < range; i++){
-                size_t x_offset = (endIndex + i) * bytesPerPixel;
-                unsigned char *bottomOffset = bottomRow + x_offset;
+                size_t x_offset = (end_index + i) * bytes_per_pixel;
+                unsigned char *bottom_offset = bottom_row + x_offset;
                 RGB_color rgb = getColor(n, rest_iterations[i], color);
 
                 if (color) {
-                    bottomOffset[0] =  rgb.b;
-                    bottomOffset[1] =  rgb.g;
-                    bottomOffset[2] =  rgb.r;
+                    bottom_offset[0] =  rgb.b;
+                    bottom_offset[1] =  rgb.g;
+                    bottom_offset[2] =  rgb.r;
                 }
                 else {
-                    bottomOffset[0] =  rgb.b;
+                    bottom_offset[0] =  rgb.b;
                 }
             }
         }
 
-        for (size_t i= width*bytesPerPixel; i<row_size; i++) {
-            bottomRow[i]=0; //restliche Padding Bits einer Zeile auffüllen
+        for (size_t i= width*bytes_per_pixel; i<row_size; i++) {
+            bottom_row[i]=0; //restliche Padding Bits einer Zeile auffüllen
         }
     }
 }

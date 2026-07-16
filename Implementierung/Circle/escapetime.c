@@ -24,7 +24,7 @@ __m128i escapeTimeCircle(const unsigned n, const float complex c1, const float c
     __m128i one = _mm_set1_epi32(1);
 	__m128 circleRadius = _mm_set1_ps(0.0625f); //Sqrt(0.25) = 0.0625
     __m128 minus_two = _mm_set1_ps(-2.0f);
-    __m128 squaredEscapeDistance = _mm_set1_ps(4.0f);
+    __m128 squared_escape_distance = _mm_set1_ps(4.0f);
 
     __m128 z_real = _mm_setzero_ps();;
     __m128 z_imagine = _mm_setzero_ps();
@@ -52,7 +52,7 @@ __m128i escapeTimeCircle(const unsigned n, const float complex c1, const float c
     while (i++ < n) {
         // Rounds inkrementieren, falls z noch nicht divergiert (also Betrag <= 4 ist)
         __m128 distance = _mm_add_ps(realSquared, imagSquared);
-        __m128 mask = _mm_cmple_ps(distance, squaredEscapeDistance); // FFFFFFFF wo distance <= 4, 0 sonst
+        __m128 mask = _mm_cmple_ps(distance, squared_escape_distance); // FFFFFFFF wo distance <= 4, 0 sonst
         if (_mm_movemask_ps(mask) == 0) break; // Wenn die Maske 0 ist schon alles escaped und man kann aufhören.
         // Setzt 1nsen genau da, wo die maske nicht 0 ist (Castet mask floats als int)
         __m128i inc  = _mm_and_si128(one, _mm_castps_si128(mask));
@@ -68,7 +68,7 @@ __m128i escapeTimeCircle(const unsigned n, const float complex c1, const float c
 
     // Es wird das inkrementiert, was im vorletzten Schritt noch nicht divergiert ist
     __m128 distance = _mm_add_ps(realSquared, imagSquared);
-    __m128 mask = _mm_cmple_ps(distance, squaredEscapeDistance);
+    __m128 mask = _mm_cmple_ps(distance, squared_escape_distance);
     __m128i inc  = _mm_and_si128(one, _mm_castps_si128(mask));
     rounds  = _mm_add_epi32(rounds, inc);
 

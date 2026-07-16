@@ -69,17 +69,17 @@ twoIntegerLanes  escapeTimeLatencyThroughputTwo(const unsigned n, const float co
         // Rounds inkrementieren, falls z noch nicht divergiert (also Betrag <= 4 ist)
     	__m128 distance_a = _mm_add_ps(real_squared.a, imag_squared.a);
     	__m128 distance_b = _mm_add_ps(real_squared.b, imag_squared.b);
-        __m128 maskA = _mm_cmple_ps(distance_a, squared_escape_distance); // FFFFFFFF wo distance <= 4, 0 sonst
+        __m128 mask_a = _mm_cmple_ps(distance_a, squared_escape_distance); // FFFFFFFF wo distance <= 4, 0 sonst
     	__m128 mask_b = _mm_cmple_ps(distance_b, squared_escape_distance);
-        if (_mm_movemask_ps(maskA) == 0) lane_a_is_finished = true; // Wenn die Maske 0 ist schon alles escaped und man kann aufhören.
+        if (_mm_movemask_ps(mask_a) == 0) lane_a_is_finished = true; // Wenn die Maske 0 ist schon alles escaped und man kann aufhören.
     	if (_mm_movemask_ps(mask_b) == 0) lane_b_is_finished = true;
     	if(lane_a_is_finished && lane_b_is_finished) break;
 
         // Setzt 1nsen genau da, wo die maske nicht 0 ist (Castet mask floats als int)
-        __m128i incA  = _mm_and_si128(one, _mm_castps_si128(maskA));
-    	__m128i incB  = _mm_and_si128(one, _mm_castps_si128(mask_b));
-        rounds.a  = _mm_add_epi32(rounds.a , incA);
-    	rounds.b  = _mm_add_epi32(rounds.b , incB);
+        __m128i inc_a  = _mm_and_si128(one, _mm_castps_si128(mask_a));
+    	__m128i inc_b  = _mm_and_si128(one, _mm_castps_si128(mask_b));
+        rounds.a  = _mm_add_epi32(rounds.a , inc_a);
+    	rounds.b  = _mm_add_epi32(rounds.b , inc_b);
 
         // Zi+1 berechnen: z = realSquared - imagSquared - 2 * crealf(z) * cimagf(z) * I;
         z_imagine.a = _mm_add_ps(c_imagine.a, _mm_mul_ps(minus_two, _mm_mul_ps(z_real.a, z_imagine.a)));
