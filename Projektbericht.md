@@ -54,34 +54,44 @@ Weiter wird die tricorn Funktion so oft aufgerufen, bis die summierte Ausführun
 Leider zählt hierbei auch das Ausführen der For-Schleife in die Messung, das nach der Vorlesung allerdings passt. 
 Außerdem wird die beste Messung aus dreimal Wiederholungen verwendet, um eventuelle Störungen, die wir nicht mitmessen wollen, zu vermeiden.
 
+Um die die Performanz der verschiedenen Versionen besser vergleichen zu können, plotten wir die Performanz dieser, bei
+steigender Größe eines quadratischen Bildes (mit ebenfalls steigender Auflösung).
   
 
 ## Testumgebung (Korrektheit)
-Es wurden eine Funktion (correctnessTest) geschrieben, die einen Testcase auf allen implementierten Tricorn Versionen
-ausführt und überprüft ob alle gleich der Naiven Implementierung ist. Darauf wurden mehrere Funktionen geschrieben, 
-die Testcases aufrufen und die korrektheit überprüfen. Falls ein Fehler entdeckt wird, kann das erste falsche byte sowie 
-die Version die nicht identisch zur naiven implementierung ist ausgegeben.
 
-Zuerst wurden manuell sinnvolle Testcases geschrieben, womit Basecases abgedeckt werden.
-Es wird aber außerdem z.B. das grenzverhalten von SIMD getestet, wo immer 4 pixel in parallel bearbeitet werden, indem die Breite 
-auf nicht durch 4 teilbare werte gesetzt werden, dadurch wird getestet ob auch der Rest korrekt behandelt wird. Die Zeit wird 
-ebenfalls mitgemessen um eventuell seltsames Verhalten genauer zu beobachten. 
+Zur Überprüfung der Korrektheit wurde eine Funktion (correctnessTest) implementiert, 
+die einen Testcase auf allen implementierten Tricorn Versionen ausführt und prüft, 
+ob alle Ergebnisse mit der naiven Implementierung übereinstimmen. Wird ein Fehler entdeckt, 
+können das erste abweichende Byte sowie die Version, die nicht mit der naiven Implementierung identisch ist, ausgegeben werden.
 
-Darüber hinaus werden randomisierte Tests ausgeführt, die Startwerte und resolution zufällig auswählen und testen. Um sehr viele
-dieser auszuführen, wird die Zeit nicht gemessen. 
+Darauf aufbauend wurden mehrere Funktionen geschrieben, die Testcases aufrufen und die Korrektheit überprüfen. 
+Zunächst wurden manuell sinnvolle Testcases erstellt, die die Basisfälle abdecken. 
+Darüber hinaus wird gezielt das Grenzverhalten der SIMD Implementierung getestet, 
+bei der jeweils vier Pixel parallel verarbeitet werden. Dazu wird die Breite auf nicht durch vier teilbare Werte gesetzt, 
+wodurch geprüft wird, ob auch der verbleibende Rest korrekt behandelt wird. Die Zeit wird bei diesen Tests ebenfalls mitgemessen, 
+um auffälliges Verhalten genauer beobachten zu können.
 
-Ebenfalls wurden speziell für die Symmetrie Optimierung eine Funktion implementiert die diese auf korrektheit testet. Das
-funktioniert indem zuerst das zentrum also, der punkt indem imaginärteil 0 ist auf ein gerades y gesetzt wird. Das liegt daran
-das eine existente Symmetrie Optimierung dann spiegeln muss, da diese der einfachste case sein sollte. Im test wird dann allerdings
-die resolution auf einen zufälligen und sehr kleinen wert gesetzt. Dies hat sehr zuverlässig Fehler gefunden, da die 
-Imaginärteile der jeweiligen y koordinaten sehr viele nachkommastellen hatten, sodass z.b. eine Koordinate den imaginärteil 20,293984 hatte 
-und die gespiegelte 20,29838 hatte, Optimierungen die sowas spiegelten, führten zu Fehlern.
+Zusätzlich werden randomisierte Tests ausgeführt, die Startwerte und Auflösung zufällig wählen.
+Um sehr viele dieser Tests durchführen zu können, wird hier die Zeit nicht gemessen.
 
+Speziell für die Symmetrie Optimierung wurde eine eigene Funktion implementiert, die deren Korrektheit prüft. 
+Dazu wird zunächst das Zentrum, also der Punkt mit Imaginärteil 0, auf ein gerades y gesetzt. 
+Der Grund ist, dass eine vorhandene Symmetrie Optimierung an dieser Stelle spiegeln muss, da dies der 
+einfachste Fall sein sollte. Im Test wird (v.a.) die Auflösung anschließend auf einen zufälligen, sehr kleinen Wert gesetzt. 
+Dieses Vorgehen hat sehr zuverlässig Fehler gefunden, da die Imaginärteile der jeweiligen y Koordinaten dann viele 
+Nachkommastellen besitzen. So hatte beispielsweise eine Koordinate den Imaginärteil 20,293984 und die gespiegelte 20,29838. 
+Optimierungen, die solche Werte gespiegelt haben, führten zu Fehlern.
 
-Die korrektheit der Bitmap wurde vor allem dadurch getestet, ob standard-Software in der Lage ist diese korrekt zu interpretieren.
-Leider war es nicht möglich externe zu 100% korrekte Bitmaps mit unserer zu vergleichen, da die spezielle Konfiguration also Startwert, Auflösung etc
-nicht zugänglich gemacht worden sind. 
+Die Korrektheit der Bitmap wurde vor allem dadurch geprüft, ob Standardsoftware in der Lage ist, sie korrekt zu
+interpretieren. Ein direkter Vergleich mit extern erzeugten, garantiert korrekten Bitmaps war nicht möglich, da die 
+spezielle Konfiguration wie Startwert und Auflösung dort nicht zugänglich gemacht wurde.
 
+## Arbeitsaufteilung
+
+- Maximilian: Optimierungen, Testumgebung, Grapherstellung
+- Timon: Testumgebung, 
+- Hendrik: Bitmap, Makefile, Kommentare
 
 
 
