@@ -4,6 +4,9 @@
 
 ## Einleitung
 
+Im Projekt soll eine Bitmap mit einem Trikorn-Fraktal erstellt werden. Die EscapeTime Funktion berechnet die Anzahl
+der Iterationen, nachdem eine Koordinate divergiert. Mit Tricorn berechnen wir das ganze Bild, welches dann and writeBmp
+gegeben, welches die finale Bitmap schreibt.
 
 ## Optimierungen 
 
