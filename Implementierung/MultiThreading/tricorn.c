@@ -42,31 +42,25 @@ static void* tricornThreading(void* arg) {
     bool color = values->color;
     unsigned char* img = values->img;
     int bytes_per_pixel = color ? 3 : 1 ;
-    size_t row_size = ((width * bytes_per_pixel+3)/4)*4; // Größe einer Reihe würde auf 4 Byte aufgefüllt(Padding)
+    // Größe einer Reihe wird durch Padding ein Vielfaches von 4
+    size_t row_size = ((width * bytes_per_pixel+3)/4)*4;
 
-    /* Wenn heigt kleiner 0 ist, startet man unten links und geht nach oben also addiert man +y und sonst
-     * startet man oben links un zieht y ab, das vorzeichen wird über factor kontrolliert*/
+    // Die Richtung der y-Achse hängt vom Vorzeichen von 'height' ab:
+    // height > 0: Start unten links, y wird nach oben größer
+    // height < 0: Start oben links, y wird nach unten größer
     float factor = height < 0 ? -1.0f : 1.0f;
 
-    /* Width muss nicht durch die Anzahl der gleichzeitig berechnet Elemente teilbar sein. Deswegen machen wir
-       x koordinaten in parallel so lange das geht und dann am Ende den Rest*/
+    // SIMD verarbeitet hier immer 4*2 Pixel gleichzeitig.
+    // endIndex ist die größte Spalte, welche durch 8 teilbar ist.
+    // Verbleibende 1 bis 7 Pixel werden am Ende aufgefüllt.
     size_t end_index = width - (width % 8);
 
-    /* For Symmetre we first find the center which is the y where imag is 0, then knowing that,
-       we for every y can calculate the corresponding mirrored y which is 2 * center - y (makes sense)
-       Now we calculate the same stuff as before, however if we find a partner, that is smaller than the current y
-       this must mean that it already was computed, as we go from 0 to top i guess. The only issue is now that
-       if the center is out of bounds. When it is below the image with our formula this would mean that we already
-       have calculated everything. So we only skip if the partner is larger than 0. If it is above the image, we dont
-       skip anything, but we obviously cant save anyhting either. We must consider that we can only draw pixels in bound
-       so we check both later.
-
-        HOWEVER. If due to weird resolutions etc the center is not at a clean y but at like 2.4 or something
-        i see no way of using that optimization.
-     */
     for (size_t y = from_y; y < to_y; y += step_size) {
-        unsigned char *bottom_row = img + y * row_size; // *row zeigt nun auf den Anfang von Zeile y (0-indexed)
 
+        // *row zeigt nun auf den Anfang von Zeile y (0-indexed)
+        unsigned char *bottom_row = img + y * row_size;
+
+        // Verarbeitung der Pixel in 8er-Blöcken mittels SIMD
         for (size_t x = 0; x < end_index; x += 8) {
             unsigned iterations[8];
             const float complex imag_part = factor * (float) y * res * I;
@@ -79,15 +73,18 @@ static void* tricornThreading(void* arg) {
             const float complex b3 = start + ((float) x + 6) * res + imag_part;
             const float complex b4 = start + ((float) x + 7) * res + imag_part;
 
+            // Escape Time für alle 8 Punkte gleichzeitig berechnen
             twoIntegerLanes both_iterations = escapeTimeLatencyThroughputTwo(n, a1, a2, a3, a4, b1, b2, b3, b4);
             _mm_storeu_si128((__m128i*)iterations,       both_iterations.a);
             _mm_storeu_si128((__m128i*)(iterations + 4), both_iterations.b);
 
+            // Ergebnisse ins Bild schreiben
             for (int i = 0; i < 8; i++){
                 size_t x_offset = (x + i) * bytes_per_pixel;
                 unsigned char *bottom_offset = bottom_row + x_offset;
                 RGB_color rgb = getColor(n, iterations[i], color);
-                // rgb is reversed on bitmap
+
+                // BMP speichert im BGR-Format
                 if (color) {
                     bottom_offset[0] =  rgb.b;
                     bottom_offset[1] =  rgb.g;
@@ -98,8 +95,11 @@ static void* tricornThreading(void* arg) {
                 }
             }
         }
-        // Den Rest von width auch noch fillen (bis zu (ParallelElemente - 1) elemente)
-        // Es werden 4 werte in parallel berechnet, aber nur die benötigten eingetragen
+
+
+        // Den Rest von width auch noch fillen (bis zu 7 elemente).
+        // Es wird weiterhin SIMD genutzt, wobei nur die tatsächlich in der Bitmap
+        // vorkommenden Pixel übernommen werden
         if(end_index < width) {
             unsigned rest_iterations[8];
             float complex imag_part = factor * (float) y * res * I;
@@ -122,7 +122,8 @@ static void* tricornThreading(void* arg) {
                 size_t x_offset = (end_index + i) * bytes_per_pixel;
                 unsigned char *bottom_offset = bottom_row + x_offset;
                 RGB_color rgb = getColor(n, rest_iterations[i], color);
-                // rgb is reversed on bitmap
+
+                // BMP speichert im BGR-Format
                 if (color) {
                     bottom_offset[0] =  rgb.b;
                     bottom_offset[1] =  rgb.g;
@@ -134,8 +135,9 @@ static void* tricornThreading(void* arg) {
             }
         }
 
+        // restliche Padding Bits einer Zeile auffüllen
         for (size_t i= width*bytes_per_pixel; i<row_size; i++) {
-            bottom_row[i] = 0; // restliche Padding Bits einer Zeile auffüllen
+            bottom_row[i] = 0;
         }
     }
     return NULL;
@@ -143,28 +145,42 @@ static void* tricornThreading(void* arg) {
 
 void tricorn(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color,
     unsigned char* img) {
-    /* Multithreaded entlang der Y-Achse */
+    // Bestimmt die absolute Bildhöhe, da das Vorzeichen von 'height'
+    // lediglich die Ausrichtung der y-Achse festlegt.
     size_t max_y = height > 0 ? height : -height;
 
-    //  The 200k Value, was approximated by measuring when thread overhead stops mattering
+    // Multithreading wird nur bei ausreichend großen Bildern verwendet.
+    // Der Grenzwert von 200.000 wurde experimentall bestimmt.
+    // Ab dieser Größe überwiegt der Geschwindigkeitsgewinn den Thread-Overhead.
     if(width * max_y > 200000){
+
+        // Ermittelt die Anzahl der verfügbaren Prozessorkerne
         int thread_amount = getCoreAmount();
 
+        // Speichert die Thread-Handles und die zugehörigen Argumente.
         pthread_t threads[thread_amount];
         thread_data data[thread_amount];
 
+        // Erstellt für jeden verfügbaren Prozessorkern einen Thread.
         for (int i = 0; i < thread_amount; i++) {
             pthread_t thread;
-            // i == bottom_y, max_y = top y, threat_amount = step size
+
+            // Jeder Thread bearbeitet jede thread_amount-te Bildzeile.
+            // i gibt die erste zu bestimmende Zeile an,
+            // max_y die obere Grenze und thread_amount die Schrittweise.
             data[i] = (thread_data) {start, width, height, i, max_y, thread_amount, res, n, color, img};;
             pthread_create(&thread, NULL, tricornThreading, &data[i]);
             threads[i] = thread;
         }
 
+        // Wartet, bis alle Threads fertig sind.
         for (int i = 0; i < thread_amount; i++) {
             pthread_join(threads[i], NULL);
         }
     } else {
+
+        //Bei kleinen Bildern wird einfach die vorherige Implementation,
+        // also die 'Circle' Implementation (V4) genutzt.
         tricorn_V4(start, width, height, res, n, color, img);
     }
 }
