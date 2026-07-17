@@ -4,7 +4,6 @@
 #include <stdbool.h>
 #include <string.h>
 #include "bitmap.h"
-#include <immintrin.h>
 #include <time.h>
 
 #include "NaiveImplementation/tricorn_V1.h"

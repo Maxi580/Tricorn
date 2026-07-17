@@ -1,13 +1,6 @@
-
 #include <complex.h>
 #include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <stddef.h>
-#include <sys/types.h>
 
 #include "escapetime.h"
 #include "../colormap.h"
