@@ -12,46 +12,44 @@
 
 void tricorn_V3(float complex start, size_t width, ssize_t height, float res, unsigned n, bool color, unsigned char* img) {
     int bytes_per_pixel = color ? 3 : 1;
-    size_t row_size = ((width * bytes_per_pixel+3)/4)*4; // Größe einer Reihe würde auf 4 Byte aufgefüllt(Padding)
 
-    /* Wenn heigt kleiner 0 ist, startet man unten links und geht nach oben also addiert man +y und sonst
-     * startet man oben links un zieht y ab, das vorzeichen wird über factor kontrolliert*/
+    // Größe einer Reihe wird durch Padding ein Vielfaches von 4
+    size_t row_size = ((width * bytes_per_pixel+3)/4)*4;
+
+    // Die Richtung der y-Achse hängt vom Vorzeichen von 'height' ab:
+    // height > 0: Start unten links, y wird nach oben größer
+    // height < 0: Start oben links, y wird nach unten größer
     float factor = height < 0 ? -1.0f : 1.0f;
     size_t top = abs_size(height);
 
-    /* Width muss nicht durch 4 teilbar sein. Deswegen machen wir 4 koordinaten in parallel so lange das geht und
-     * dann am Ende den Rest (also 0 - 3 Elemente) sequenziell*/
+    // SIMD verarbeitet immer 4 Pixel gleichzeitig.
+    // endIndex ist die größte Spalte, welche durch 4 teilbar ist.
+    // Verbleibende 1 bis 3 Pixel werden am Ende aufgefüllt.
     size_t end_index = width - (width % 4);
 
-    /* For Symmetre we first find the center which is the y where imag is 0, then knowing that,
-       we for every y can calculate the corresponding mirrored y which is 2 * center - y (makes sense)
-       Now we calculate the same stuff as before, however if we find a partner, that is smaller than the current y
-       this must mean that it already was computed, as we go from 0 to top i guess. The only issue is now that
-       if the center is out of bounds. When it is below the image with our formula this would mean that we already
-       have calculated everything. So we only skip if the partner is larger than 0. If it is above the image, we dont
-       skip anything, but we obviously cant save anyhting either. We must consider that we can only draw pixels in bound
-       so we check both later.
-
-        HOWEVER. If due to weird resolutions etc the center is not at a clean y but at like 2.4 or something
-        i see no way of using that optimization.
-     */
     for (size_t y = 0; y < top; y++) {
-        unsigned char *bottom_row = img + y * row_size; // *row zeigt nun auf den Anfang von Zeile y (0-indexed)
 
+        // *row zeigt nun auf den Anfang von Zeile y (0-indexed)
+        unsigned char *bottom_row = img + y * row_size;
+
+        // Verarbeitung der Pixel in 4er-Blöcken mittels SIMD
         for (size_t x = 0; x < end_index; x += 4) {
             unsigned iterations[4];
             const float complex c1 = start + (float) x * res + factor * (float) y * res * I;
             const float complex c2 = start + ((float) x + 1) * res + factor * (float) y * res * I;
             const float complex c3 = start + ((float) x + 2) * res + factor * (float) y * res * I;
             const float complex c4 = start + ((float) x + 3) * res + factor * (float) y * res * I;
+
+            // Escape Time für alle 4 Punkte gleichzeitig berechnen
             _mm_storeu_si128((__m128i*) iterations, escapeTimeCircle(n, c1, c2, c3, c4));
 
+            // Ergebnisse ins Bild schreiben
             for (int i = 0; i < 4; i++){
                 size_t x_offset = (x + i) * bytes_per_pixel;
                 unsigned char *bottom_offset = bottom_row + x_offset;
                 RGB_color rgb = getColor(n, iterations[i], color);
 
-                // rgb is reversed on bitmap
+                // BMP speichert im BGR-Format
                 if (color) {
                     bottom_offset[0] =  rgb.b;
                     bottom_offset[1] =  rgb.g;
@@ -62,8 +60,9 @@ void tricorn_V3(float complex start, size_t width, ssize_t height, float res, un
                 }
             }
         }
-        // Den Rest von width auch noch fillen (bis zu 3 elemente)
-        // Es werden 4 werte in parallel berechnet, aber nur die benötigten eingetragen
+        // Den Rest von width auch noch fillen (bis zu 3 elemente).
+        // Es wird weiterhin SIMD genutzt, wobei nur die tatsächlich in der Bitmap
+        // vorkommenden Pixel übernommen werden
         if(end_index < width) {
             unsigned rest_iterations[4];
             const float complex c1 = start + (float) end_index * res + factor * (float) y * res * I;
@@ -78,6 +77,7 @@ void tricorn_V3(float complex start, size_t width, ssize_t height, float res, un
                 unsigned char *bottom_offset = bottom_row + x_offset;
                 RGB_color rgb = getColor(n, rest_iterations[i], color);
 
+                // BMP speichert im BGR-Format
                 if (color) {
                     bottom_offset[0] =  rgb.b;
                     bottom_offset[1] =  rgb.g;
@@ -89,8 +89,9 @@ void tricorn_V3(float complex start, size_t width, ssize_t height, float res, un
             }
         }
 
+        //restliche Padding Bits einer Zeile auffüllen
         for (size_t i= width*bytes_per_pixel; i<row_size; i++) {
-            bottom_row[i]=0; //restliche Padding Bits einer Zeile auffüllen
+            bottom_row[i]=0;
         }
     }
 }

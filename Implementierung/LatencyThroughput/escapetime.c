@@ -87,7 +87,7 @@ twoIntegerLanes  escapeTimeLatencyThroughputTwo(const unsigned n, const float co
 	// Es wird nur bis z(n-1) berechnet, da es für den Rückgabewert irrelevant ist, ob z(n) noch divergiert.
 	while (i++ < n) {
 
-        // Betrag von z berechnen
+		// (Betrag)^2 der aktuellen acht Punkte berechnen
     	__m128 distance_a = _mm_add_ps(real_squared.a, imag_squared.a);
     	__m128 distance_b = _mm_add_ps(real_squared.b, imag_squared.b);
 
