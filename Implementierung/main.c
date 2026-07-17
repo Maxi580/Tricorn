@@ -353,7 +353,7 @@ int main(int argc, char *argv[]) {
 
     // Bestimmt die absolute Bildhöhe.
     // Das Vorzeichen legt nur die Ausrichtung der Bitmap fest.
-    size_t height = height_signed < 0 ? -(size_t) height_signed : (size_t) height_signed;;
+    size_t height = abs_size(height_signed);
 
     // Bestimmt die Anzahl der Bytes pro Pixel.
     // Farbbilder verwenden drei Bytes, Graustufenbilder nur ein Byte.
