@@ -92,7 +92,7 @@ spezielle Konfiguration wie Startwert und Auflösung dort nicht zugänglich gema
 
 - Maximilian: Optimierungen, Testumgebung, Grapherstellung
 - Timon: Testumgebung, 
-- Hendrik: Bitmap, Makefile, Kommentare
+- Hendrik: Bitmap, Makefile, Kommentare, Verarbeitung der Kommandozeilenargumente 
 
 
 
