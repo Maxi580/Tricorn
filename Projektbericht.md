@@ -36,6 +36,13 @@ nie zu 100% korrekt ist, wurde diese Optimierung in der finalen Version weggelas
 
 ### Latency Throughput (tricorn_V4)
 
+Laut den Intel-Intrinsics ist die Latency von z.B. _mm_add_ps_ 8 mal so hoch wie der Throughput. Dadurch, dass
+wir in Escape Time eine Dependency Chain haben, da eine Instruktion fast immer das Ergebnis der vorherigen braucht ist 
+das sehr ineffizient. Deswegen berechnen wir gleich 2 mal 4er lanes (also insgesamt 8 Punkte gleichzeitig). Da wir so
+z.B. zwei add Operationen hintereinander machen können, wobei die zweite add operation nicht von der ersten abhängt, 
+also nicht darauf gewartet werden muss bis das Ergebnis im Speicher ist. Aufgrund limitierter Anzahl von xmm Registern 
+haben wir es auf bei 2x belassen.
+
 ### MutliThreading (Hauptimplementierung)
 
 
