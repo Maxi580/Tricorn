@@ -50,15 +50,36 @@ Weil die meiste Rechenlast in der Bildmitte liegt, teilen wir die Threads gleich
 Es wurde eine einheitliche Funktion implementiert, die für jede übergebene Implementierung und jeden Testcase genau gleich, die Zeit zur Berechnung des Images
 misst. Die Erstellung der Bitmap wird nicht gemessen, da es sich hierbei um I/O handelt. Es werden keine irellevanten setup Funktionen wie malloc() gemessen. Weiter wird die tricorn Funktion 
 so oft aufgerufen, bis die summierte Ausführungszeit mindestens 1sek überschreibt indem die Iterationen iterativ erhöht werden, 
-falls dies nicht erreicht worden is. Außerdem werden 3 Wiederholungen durchgeführt, selbst wenn weniger
-übergeben worden sind, um das Ergebnis verlässlicher zu macehn. Leider zählt hierbei auch das ausführen der for-schleife in die messung, was laut slides 
+falls dies nicht erreicht worden is. Außerdem werden 3 Wiederholungen des Tests durchgeführt, um das Ergebnis verlässlicher zu macehn. Leider zählt hierbei auch das ausführen der for-schleife in die messung, was laut slides 
 allerdings ok ist.
 
   
 
 ## Testumgebung (Korrektheit)
+Es wurden eine Funktion (correctnessTest) geschrieben, die einen Testcase auf allen implementierten Tricorn Versionen
+ausführt und überprüft ob alle gleich der Naiven Implementierung ist. Darauf wurden mehrere Funktionen geschrieben, 
+die Testcases aufrufen und die korrektheit überprüfen. Falls ein Fehler entdeckt wird, kann das erste falsche byte sowie 
+die Version die nicht identisch zur naiven implementierung ist ausgegeben.
+
+Zuerst wurden manuell sinnvolle Testcases geschrieben, womit Basecases abgedeckt werden.
+Es wird aber außerdem z.B. das grenzverhalten von SIMD getestet, wo immer 4 pixel in parallel bearbeitet werden, indem die Breite 
+auf nicht durch 4 teilbare werte gesetzt werden, dadurch wird getestet ob auch der Rest korrekt behandelt wird. Die Zeit wird 
+ebenfalls mitgemessen um eventuell seltsames Verhalten genauer zu beobachten. 
+
+Darüber hinaus werden randomisierte Tests ausgeführt, die Startwerte und resolution zufällig auswählen und testen. Um sehr viele
+dieser auszuführen, wird die Zeit nicht gemessen. 
+
+Ebenfalls wurden speziell für die Symmetrie Optimierung eine Funktion implementiert die diese auf korrektheit testet. Das
+funktioniert indem zuerst das zentrum also, der punkt indem imaginärteil 0 ist auf ein gerades y gesetzt wird. Das liegt daran
+das eine existente Symmetrie Optimierung dann spiegeln muss, da diese der einfachste case sein sollte. Im test wird dann allerdings
+die resolution auf einen zufälligen und sehr kleinen wert gesetzt. Dies hat sehr zuverlässig Fehler gefunden, da die 
+Imaginärteile der jeweiligen y koordinaten sehr viele nachkommastellen hatten, sodass z.b. eine Koordinate den imaginärteil 20,293984 hatte 
+und die gespiegelte 20,29838 hatte, Optimierungen die sowas spiegelten, führten zu Fehlern.
 
 
+Die korrektheit der Bitmap wurde vor allem dadurch getestet, ob standard-Software in der Lage ist diese korrekt zu interpretieren.
+Leider war es nicht möglich externe zu 100% korrekte Bitmaps mit unserer zu vergleichen, da die spezielle Konfiguration also Startwert, Auflösung etc
+nicht zugänglich gemacht worden sind. 
 
 
 
