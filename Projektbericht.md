@@ -75,8 +75,7 @@ um auffälliges Verhalten genauer beobachten zu können.
 Zusätzlich werden randomisierte Tests ausgeführt, die Startwerte und Auflösung zufällig wählen.
 Um sehr viele dieser Tests durchführen zu können, wird hier die Zeit nicht gemessen.
 
-Speziell für die Symmetrie Optimierung wurde eine eigene Funktion implementiert, die deren Korrektheit prüft. 
-Dazu wird zunächst das Zentrum, also der Punkt mit Imaginärteil 0, auf ein gerades y gesetzt. 
+Symmetrie wurde außerdem gesondert getestet, indem zunächst das Zentrum, also der Punkt mit Imaginärteil 0, auf ein gerades y gesetzt. 
 Der Grund ist, dass eine vorhandene Symmetrie Optimierung an dieser Stelle spiegeln muss, da dies der 
 einfachste Fall sein sollte. Im Test wird (v.a.) die Auflösung anschließend auf einen zufälligen, sehr kleinen Wert gesetzt. 
 Dieses Vorgehen hat sehr zuverlässig Fehler gefunden, da die Imaginärteile der jeweiligen y Koordinaten dann viele 
