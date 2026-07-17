@@ -32,7 +32,7 @@ So können wir für jede zu zeichnende Zeile, die potenzielle Partner-Zeile find
 und berechnen, ob der Imaginärteil der beiden Kandidaten exakt das inverse ist. Da die Imaginärteile Floats sind und ein Vergleich deswegen
 nie zu 100% korrekt ist, wurde diese Optimierung in der finalen Version weggelassen. 
 
-### Latency Throughput (tricorn_V3)
+### Circle (tricorn_V3)
 
 ### Latency Throughput (tricorn_V4)
 
