@@ -5,18 +5,6 @@
 ## Einleitung
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 ## Optimierungen 
 
 ### Naive (tricorn_V1)
@@ -58,6 +46,13 @@ Nur bei sehr kleinen Bildern nutzen wir einen einzigen Thread, da sich der Threa
 Weil die meiste Rechenlast in der Bildmitte liegt, teilen wir die Threads gleichmäßig über das gesamte Bild auf.
 
 ## Benchmarking-Methodik (Zeitmessung)
+
+Es wurde eine einheitliche Funktion implementiert, die für jede übergebene Implementierung und jeden Testcase genau gleich, die Zeit zur Berechnung des Images
+misst. Die Erstellung der Bitmap wird nicht gemessen, da es sich hierbei um I/O handelt. Es wird wirklich nur der 
+Funktionsaufruf Tricorn() und auch nicht, andere unnötigen Funktionen wie malloc() gemessen. Weiter wird die tricorn Funktion 
+so oft aufgerufen, bis die summierte Ausführungszeit mindestens 1sek überschreibt indem die Iterationen iterativ erhöht werden, 
+falls dies nicht erreicht worden is. Leider zählt hierbei auch das ausführen der for-schleife in die messung, was laut slides 
+allerdings ok ist.
 
   
 
