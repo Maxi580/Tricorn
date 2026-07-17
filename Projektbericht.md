@@ -34,17 +34,23 @@ nie zu 100% korrekt ist, wurde diese Optimierung in der finalen Version weggelas
 
 ### Circle (tricorn_V3)
 
+Man kann in das Trikorn_Fraktal einen Kreis mit Radius 0,25 zeichnen, in dem garantiert kein Punkt konvergiert.
+(Skript zur Findung des Radius ist unter Circle/findCircleRad.c zu finden)
+
 ### Latency Throughput (tricorn_V4)
 
-Laut den Intel-Intrinsics ist die Latency von z.B. _mm_add_ps_ 8 mal so hoch wie der Throughput. Dadurch, dass
-wir in Escape Time eine Dependency Chain haben, da eine Instruktion fast immer das Ergebnis der vorherigen braucht ist 
-das sehr ineffizient. Deswegen berechnen wir gleich 2 mal 4er lanes (also insgesamt 8 Punkte gleichzeitig). Da wir so
-z.B. zwei add Operationen hintereinander machen können, wobei die zweite add operation nicht von der ersten abhängt, 
-also nicht darauf gewartet werden muss bis das Ergebnis im Speicher ist. Aufgrund limitierter Anzahl von xmm Registern 
-haben wir es auf bei 2x belassen.
+Laut den Intel-Intrinsics ist die Latency von z.B. _mm_add_ps achtmal so hoch wie der Throughput. 
+In Escape Time haben wir eine Dependency Chain, da fast jede Instruktion das Ergebnis der vorherigen benötigt. 
+Das ist ineffizient, weil dann immer darauf gewartet werden muss, bis das Ergebnis im Register zur Verfügung steht, 
+obwohl die CPU in dieser Zeit rechnen könnte. Deshalb berechnen wir zwei 4er-Lanes gleichzeitig, also insgesamt 8 Punkte.
+So können wir bspw. zwei add-Operationen hintereinander ausführen, ohne dass die zweite von dem Ergebnis der ersten
+abhängig ist und warten muss. Es werden nur zwei 4er-Lanes genutzt, weil es begrenzte xmm-Register gibt.
 
 ### MutliThreading (Hauptimplementierung)
 
+Wir multithreaden entlang der y-Achse mit so vielen Threads, wie das System logische Prozessoren bereitstellt. 
+Nur bei sehr kleinen Bildern nutzen wir einen einzigen Thread, da sich der Thread-Overhead sonst nicht lohnt. 
+Weil die meiste Rechenlast in der Bildmitte liegt, teilen wir die Threads gleichmäßig über das gesamte Bild auf.
 
 ## Benchmarking-Methodik (Zeitmessung)
 
