@@ -31,31 +31,41 @@ double performanceTest(void (*fn)(float complex, size_t, ssize_t, float,  unsign
         exit(EXIT_FAILURE);
     }
 
-    iterations = iterations < 3 ? 3 : iterations; // Mindestens 3 Iterationen
-
     struct timespec time_start, time_end;
+    double min_time = 0.0;
     double time = 0;
-    bool test_is_valid = false;
 
-    while (!test_is_valid) {
-        clock_gettime(CLOCK_MONOTONIC, &time_start);
-        for (size_t i = 0; i < iterations; i++) {
-            fn(tc.start, tc.width, tc.height_signed, tc.res, tc.n, tc.color, img);
-        }
-        clock_gettime(CLOCK_MONOTONIC, &time_end);
+    // Der Test muss mindestens 3 mal wiederholt werden (Wir nehmen minimum, da Störungen, den Test langsamer machen)
+    int repetitions = 3;
+    for (int rep = 0; rep < repetitions; rep++) {
+        bool test_is_valid = false;
+        // Ein Test ist erst gültig, wenn er länger als 1sek ist
+        while (!test_is_valid) {
+            clock_gettime(CLOCK_MONOTONIC, &time_start);
+            for (size_t i = 0; i < iterations; i++) {
+                fn(tc.start, tc.width, tc.height_signed, tc.res, tc.n, tc.color, img);
+            }
+            clock_gettime(CLOCK_MONOTONIC, &time_end);
 
-        time = (double)(time_end.tv_sec - time_start.tv_sec) + 1e-9 * (time_end.tv_nsec - time_start.tv_nsec);
-        if (time < MIN_TEST_DURATION) { // unter 1 Sekunde getestet (ungültig) → erhöhe iterationen
-            size_t increased_iterations = (time > 0.0) ?
-                            (size_t) ((double) iterations * (1.3 * MIN_TEST_DURATION/time)) : 0;
-            iterations = (increased_iterations > iterations) ? increased_iterations : (iterations + 1);
-        } else {
-            test_is_valid = true;
+            time = (double)(time_end.tv_sec - time_start.tv_sec) + 1e-9 * (time_end.tv_nsec - time_start.tv_nsec);
+            if (time < MIN_TEST_DURATION) { // unter 1 Sekunde getestet (ungültig) → erhöhe iterationen
+                size_t increased_iterations = (time > 0.0) ?
+                                (size_t) ((double) iterations * (1.3 * MIN_TEST_DURATION/time)) : 0;
+                iterations = (increased_iterations > iterations) ? increased_iterations : (iterations + 1);
+            } else {
+                double new_time = time / (double) iterations;
+                if (rep == 0) {
+                    min_time = new_time;
+                } else {
+                    min_time = new_time < min_time ? new_time : min_time;
+                }
+
+                test_is_valid = true;
+            }
         }
     }
-
     free(img);
-    return time / (double) iterations;
+    return min_time;
 }
 
 void printDebug(unsigned char *base, unsigned char *test, size_t pixel_array_size) {
