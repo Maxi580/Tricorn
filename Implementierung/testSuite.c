@@ -31,6 +31,8 @@ double performanceTest(void (*fn)(float complex, size_t, ssize_t, float,  unsign
         exit(EXIT_FAILURE);
     }
 
+    iterations = iterations < 3 ? 3 : iterations; // Mindestens 3 Iterationen
+
     struct timespec time_start, time_end;
     double time = 0;
     bool test_is_valid = false;
