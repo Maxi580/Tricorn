@@ -22,7 +22,7 @@ bis entweder der letzte Punkt auch divergiert oder die maximale Anzahl an Iterat
 Trikorn-Fraktale sind an der X-Achse symmetrisch, weswegen man nur die Hälfte des Bilds berechnen muss.
 Um dies auszunutzen, berechnen wir das Zentrum des Bildes, also die y-Koordinate an dem der Imaginärteil 0 ist.
 So können wir für jede zu zeichnende Zeile, die potenzielle Partner-Zeile finden (y_gespiegelt = 2 * center - y) 
-und berechnen, ob der Imaginärteil der beiden Kandidaten exakt das inverse ist. Da die Imaginärteile Floats sind und ein Vergleich deswegen
+und berechnen, ob der Imaginärteil der beiden Kandidaten exakt das Inverse ist. Da die Imaginärteile Floats sind und ein Vergleich deswegen
 nie zu 100% korrekt ist, wurde diese Optimierung in der finalen Version weggelassen. 
 
 ### Circle (tricorn_V3)
@@ -47,18 +47,40 @@ Weil die meiste Rechenlast in der Bildmitte liegt, teilen wir die Threads gleich
 
 ## Benchmarking-Methodik (Zeitmessung)
 
-Es wurde eine einheitliche Funktion implementiert, die für jede übergebene Implementierung und jeden Testcase genau gleich, die Zeit zur Berechnung des Images
-misst. Die Erstellung der Bitmap wird nicht gemessen, da es sich hierbei um I/O handelt. Es wird wirklich nur der 
-Funktionsaufruf Tricorn() und auch nicht, andere unnötigen Funktionen wie malloc() gemessen. Weiter wird die tricorn Funktion 
-so oft aufgerufen, bis die summierte Ausführungszeit mindestens 1sek überschreibt indem die Iterationen iterativ erhöht werden, 
-falls dies nicht erreicht worden is. Leider zählt hierbei auch das ausführen der for-schleife in die messung, was laut slides 
-allerdings ok ist.
+Es wurde eine einheitliche Funktion performanceTest implementiert, die für jede übergebene Implementierung und jeden 
+Testcase genau gleich, die Zeit zur Berechnung des Images misst. Um die reine Berechnungszeit zu messen, wird auch das 
+Schreiben der Bitmap ignoriert, da es sich hierbei um I/O handelt. Es werden auch keine irrelevant Setup Funktionen wie malloc() gemessen. 
+Weiter wird die tricorn Funktion so oft aufgerufen, bis die summierte Ausführungszeit mindestens eine Sekunde überschreitet. 
+Leider zählt hierbei auch das Ausführen der For-Schleife in die Messung, das nach der Vorlesung allerdings passt. 
+Außerdem wird die beste Messung aus dreimal Wiederholungen verwendet, um eventuelle Störungen, die wir nicht mitmessen wollen, zu vermeiden.
 
   
 
 ## Testumgebung (Korrektheit)
+Es wurden eine Funktion (correctnessTest) geschrieben, die einen Testcase auf allen implementierten Tricorn Versionen
+ausführt und überprüft ob alle gleich der Naiven Implementierung ist. Darauf wurden mehrere Funktionen geschrieben, 
+die Testcases aufrufen und die korrektheit überprüfen. Falls ein Fehler entdeckt wird, kann das erste falsche byte sowie 
+die Version die nicht identisch zur naiven implementierung ist ausgegeben.
+
+Zuerst wurden manuell sinnvolle Testcases geschrieben, womit Basecases abgedeckt werden.
+Es wird aber außerdem z.B. das grenzverhalten von SIMD getestet, wo immer 4 pixel in parallel bearbeitet werden, indem die Breite 
+auf nicht durch 4 teilbare werte gesetzt werden, dadurch wird getestet ob auch der Rest korrekt behandelt wird. Die Zeit wird 
+ebenfalls mitgemessen um eventuell seltsames Verhalten genauer zu beobachten. 
+
+Darüber hinaus werden randomisierte Tests ausgeführt, die Startwerte und resolution zufällig auswählen und testen. Um sehr viele
+dieser auszuführen, wird die Zeit nicht gemessen. 
+
+Ebenfalls wurden speziell für die Symmetrie Optimierung eine Funktion implementiert die diese auf korrektheit testet. Das
+funktioniert indem zuerst das zentrum also, der punkt indem imaginärteil 0 ist auf ein gerades y gesetzt wird. Das liegt daran
+das eine existente Symmetrie Optimierung dann spiegeln muss, da diese der einfachste case sein sollte. Im test wird dann allerdings
+die resolution auf einen zufälligen und sehr kleinen wert gesetzt. Dies hat sehr zuverlässig Fehler gefunden, da die 
+Imaginärteile der jeweiligen y koordinaten sehr viele nachkommastellen hatten, sodass z.b. eine Koordinate den imaginärteil 20,293984 hatte 
+und die gespiegelte 20,29838 hatte, Optimierungen die sowas spiegelten, führten zu Fehlern.
 
 
+Die korrektheit der Bitmap wurde vor allem dadurch getestet, ob standard-Software in der Lage ist diese korrekt zu interpretieren.
+Leider war es nicht möglich externe zu 100% korrekte Bitmaps mit unserer zu vergleichen, da die spezielle Konfiguration also Startwert, Auflösung etc
+nicht zugänglich gemacht worden sind. 
 
 
 
