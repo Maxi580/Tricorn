@@ -22,7 +22,7 @@ bis entweder der letzte Punkt auch divergiert oder die maximale Anzahl an Iterat
 Trikorn-Fraktale sind an der X-Achse symmetrisch, weswegen man nur die Hälfte des Bilds berechnen muss.
 Um dies auszunutzen, berechnen wir das Zentrum des Bildes, also die y-Koordinate an dem der Imaginärteil 0 ist.
 So können wir für jede zu zeichnende Zeile, die potenzielle Partner-Zeile finden (y_gespiegelt = 2 * center - y) 
-und berechnen, ob der Imaginärteil der beiden Kandidaten exakt das inverse ist. Da die Imaginärteile Floats sind und ein Vergleich deswegen
+und berechnen, ob der Imaginärteil der beiden Kandidaten exakt das Inverse ist. Da die Imaginärteile Floats sind und ein Vergleich deswegen
 nie zu 100% korrekt ist, wurde diese Optimierung in der finalen Version weggelassen. 
 
 ### Circle (tricorn_V3)
@@ -47,11 +47,12 @@ Weil die meiste Rechenlast in der Bildmitte liegt, teilen wir die Threads gleich
 
 ## Benchmarking-Methodik (Zeitmessung)
 
-Es wurde eine einheitliche Funktion implementiert, die für jede übergebene Implementierung und jeden Testcase genau gleich, die Zeit zur Berechnung des Images
-misst. Die Erstellung der Bitmap wird nicht gemessen, da es sich hierbei um I/O handelt. Es werden keine irellevanten setup Funktionen wie malloc() gemessen. Weiter wird die tricorn Funktion 
-so oft aufgerufen, bis die summierte Ausführungszeit mindestens 1sek überschreibt indem die Iterationen iterativ erhöht werden, 
-falls dies nicht erreicht worden is. Außerdem werden 3 Wiederholungen des Tests durchgeführt, um das Ergebnis verlässlicher zu macehn. Leider zählt hierbei auch das ausführen der for-schleife in die messung, was laut slides 
-allerdings ok ist.
+Es wurde eine einheitliche Funktion performanceTest implementiert, die für jede übergebene Implementierung und jeden 
+Testcase genau gleich, die Zeit zur Berechnung des Images misst. Um die reine Berechnungszeit zu messen, wird auch das 
+Schreiben der Bitmap ignoriert, da es sich hierbei um I/O handelt. Es werden auch keine irrelevant Setup Funktionen wie malloc() gemessen. 
+Weiter wird die tricorn Funktion so oft aufgerufen, bis die summierte Ausführungszeit mindestens eine Sekunde überschreitet. 
+Leider zählt hierbei auch das Ausführen der For-Schleife in die Messung, das nach der Vorlesung allerdings passt. 
+Außerdem wird die beste Messung aus dreimal Wiederholungen verwendet, um eventuelle Störungen, die wir nicht mitmessen wollen, zu vermeiden.
 
   
 
