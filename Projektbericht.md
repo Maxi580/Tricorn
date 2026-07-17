@@ -21,8 +21,13 @@
 
 ### Naive (tricorn_V1)
 
+Die erste Implementierung, mit Fokus auf Korrektheit.
 
 ### SIMD (tricorn_V2)
+
+Die Escape-Time-Funktion führt für jeden Punkt die exakt gleichen Berechnungen aus, deswegen nutzen wir SIMD und berechnen vier Punkte gleichzeitig. 
+Ein Nachteil ist, dass wenn z.B. bereits 3 Punkte divergiert sind und bloß der letzte nicht, trotzdem solange weiter gerechnet werden muss
+bis entweder der letzte Punkt auch divergiert oder die maximale Anzahl an Iterationen erreicht ist.
 
 ### Symmetry (Nicht genutzt)
 
