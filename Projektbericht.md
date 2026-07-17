@@ -66,14 +66,13 @@ steigender Größe eines quadratischen Bildes (mit ebenfalls steigender Auflösu
 Zur Überprüfung der Korrektheit wurde eine Funktion (correctnessTest) implementiert, 
 die einen Testcase auf allen implementierten Tricorn Versionen ausführt und prüft, 
 ob alle Ergebnisse mit der naiven Implementierung übereinstimmen. Wird ein Fehler entdeckt, 
-können das erste abweichende Byte sowie die Version, die nicht mit der naiven Implementierung identisch ist, ausgegeben werden.
+können das erste abweichende Byte sowie die Version, die nicht mit der naiven Implementierung identisch ist, 
+ausgegeben werden.
 
-Darauf aufbauend wurden mehrere Funktionen geschrieben, die Testcases aufrufen und die Korrektheit überprüfen. 
 Zunächst wurden manuell sinnvolle Testcases erstellt, die die Basisfälle abdecken. 
-Darüber hinaus wird gezielt das Grenzverhalten der SIMD Implementierung getestet, 
-bei der jeweils vier Pixel parallel verarbeitet werden. Dazu wird die Breite auf nicht durch vier teilbare Werte gesetzt, 
-wodurch geprüft wird, ob auch der verbleibende Rest korrekt behandelt wird. Die Zeit wird bei diesen Tests ebenfalls mitgemessen, 
-um auffälliges Verhalten genauer beobachten zu können.
+Darüber hinaus werden gezielt Grenzfälle getestet wie z.B. bei SIMD. Dort werden bei einer Iteration vier Pixel parallel
+verarbeitet. Hierbei testen wir bspw. ob bei Breiten, die nicht durch 4 teilbar sind, der Rest auch korrekt berechnet
+wird
 
 Zusätzlich werden randomisierte Tests ausgeführt, die Startwerte und Auflösung zufällig wählen.
 Um sehr viele dieser Tests durchführen zu können, wird hier die Zeit nicht gemessen.
