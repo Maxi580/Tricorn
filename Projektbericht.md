@@ -50,7 +50,7 @@ Weil die meiste Rechenlast in der Bildmitte liegt, teilen wir die Threads gleich
 Es wurde eine einheitliche Funktion implementiert, die für jede übergebene Implementierung und jeden Testcase genau gleich, die Zeit zur Berechnung des Images
 misst. Die Erstellung der Bitmap wird nicht gemessen, da es sich hierbei um I/O handelt. Es werden keine irellevanten setup Funktionen wie malloc() gemessen. Weiter wird die tricorn Funktion 
 so oft aufgerufen, bis die summierte Ausführungszeit mindestens 1sek überschreibt indem die Iterationen iterativ erhöht werden, 
-falls dies nicht erreicht worden is. Außerdem werden immer mindestens 3 Iterationen durchgeführt, selbst wenn weniger
+falls dies nicht erreicht worden is. Außerdem werden 3 Wiederholungen durchgeführt, selbst wenn weniger
 übergeben worden sind, um das Ergebnis verlässlicher zu macehn. Leider zählt hierbei auch das ausführen der for-schleife in die messung, was laut slides 
 allerdings ok ist.
 
