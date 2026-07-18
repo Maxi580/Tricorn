@@ -1,7 +1,5 @@
 # Projektbericht
 
-
-
 ## Einleitung
 
 Im Projekt soll eine Bitmap mit einem Trikorn-Fraktal erstellt werden. Die EscapeTime Funktion berechnet die Anzahl
@@ -10,11 +8,15 @@ gegeben, welches die finale Bitmap schreibt.
 
 ## Optimierungen 
 
+Mittels profiling wurde festgestellt, dass der Flaschenhals die escapeTime Funktion ist, weswegen die Optimierungen
+hauptsächlich diese Funktion verbessern.
+
 ### Naive (tricorn_V1)
 
 Die erste Implementierung, mit Fokus auf Korrektheit.
 
 ![laufzeit-mit-naive.PNG](Benchmarking/laufzeit-mit-naive.PNG)
+
 ### SIMD (tricorn_V2)
 
 Die Escape-Time-Funktion führt für jeden Punkt die exakt gleichen Berechnungen aus, deswegen nutzen wir SIMD und berechnen vier Punkte gleichzeitig. 
@@ -53,9 +55,9 @@ Weil die meiste Rechenlast in der Bildmitte liegt, teilen wir die Threads gleich
 
 ## Benchmarking-Methodik (Zeitmessung)
 
-Es wurde eine einheitliche Funktion performanceTest implementiert, die für jede übergebene Implementierung und jeden 
-Testcase genau gleich, die Zeit zur Berechnung des Images misst. Um die reine Berechnungszeit zu messen, wird auch das 
-Schreiben der Bitmap ignoriert, da es sich hierbei um I/O handelt. Es werden auch keine irrelevant Setup Funktionen wie malloc() gemessen. 
+Es wurde die Funktion "performanceTest" implementiert, die für jede übergebene Implementierung und jeden 
+Testcase genau gleich, die Zeit zur Berechnung des Images misst. Da die reine Berechnungszeit gemessen werden soll, wird
+jegliche I/O sowie bspw. das Schreiben der Bitmap ignoriert. Es werden auch keine irrelevanten Setup Funktionen wie malloc() gemessen. 
 Weiter wird die tricorn Funktion so oft aufgerufen, bis die summierte Ausführungszeit mindestens eine Sekunde überschreitet. 
 Leider zählt hierbei auch das Ausführen der For-Schleife in die Messung, das nach der Vorlesung allerdings passt. 
 Außerdem wird die beste Messung aus dreimal Wiederholungen verwendet, um eventuelle Störungen, die wir nicht mitmessen wollen, zu vermeiden.
