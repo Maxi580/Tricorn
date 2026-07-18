@@ -5,6 +5,7 @@
 
 #include "NaiveImplementation/tricorn_V1.h"
 #include "Simd/tricorn_V2.h"
+#include "LegacySym/tricorn_sym_legacy.h"
 #include "Circle/tricorn_V3.h"
 #include "LatencyThroughput/tricorn_V4.h"
 #include "MultiThreading/tricorn.h"
@@ -18,7 +19,7 @@
 timeMeasurement* plotTableGeneration(const size_t steps, const size_t step_length, const size_t step_n, TestCase tc) {
     timeMeasurement* results = malloc(sizeof(timeMeasurement) * steps);
     if (results == NULL) {
-        printf("malloc() returned NULL\n");
+        fprintf(stderr, "Error allocating memory\n");
         return NULL;
     }
 
@@ -35,6 +36,7 @@ timeMeasurement* plotTableGeneration(const size_t steps, const size_t step_lengt
         TestCase tc_step = {tc.start, length, (ssize_t) length, res, n, tc.color, "plot"};
         results[step].naive = performanceTest(tricorn_V1, tc_step, 1);
         results[step].simd = performanceTest(tricorn_V2, tc_step, 1);
+        results[step].sym = performanceTest(tricorn_sym_legacy, tc_step, 1);
         results[step].circle = performanceTest(tricorn_V3, tc_step, 1);
         results[step].latency = performanceTest(tricorn_V4, tc_step, 1);
         results[step].multithreading = performanceTest(tricorn, tc_step, 1);
@@ -96,11 +98,11 @@ void printTable(const timeMeasurement* r, size_t steps) {
         return;
     }
 
-    printf("%12s %12s %12s %12s %12s %12s %12s %12s\n",
-           "width", "iter", "res", "naive", "simd", "circle", "latency", "multithr");
+    printf("%12s %12s %12s %12s %12s %12s %12s %12s %12s\n",
+           "width", "iter", "res", "naive", "simd", "sym", "circle", "latency", "multithr");
     for (size_t i = 0; i < steps; i++) {
-        printf("%12zu %12u %12f %12f %12f %12f %12f %12f\n",
-               r[i].width, r[i].iterations, r[i].res, r[i].naive, r[i].simd, r[i].circle, r[i].latency,
+        printf("%12zu %12u %12f %12f %12f %12f %12f %12f %12f\n",
+               r[i].width, r[i].iterations, r[i].res, r[i].naive, r[i].simd, r[i].sym, r[i].circle, r[i].latency,
                r[i].multithreading);
     }
 }
