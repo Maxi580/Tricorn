@@ -199,7 +199,7 @@ bool individualTests(bool print_debug) {
                    "V0: %f V1: %f V2: %f V3: %f V4: %f\n\n", time, time_V1, time_V2, time_V3, time_V4);
             passed++;
         } else {
-            printf("UNGÜLTIGER TEST\n\n");
+            printf("UNGÜLTIG: Image stimmt nicht mit Naiven Implementation überein\n\n");
             all_passed = false;
         }
     }
@@ -282,6 +282,6 @@ bool testSuite() {
     individualTests(true);
     randomizedTest(200, 200, 100);
     symmetryTest(200, 200, 100);
-    printf("Tests beendet:\n");
+    printf("Tests beendet\n");
     return true;
 }
