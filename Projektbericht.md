@@ -14,6 +14,7 @@ gegeben, welches die finale Bitmap schreibt.
 
 Die erste Implementierung, mit Fokus auf Korrektheit.
 
+![laufzeit-mit-naive.PNG](Benchmarking/laufzeit-mit-naive.PNG)
 ### SIMD (tricorn_V2)
 
 Die Escape-Time-Funktion führt für jeden Punkt die exakt gleichen Berechnungen aus, deswegen nutzen wir SIMD und berechnen vier Punkte gleichzeitig. 
@@ -47,6 +48,8 @@ abhängig ist und warten muss. Es werden nur zwei 4er-Lanes genutzt, weil es beg
 Wir multithreaden entlang der y-Achse mit so vielen Threads, wie das System logische Prozessoren bereitstellt. 
 Nur bei sehr kleinen Bildern nutzen wir einen einzigen Thread, da sich der Thread-Overhead sonst nicht lohnt. 
 Weil die meiste Rechenlast in der Bildmitte liegt, teilen wir die Threads gleichmäßig über das gesamte Bild auf.
+
+![laufzeit-optimierungen.PNG](Benchmarking/laufzeit-optimierungen.PNG)
 
 ## Benchmarking-Methodik (Zeitmessung)
 
