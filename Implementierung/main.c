@@ -17,7 +17,6 @@
 #include "MultiThreading/tricorn.h"
 #include "testSuite.h"
 #include "helpMessage.h"
-#include "testSuite.h"
 #include "utils.h"
 #include "graph.h"
 

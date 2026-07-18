@@ -1,5 +1,4 @@
 #include "bitmap.h"
-#include <complex.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>

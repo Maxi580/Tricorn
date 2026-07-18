@@ -1,9 +1,6 @@
 #include <complex.h>
 #include <stdbool.h>
-#include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <immintrin.h>
 #include "escapetime.h"
 #include "../utils.h"
