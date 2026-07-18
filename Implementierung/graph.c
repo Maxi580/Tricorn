@@ -40,6 +40,7 @@ timeMeasurement* plotTableGeneration(const size_t steps, const size_t step_lengt
         results[step].circle = performanceTest(tricorn_V3, tc_step, 1);
         results[step].latency = performanceTest(tricorn_V4, tc_step, 1);
         results[step].multithreading = performanceTest(tricorn, tc_step, 1);
+        printf("Abgeschlossene Test Schritte: %zu/%zu\n", step + 1, steps);
     }
     return results;
 }
