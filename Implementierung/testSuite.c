@@ -141,7 +141,7 @@ bool correctnessTest(TestCase tc, bool print_debug) {
     return all_passed;
 }
 
-bool individualTests(bool print_debug, bool measure_time) {
+bool individualTests(bool print_debug) {
     unsigned iterations = 100;
     bool all_passed = true;
 
@@ -216,15 +216,6 @@ bool individualTests(bool print_debug, bool measure_time) {
 
         if (correct) {
             printf("BESTANDEN!\n");
-            if (measure_time) {
-                double time = performanceTest(tricorn, test_cases[i], iterations);
-                double time_V1 = performanceTest(tricorn_V1, test_cases[i], iterations);
-                double time_V2 = performanceTest(tricorn_V2, test_cases[i], iterations);
-                double time_V3 = performanceTest(tricorn_V3, test_cases[i], iterations);
-                double time_V4 = performanceTest(tricorn_V4, test_cases[i], iterations);
-                printf("Zeiten (pro Iteration) - "
-                       "V0: %f V1: %f V2: %f V3: %f V4: %f\n\n", time, time_V1, time_V2, time_V3, time_V4);
-            }
             passed++;
         } else {
             printf("UNGÜLTIG: Image stimmt nicht mit Naiven Implementation überein\n\n");
@@ -317,12 +308,12 @@ bool symmetryTest(size_t width, ssize_t height_signed, int trials, bool debug) {
 }
 
 bool testSuite() {
+    // testet nur die Korrektheit, da Zeitmessungen ewig dauern würden
     printf("Starte Tests:\n");
-    bool measure_time = false;
     bool print_debug = true;
-    individualTests(print_debug, measure_time);
-    randomizedTest(2000, print_debug);
-    symmetryTest(200, 200, 250, print_debug);
+    bool result = individualTests(print_debug) ? true : false;
+    result = randomizedTest(2000, print_debug) ? result : false;
+    result = symmetryTest(200, 200, 250, print_debug) ? result : false;
     printf("Tests beendet\n");
-    return true;
+    return result;
 }
