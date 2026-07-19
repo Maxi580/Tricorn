@@ -3,27 +3,27 @@
 ## Einleitung
 
 Im Projekt soll eine Bitmap mit einem Trikorn-Fraktal erstellt werden. Die EscapeTime Funktion berechnet die Anzahl
-der Iterationen, nachdem eine Koordinate divergiert. Mit Tricorn berechnen wir das ganze Bild, welches dann and writeBmp
+der Iterationen, nachdem eine Koordinate divergiert. Mit `tricorn` berechnen wir das ganze Bild, welches dann an `writeBmp`
 gegeben, welches die finale Bitmap schreibt.
 
 ## Optimierungen 
 
-Mittels profiling wurde festgestellt, dass der Flaschenhals die escapeTime Funktion ist, weswegen die Optimierungen
+Mittels profiling wurde die `escapeTime` Funktion als Flaschenhals festgestellt, weswegen die Optimierungen
 hauptsächlich diese Funktion verbessern.
 
-### Naive (tricorn_V1)
+### Naive (`tricorn_V1`)
 
 Die erste Implementierung, mit Fokus auf Korrektheit.
 
 ![laufzeit-mit-naive.PNG](Benchmarking/laufzeit-mit-naive.PNG)
 
-### SIMD (tricorn_V2)
+### SIMD (`tricorn_V2`)
 
 Die Escape-Time-Funktion führt für jeden Punkt die exakt gleichen Berechnungen aus, deswegen nutzen wir SIMD und berechnen vier Punkte gleichzeitig. 
-Ein Nachteil ist, dass wenn z.B. bereits 3 Punkte divergiert sind und bloß der letzte nicht, trotzdem solange weiter gerechnet werden muss
+Ein Nachteil ist, dass wenn z.B. bereits 3 Punkte divergiert sind und bloß der letzte nicht, trotzdem so lange weiter gerechnet werden muss
 bis entweder der letzte Punkt auch divergiert oder die maximale Anzahl an Iterationen erreicht ist.
 
-### Symmetry (Nicht genutzt)
+### Symmetry (Verworfener Ansatz)
 
 Trikorn-Fraktale sind an der X-Achse symmetrisch, weswegen man nur die Hälfte des Bilds berechnen muss.
 Um dies auszunutzen, berechnen wir das Zentrum des Bildes, also die y-Koordinate an dem der Imaginärteil 0 ist.
@@ -31,12 +31,12 @@ So können wir für jede zu zeichnende Zeile, die potenzielle Partner-Zeile find
 und berechnen, ob der Imaginärteil der beiden Kandidaten exakt das Inverse ist. Da die Imaginärteile Floats sind und ein Vergleich deswegen
 nie zu 100% korrekt ist, wurde diese Optimierung in der finalen Version weggelassen. 
 
-### Circle (tricorn_V3)
+### Circle (`tricorn_V3`)
 
 Man kann in das Trikorn_Fraktal einen Kreis mit Radius 0,25 zeichnen, in dem garantiert kein Punkt konvergiert.
 (Skript zur Findung des Radius ist unter Circle/findCircleRad.c zu finden)
 
-### Latency Throughput (tricorn_V4)
+### Latency Throughput (`tricorn_V4`)
 
 Laut den Intel-Intrinsics ist die Latency von z.B. _mm_add_ps achtmal so hoch wie der Throughput. 
 In Escape Time haben wir eine Dependency Chain, da fast jede Instruktion das Ergebnis der vorherigen benötigt. 
@@ -51,7 +51,7 @@ Wir multithreaden entlang der y-Achse mit so vielen Threads, wie das System logi
 Nur bei sehr kleinen Bildern nutzen wir einen einzigen Thread, da sich der Thread-Overhead sonst nicht lohnt. 
 Weil die meiste Rechenlast in der Bildmitte liegt, teilen wir die Threads gleichmäßig über das gesamte Bild auf.
 
-![laufzeit-optimierungen.PNG](Benchmarking/laufzeit-optimierungen.PNG)
+![laufzeit_pro_pixel.png](Benchmarking/laufzeit_pro_pixel.png)
 
 ## Benchmarking-Methodik (Zeitmessung)
 
@@ -65,7 +65,15 @@ Außerdem wird die beste Messung aus dreimal Wiederholungen verwendet, um eventu
 Um die Performanz der verschiedenen Versionen besser vergleichen zu können, plotten wir die Performanz dieser, bei
 steigender Größe eines quadratischen Bildes (mit ebenfalls steigender Auflösung).
 
-## Testumgebung (Korrektheit)
+## Testumgebung
+- AMD Ryzen 9 5900X 12-Core Prozessor, 3.7GHz / 32 GB Arbeitsspeicher
+- Ubuntu 26.04, 64 Bit, Linux-Kernel 7.0.0-14-generic, kompiliert mit GCC 15.2 mit der Option -O2
+- quadratisches Bild mit Seitenlänge 50 bis 10.000 Pixeln (+50 je Durchgang)
+- Resolution = 4/Bildbreite
+- n=256
+- s=-2,-2
+
+## Test auf Korrektheit
 
 Zur Überprüfung der Korrektheit wurde eine Funktion (correctnessTest) implementiert, 
 die einen Testcase auf allen implementierten Tricorn Versionen ausführt und prüft, 
