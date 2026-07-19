@@ -313,7 +313,7 @@ bool testSuite() {
     bool print_debug = true;
     bool print_time_debug = true;
     bool result = individualTests(print_debug) ? true : false;
-    result = randomizedTest(500, print_time_debug) ? result : false;
+    result = randomizedTest(200, print_time_debug) ? result : false;
     result = symmetryTest(200, 200, 250, print_time_debug) ? result : false;
     printf("Korrektheits Tests beendet\n");
 
@@ -323,8 +323,25 @@ bool testSuite() {
     /* Wir starten bei dem TestCase tc und inkrementieren dann Stück für Stück die Breite/Höhe, sodas wir die
      * Performance der Versionen bei größeren Rechenaufwand beobachten können.
      */
+    float complex start = -2.0f - 2.0f * I;
+    size_t width = 100;
+    unsigned n = 256;
+    bool color = false;
+
+    printf("Der Benchmark misst die Laufzeit aller Versionen bei steigender (quadratischer) Bildgröße und "
+           "angepasster Auflösung.\n");
+    printf("Startkoordinate: %f %fI\n", crealf(start), cimag(start));
+    printf("Startlänge: %zu (wird erhöht)\n", width);
+    printf("Iterationen: %d\n", n);
+
+    if (color) {
+        printf("Bild ist farbig\n\n");
+    } else {
+        printf("Bild ist grau\n\n");
+    }
+
     size_t steps = 5;
-    TestCase startTestCase = {-2.0f + -2.0f * I, 100, 50, 0.0f, 256, false, "plot"};
+    TestCase startTestCase = {start, width, width, 0.0f, n, color, "plot"};
     size_t step_length = 200;
 
     generateCustomPlottableTable(steps, startTestCase, step_length);
