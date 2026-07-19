@@ -45,7 +45,7 @@ timeMeasurement* plotTableGeneration(const size_t steps, const size_t step_lengt
 
 void printTable(const timeMeasurement* r, size_t steps) {
     if (r == NULL) {
-        printf("Passed Pointer was NULL\n");
+        fprintf(stderr,"Passed Pointer was NULL\n");
         return;
     }
     printf("\n");
