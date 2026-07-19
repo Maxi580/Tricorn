@@ -308,7 +308,9 @@ bool symmetryTest(size_t width, ssize_t height_signed, int trials, bool debug) {
 }
 
 bool testSuite() {
-    // Prüft zuerst die Korrektheit und benchmarked dann die Versionen
+    /* In der Testsuite wird zunächst nur die Korrektheit geprüft, da eine Zeitmessung in diesen Fällen wenig aussagekräftig ist.
+    Um anschließend die Performance zu benchmarken, erstellen wir einen Plot, in dem alle Funktionen zunehmend größere Bilder
+    berechnen und dabei die Laufzeit gemessen wird. */
     printf("Starte Korrektheits Tests:\n\n");
     bool print_debug = true;
     bool print_time_debug = true;

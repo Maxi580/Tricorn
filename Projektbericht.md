@@ -99,10 +99,6 @@ Dieses Vorgehen hat sehr zuverlässig Fehler gefunden, da die Imaginärteile der
 Nachkommastellen besitzen. So hatte beispielsweise eine Koordinate den Imaginärteil 20,293984 und die gespiegelte 20,29838.
 Optimierungen, die solche Werte gespiegelt haben, führten zu Fehlern.
 
-In der Testsuite wird zunächst nur die Korrektheit geprüft, da eine Zeitmessung in diesen Fällen wenig aussagekräftig ist. 
-Um anschließend die Performance zu benchmarken, erstellen wir einen Plot, in dem alle Funktionen zunehmend größere Bilder
-berechnen und dabei die Laufzeit gemessen wird.
-
 Die Korrektheit der Bitmap wurde vor allem dadurch geprüft, ob Standardsoftware in der Lage ist, sie korrekt zu
 interpretieren. Ein direkter Vergleich mit extern erzeugten, garantiert korrekten Bitmaps war nicht möglich, da die
 spezielle Konfiguration wie Startwert und Auflösung dort nicht zugänglich gemacht wurde.
