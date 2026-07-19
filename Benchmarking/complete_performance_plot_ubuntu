@@ -1,3 +1,12 @@
+Testumgebung:
+- AMD Ryzen 9 5900X 12-Core Prozessor, 3.7GHz / 32 GB Arbeitsspeicher
+- Ubuntu 26.04, 64 Bit, Linux-Kernel 7.0.0-14-generic, kompiliert mit GCC 15.2 mit der Option -O2
+- quadratisches Bild mit Seitenlänge 5 bis 10.000 Pixeln (+50 je Durchgang)
+- Resolution = 4/Bildbreite
+- n=256
+- s=-2,-2
+(Ausführbar mit -graph Flag)
+
        width         iter          res        naive         simd          sym       circle      latency     multithr
           50            0     0.080000     0.000141     0.000050     0.000043     0.000047     0.000042     0.000042
          100            1     0.040000     0.000533     0.000162     0.000138     0.000149     0.000126     0.000124
