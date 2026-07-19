@@ -215,7 +215,7 @@ bool individualTests(bool print_debug) {
         bool correct = correctnessTest(test_cases[i], print_debug);
 
         if (correct) {
-            printf("BESTANDEN: Zeiten \n\n");
+            printf("BESTANDEN \n\n");
             passed++;
         } else {
             printf("UNGÜLTIG: Image stimmt nicht mit Naiven Implementation überein\n\n");
@@ -319,7 +319,7 @@ bool testSuite() {
 
     printf("\n\n---------------------------------------\n\n");
 
-    printf("Starte Benchmarking:\n\n");
+    printf("Starte Benchmarking (mit steigender Bildgröße):\n\n");
     /* Wir starten bei dem TestCase tc und inkrementieren dann Stück für Stück die Breite/Höhe, sodas wir die
      * Performance der Versionen bei größeren Rechenaufwand beobachten können.
      */
