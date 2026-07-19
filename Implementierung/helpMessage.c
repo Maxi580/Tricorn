@@ -62,9 +62,9 @@ void helpMessage() {
 
     printf("  -graph                       Es wird eine Tabelle die sämtliche\n"
            "                               Laufzeiten aller Implementierungen für ein quadratisches Bild\n"
-           "                               mit dem Fraktal in der Mitte (r=4/Bildbreite) und dem \n"
-           "                               Startwert -2,-2; n=256; den Breiten 50 bis 10.000 Pixeln erstellt.\n"
-           "                               Es wird jeweils die Beste aus drei Testdurchgängen ausgegeben\n\n");
+           "                               mit dem Fraktal in der Mitte (r=4/Bildbreite), dem \n"
+           "                               Startwert -2,-2, n=256 und den Längen 50 bis 10.000 Pixel erstellt.\n"
+           "                               Es wird jeweils die beste Zeit aus drei Testdurchgängen ausgegeben.\n\n");
 
     printf("Beispiele:\n");
 
