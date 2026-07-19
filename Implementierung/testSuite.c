@@ -337,7 +337,7 @@ bool testSuite() {
     printf("Iterationen: %d\n", n);
     printf("Bild ist grau\n\n");
 
-    size_t steps = 1;
+    size_t steps = 5;
     TestCase startTestCase = {start, width, width, 0.0f, n, color, "plot"};
     size_t step_length = 200;
 
