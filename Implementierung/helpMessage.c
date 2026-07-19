@@ -2,7 +2,7 @@
 #include <stdio.h>
 
 void helpMessage() {
-    printf("Help Message: Tricorn-Fraktal Generator\n\n");
+    printf("Help Message Tricorn-Fraktal Generator\n\n");
 
     printf("Beschreibung:\n");
     printf("  Erstellt ein Tricorn-Fraktal anhand der gesetzten Flags. Dabei kann\n"
@@ -58,12 +58,13 @@ void helpMessage() {
 
     printf("  -t | --test                  Es wird eine vordefinierte Testsuite ausgeführt\n"
            "                               und ausgegeben. Diese beinhaltet sämtliche\n"
-           "                               Benchmarking-Szenarien mit Beschreibungen und gibt die\n"
-           "                               Messungen in gut lesbarer Form aus.\n\n");
+           "                               Benchmarking-Szenarien.\n\n");
 
-    printf("  -graph                       Es wird eine vordefinierte Testsuite ausgeführt,\n"
-           "                               welche Werte in Tabellenform zum Erstellen\n"
-           "                               von Graphen ausgibt.\n\n");
+    printf("  -graph                       Es wird eine Tabelle die sämtliche\n"
+           "                               Laufzeiten aller Implementierungen für ein quadratisches Bild\n"
+           "                               mit dem Fraktal in der Mitte (r=4/Bildbreite) und dem \n"
+           "                               Startwert -2,-2; n=256; den Breiten 50 bis 10.000 Pixeln erstellt.\n"
+           "                               Es wird jeweils die Beste aus drei Testdurchgängen ausgegeben\n\n");
 
     printf("Beispiele:\n");
 
