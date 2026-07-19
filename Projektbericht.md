@@ -83,14 +83,14 @@ steigender Größe eines quadratischen Bildes (mit ebenfalls steigender Auflösu
 Zur Überprüfung der Korrektheit wurde die Funktion `correctnessTest` implementiert,
 die einen Testcase auf allen implementierten Tricorn Versionen ausführt und prüft,
 ob alle Ergebnisse mit der naiven Implementierung übereinstimmen. Wird ein Fehler entdeckt, wird das erste
-abweichende Byte, sowie die Version die nicht mit der naiven Implementierung identisch ist ausgegeben werden.
+abweichende Byte, sowie die Version die nicht mit der naiven Implementierung identisch ist ausgegeben.
 
-Zunächst wurden manuell sinnvolle Testcases erstellt, die die Basisfälle abdecken.
+Zunächst wurden sinnvolle Testcases manuell erstellt, die die Basisfälle abdecken.
 Darüber hinaus werden gezielt Grenzfälle getestet wie beispielsweise bei SIMD, wenn die Breite nicht durch 4 teilbar ist,
 um zu testen, ob die restlichen Pixel ebenso korrekt berechnet wurden.
 
-Zusätzlich werden randomisierte Tests ausgeführt, die Startwerte und Auflösung zufällig wählen.
-Um sehr viele dieser Tests durchführen zu können, wird hier die Zeit nicht gemessen.
+Zusätzlich werden randomisierte Tests ausgeführt, die alle Konfigurationen zufällig wählen. Der Zufallsgenerator wird 
+dabei mit der aktuellen Uhrzeit initialisiert, sodass bei jeder Testausführung neue Zufallswerte entstehen.
 
 Symmetrie wurde außerdem gesondert getestet, indem zunächst das Zentrum, also der Punkt mit Imaginärteil 0, auf ein gerades y gesetzt.
 Der Grund ist, dass eine vorhandene Symmetrie Optimierung an dieser Stelle spiegeln muss, da dies der
@@ -98,6 +98,10 @@ einfachste Fall sein sollte. Im Test wird (v.a.) die Auflösung anschließend au
 Dieses Vorgehen hat sehr zuverlässig Fehler gefunden, da die Imaginärteile der jeweiligen y Koordinaten dann viele
 Nachkommastellen besitzen. So hatte beispielsweise eine Koordinate den Imaginärteil 20,293984 und die gespiegelte 20,29838.
 Optimierungen, die solche Werte gespiegelt haben, führten zu Fehlern.
+
+In der Testsuite wird zunächst nur die Korrektheit geprüft, da eine Zeitmessung in diesen Fällen wenig aussagekräftig ist. 
+Um anschließend die Performance zu benchmarken, erstellen wir einen Plot, in dem alle Funktionen zunehmend größere Bilder
+berechnen und dabei die Laufzeit gemessen wird.
 
 Die Korrektheit der Bitmap wurde vor allem dadurch geprüft, ob Standardsoftware in der Lage ist, sie korrekt zu
 interpretieren. Ein direkter Vergleich mit extern erzeugten, garantiert korrekten Bitmaps war nicht möglich, da die
