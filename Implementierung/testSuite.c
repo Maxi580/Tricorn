@@ -142,7 +142,6 @@ bool correctnessTest(TestCase tc, bool print_debug) {
 }
 
 bool individualTests(bool print_debug) {
-    unsigned iterations = 100;
     bool all_passed = true;
 
     TestCase test_cases[] = {
