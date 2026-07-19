@@ -74,8 +74,10 @@ int main(int argc, char *argv[]) {
 
         // Führt bei gesetzter Flag die vollständige TestSuite aus.
         if (strcmp(argv[i], "--test") == 0 || strcmp(argv[i], "-t") == 0) {
-            testSuite();
-            return EXIT_SUCCESS;
+            if (testSuite()) {
+                return EXIT_SUCCESS;
+            }
+            return EXIT_FAILURE;
         }
 
         // Erzeugt Messdaten für einen Performance-Graphen bei gesetzter Flag.
