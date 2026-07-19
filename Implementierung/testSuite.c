@@ -151,28 +151,39 @@ bool individualTests(bool print_debug) {
         {-2.0 + 2.0f * I, 800, -600, 0.005f, 256, true, "topDown Bunt"},
         {-2.0 - 2.0f * I, 800, +600, 0.005f, 256, false, "bottomUp Grau"},
         {-2.0 - 2.0f * I, 800, +600, 0.005f, 256, true, "bottomUp Bunt"},
+        {0.0 - 0.0f * I, 800, +800, 0.005f, 256, true, "von Mitte nach rechts oben"},
+        {0.0 - 0.0f * I, 800, -800, 0.005f, 256, true, "von Mitte nach rechts unten"},
+        {-2.0 - 0.0f * I, 800, 800, 0.005f, 256, true, "oberhalb der X-Achse"},
+        {-2.0 - 0.0f * I, 800, -800, 0.005f, 256, true, "unterhalb der X-Achse"},
 
-        {-0.5 + 2.0f * I, 200, -200, 0.01f, 50, false, "randomGrayscale"},
-        {-2.0 + 1.5f * I, 800, 600, 0.005f, 100, false, "OutOfScope"},
+        // Komplett weiß (alles sofort divergent)
+        {2.0 + 2.0f * I, 400, 400, 0.005f, 256, true, "Bild außerhalb des Fraktals"},
 
-        {-2.0 + 1.5f * I, 1, 1, 0.005f, 100, false, "1x1 bottomUp"},
-        {-2.0 + 2.0f * I, 1, -1, 0.01f, 10, false, "1x1 topDown"},
-        {-2.0 - 2.0f * I, 2, 2, 0.01f, 10, false, "2x2 bottomUp"},
-        {-2.0 - 2.0f * I, 2, -2, 0.01f, 10, false, "2x2 topDown"},
-        {-2.0 + 2.0f * I, 3, 3, 0.01f, 10, false, "3x3 bottomUp"},
-        {-2.0 + 2.0f * I, 3, -3, 0.01f, 10, false, "3x3 topDown"},
+        // Sehr kleine Bilder
+        {-2.0 + 1.5f * I, 20, -20, 0.005f, 100, false, "20x20 topDown"},
+        {-2.0 + 2.0f * I, 5, -5, 0.1f, 10, false, "5x5 topDown"},
+        {-2.0 - 2.0f * I, 10, 10, 0.00001f, 10, false, "10x10 bottomUp"},
+        {-2.0 - 2.0f * I, 1, 1, 0.05f, 10, false, "1x1 bottomUp"},
+        {-2.0 + 2.0f * I, 7, 7, 0.001f, 10, false, "7x7 topDown"},
+        {-2.0 + 2.0f * I, 13, -13, 0.01f, 10, false, "3x3 topDown"},
 
+        // Eine Dimension sehr klein
         {-2.0 + 2.0f * I, 3, -300, 0.01f, 10, false, "3x300 topDown"},
-        {-2.0 + 2.0f * I, 3, 300, 0.01f, 10, false, "3x300 bottomUp"},
+        {-2.0 - 2.0f * I, 3, 300, 0.01f, 10, false, "3x300 bottomUp"},
+        {-2.0 + 2.0f * I, 300, -3, 0.01f, 10, false, "300x3 topDown"},
+        {-2.0 - 2.0f * I, 300, 3, 0.01f, 10, false, "3x300 topDown"},
 
-        {-0.5 + 0.5 * I, 300, -200, 0.001f, 1500, false, "high iterations außerhalb Fraktal"},
-        {0.0 +0.0 * I, 800, 800, 0.0001f, 1500 ,false, "high iterations im Fraktal Grau"},
-        {0.0 +0.0 * I, 800, 800, 0.0001f, 1500 ,true, "high iterations im Fraktal Bunt"},
-        {0.0 +0.0 * I, 800, 800, 0.001f, 1500 ,false, "high iterations Kante Grau"},
-        {0.0 +0.0 * I, 800, 800, 0.001f, 1500 ,true, "high iterations Kante Bunt"},
+         // Iterations Sonderfälle
+        {-2.0 + 2.0f * I, 800, -800, 0.005f, 0, true, "0 Iterations"},
+        {-2.0 + 2.0f * I, 800, -800, 0.005f, 1, true, "1 Iterations"},
+        {-2.0 + 2.0f * I, 800, -800, 0.005f, 2, true, "2 Iterations"},
+        {-2.0 + 2.0f * I, 800, -800, 0.005f, 3, true, "3 Iterations"},
+        {-0.5 + 0.5 * I, 300, -200, 0.001f, 1500, false, "1500 Iterations"},
 
+
+        // Stark rein und rausgezoomed
         {-2.0 -2.0 * I, 300, 200, 0.000001f, 10, false, "zoomed in"},
-        {-2.0 -2.0 * I, 300, 200, 1.0f, 10, false, "zoomed out"},
+        {-2.0 -2.0 * I, 300, 200, 10.0f, 10, false, "zoomed out"},
 
            // Simd macht immer 4er Blöcke, wir testen ob der Rest auch korrekt behandelt wird
         {-2.0 -2.0 * I, 401, 200, 0.005f, 10, false, "Breite mod 4 = 1"},
