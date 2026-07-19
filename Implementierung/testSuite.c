@@ -210,17 +210,24 @@ bool individualTests(bool print_debug) {
     return all_passed;
 }
 
-bool randomizedTest(size_t width, ssize_t height_signed, int trials){
+bool randomizedTest(int trials, bool debug){
     // Führt viele randomisierte tests aus, variiert startwerte und resolution
-    printf("Starte bruteforce Tests\n\n");
+    printf("Starte randomisierte Tests\n\n");
     bool all_passed = true;
     int passed = 0;
-
     float max = 2.0f;
     float min = -2.0f;
-    unsigned n = 256;
+
     bool color = false;
     for (int iterations = 0; iterations < trials; iterations++) {
+        if (debug && iterations % 100 == 0) {
+            printf("%d/%d\n", iterations, trials);
+        }
+
+        size_t width = 1 + rand() % 2000;
+        size_t height = rand() % 2000;
+        ssize_t height_signed = (rand() & 1) ? -height : height;
+        unsigned n = 1 + rand() % 512;
         float start_real = min + (max - min) * ((float) rand()/ (float) RAND_MAX);
         float start_imag = min + (max - min) * ((float) rand()/ (float) RAND_MAX);
         float complex start = start_real + start_imag * I;
@@ -233,11 +240,11 @@ bool randomizedTest(size_t width, ssize_t height_signed, int trials){
             all_passed = false;
         }
     }
-    printf("Bruteforce Tests sind fertig. Erfolg bei %d/%d\n", passed, trials);
+    printf("Randomisierte Tests sind fertig. Erfolg bei %d/%d\n", passed, trials);
     return all_passed;
 }
 
-bool symmetryTest(size_t width, ssize_t height_signed, int trials) {
+bool symmetryTest(size_t width, ssize_t height_signed, int trials, bool debug) {
     /* Führt viele randomisierte Tests aus, die gezielt das center auf einem geraden y setzen, da dann symmetrie
      * funktionieren muss. Dann wählen wir zufällig sehr kleine resolutions, da dabei unter Symmetrie immer
      * Probleme aufgetreten sind*/
@@ -254,6 +261,10 @@ bool symmetryTest(size_t width, ssize_t height_signed, int trials) {
 
     srand(3141592653);
     for (int i = 0; i < trials;  i++){
+        if (debug && i % 100 == 0) {
+            printf("%d/%d\n", i, trials);
+        }
+
         int center = height / 2 + rand() % 10;
 
         // Kleine zufällige Auflösung wählen. Somit entstehen Rundungsfehler,
@@ -276,15 +287,15 @@ bool symmetryTest(size_t width, ssize_t height_signed, int trials) {
             all_passed = false;
         }
     }
-    printf("Symmetrie Tests sind fertig. Erfolg bei %d/%d\n", passed, trials);
+    printf("Symmetrie Tests sind fertig. Erfolg bei %d/%d\n\n", passed, trials);
     return all_passed;
 }
 
 bool testSuite() {
     printf("Starte Tests:\n");
     individualTests(true);
-    randomizedTest(200, 200, 100);
-    symmetryTest(200, 200, 100);
+    randomizedTest(2000, true);
+    symmetryTest(200, 200, 100, true);
     printf("Tests beendet\n");
     return true;
 }
