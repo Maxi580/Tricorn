@@ -45,7 +45,7 @@ obwohl die CPU in dieser Zeit rechnen könnte. Deshalb berechnen wir zwei 4er-La
 So können wir bspw. zwei add-Operationen hintereinander ausführen, ohne dass die zweite von dem Ergebnis der ersten
 abhängig ist und warten muss. Es werden nur zwei 4er-Lanes genutzt, weil es begrenzte xmm-Register gibt.
 
-### MutliThreading (Hauptimplementierung)
+### MultiThreading (Hauptimplementierung)
 
 Wir multithreaden entlang der y-Achse mit so vielen Threads, wie das System logische Prozessoren bereitstellt. 
 Nur bei sehr kleinen Bildern nutzen wir einen einzigen Thread, da sich der Thread-Overhead sonst nicht lohnt. 
@@ -62,9 +62,8 @@ Weiter wird die tricorn Funktion so oft aufgerufen, bis die summierte Ausführun
 Leider zählt hierbei auch das Ausführen der For-Schleife in die Messung, das nach der Vorlesung allerdings passt. 
 Außerdem wird die beste Messung aus dreimal Wiederholungen verwendet, um eventuelle Störungen, die wir nicht mitmessen wollen, zu vermeiden.
 
-Um die die Performanz der verschiedenen Versionen besser vergleichen zu können, plotten wir die Performanz dieser, bei
+Um die Performanz der verschiedenen Versionen besser vergleichen zu können, plotten wir die Performanz dieser, bei
 steigender Größe eines quadratischen Bildes (mit ebenfalls steigender Auflösung).
-  
 
 ## Testumgebung (Korrektheit)
 
@@ -96,9 +95,5 @@ spezielle Konfiguration wie Startwert und Auflösung dort nicht zugänglich gema
 ## Arbeitsaufteilung
 
 - Maximilian: Optimierungen, Testumgebung, Grapherstellung
-- Timon: Testumgebung, 
+- Timon: Testumgebung, Help Funktion, Benchmarking
 - Hendrik: Bitmap, Makefile, Kommentare, Verarbeitung der Kommandozeilenargumente 
-
-
-
-
