@@ -2,89 +2,91 @@
 
 ## Einleitung
 
-Im Projekt soll eine Bitmap mit einem Trikorn-Fraktal erstellt werden. Die EscapeTime Funktion berechnet die Anzahl
-der Iterationen, nachdem eine Koordinate divergiert. Mit `tricorn` berechnen wir das ganze Bild, welches dann an `writeBmp`
-gegeben, welches die finale Bitmap schreibt.
+Im Projekt soll eine Bitmap mit einem Trikorn-Fraktal erstellt werden. Die `escapeTime` Funktion berechnet die Anzahl
+der Iterationen, nachdem eine Koordinate divergiert und mit `tricorn` das ganze Bild, welches an `writeBmp`
+weitergegeben wird und die Bitmap schreibt.
 
 ## Optimierungen 
 
-Mittels profiling wurde die `escapeTime` Funktion als Flaschenhals festgestellt, weswegen die Optimierungen
+Mittels profiling wurde `escapeTime` als Flaschenhals festgestellt, weswegen die Optimierungen
 hauptsächlich diese Funktion verbessern.
 
 ### Naive (`tricorn_V1`)
 
 Die erste Implementierung, mit Fokus auf Korrektheit.
 
-![laufzeit-mit-naive.PNG](Benchmarking/laufzeit-mit-naive.PNG)
+![laufzeit-optimierungen.png](Benchmarking/laufzeit-optimierungen.png)
 
 ### SIMD (`tricorn_V2`)
 
-Die Escape-Time-Funktion führt für jeden Punkt die exakt gleichen Berechnungen aus, deswegen nutzen wir SIMD und berechnen vier Punkte gleichzeitig. 
-Ein Nachteil ist, dass wenn z.B. bereits 3 Punkte divergiert sind und bloß der letzte nicht, trotzdem so lange weiter gerechnet werden muss
-bis entweder der letzte Punkt auch divergiert oder die maximale Anzahl an Iterationen erreicht ist.
+Da für jeden Punkt dieselben Berechnungen stattfinden, nutzen wir SIMD um vier Punkte parallel in einem Vektorregister zu verarbeiten. 
+Ein Nachteil ist, dass die Berechnung erst abbricht, wenn alle vier Punkte divergiert sind oder die maxime Anzahl an Iterationen erreichen.
+Dennoch zeigt der Speedup von 3,9x, dass die Berechnung nahezu mit der Breite des Vektorregisters (4 floats) skaliert.
 
 ### Symmetry (Verworfener Ansatz)
 
-Trikorn-Fraktale sind an der X-Achse symmetrisch, weswegen man nur die Hälfte des Bilds berechnen muss.
-Um dies auszunutzen, berechnen wir das Zentrum des Bildes, also die y-Koordinate an dem der Imaginärteil 0 ist.
-So können wir für jede zu zeichnende Zeile, die potenzielle Partner-Zeile finden (y_gespiegelt = 2 * center - y) 
-und berechnen, ob der Imaginärteil der beiden Kandidaten exakt das Inverse ist. Da die Imaginärteile Floats sind und ein Vergleich deswegen
-nie zu 100% korrekt ist, wurde diese Optimierung in der finalen Version weggelassen. 
+Trikorn-Fraktale sind an der x-Achse symmetrisch, weswegen man nur die Hälfte des Bilds berechnen muss. 
+Hierfür berechnen wir das Zentrum des Bildes, also die y-Koordinate an dem der Imaginärteil 0 ist um für jede zu 
+zeichnende Zeile, die potenzielle Partner-Zeile finden (`y_gespiegelt = 2 * center - y`) und berechnen, ob der Imaginärteil 
+exakt das Inverse ist. Da die Imaginärteile Floats sind, ist ein Vergleich nie exakt korrekt, sodass
+diese Optimierung in der finalen Version weggelassen wurde.
 
 ### Circle (`tricorn_V3`)
 
-Man kann in das Trikorn_Fraktal einen Kreis mit Radius 0,25 zeichnen, in dem garantiert kein Punkt konvergiert.
-(Skript zur Findung des Radius ist unter Circle/findCircleRad.c zu finden)
+In das Trikorn-Fraktal kann man einen Kreis mit Radius 0,25 zeichnen, in dem garantiert kein Punkt konvergiert 
+(Skript: `Circle/findCircleRad.c`). Da Punkte innerhalb dieses Kreises die maximalen Iterationen durchlaufen würden, 
+kann durch das direkte Berechnen der Iterationen ein Speedup von ca. 1,18x zur SIMD erreicht werden.
 
 ### Latency Throughput (`tricorn_V4`)
 
-Laut den Intel-Intrinsics ist die Latency von z.B. _mm_add_ps achtmal so hoch wie der Throughput. 
-In Escape Time haben wir eine Dependency Chain, da fast jede Instruktion das Ergebnis der vorherigen benötigt. 
-Das ist ineffizient, weil dann immer darauf gewartet werden muss, bis das Ergebnis im Register zur Verfügung steht, 
-obwohl die CPU in dieser Zeit rechnen könnte. Deshalb berechnen wir zwei 4er-Lanes gleichzeitig, also insgesamt 8 Punkte.
-So können wir bspw. zwei add-Operationen hintereinander ausführen, ohne dass die zweite von dem Ergebnis der ersten
-abhängig ist und warten muss. Es werden nur zwei 4er-Lanes genutzt, weil es begrenzte xmm-Register gibt.
+Laut den Intel-Intrinsics ist die Latencz von z.B. _mm_add_ps achtmal so hoch wie der Throughput. 
+In `escapeTime` haben wir eine Dependency Chain, da fast jede Instruktion das Ergebnis der vorherigen benötigt, 
+wodurch die CPU auf Register warten muss, obwohl sie schon weiterrechnen könnte. Deshalb berechnen wir zwei 4er-Lanes 
+gleichzeitig, also insgesamt 8 Punkte. So können wir beispielsweise zwei add-Operationen hintereinander ausführen, 
+ohne dass die zweite von dem Ergebnis der ersten abhängig ist und warten muss. Dadurch wurde ein Speedup von ca. 1,4x 
+erreicht. Wir nutzen nur zwei 4er-Lanes, da die Anzahl der xmm-Register begrenzt ist.
 
 ### MultiThreading (Hauptimplementierung)
+![thread-overhead.png](Benchmarking/thread-overhead.png)
 
-Wir multithreaden entlang der y-Achse mit so vielen Threads, wie das System logische Prozessoren bereitstellt. 
-Nur bei sehr kleinen Bildern nutzen wir einen einzigen Thread, da sich der Thread-Overhead sonst nicht lohnt. 
-Weil die meiste Rechenlast in der Bildmitte liegt, teilen wir die Threads gleichmäßig über das gesamte Bild auf.
+Wir multithreaden entlang der y-Achse mit so vielen Threads, wie das System logische Prozessoren bereitstellt.
+Das Multithreading lohnt sich, wie auf der Grafik oben zuerkennen ist, erst ab ca. 57600 Pixel, da sonst der 
+Thread-Overhead zu groß ist. Da die meiste Rechenlast in der Bildmitte liegt, werden die Threads gleichmäßig über das 
+gesamte Bild aufgeteilt, sodass es gegenüber `LatencyThroughput` einen Speedup von 14x gibt. 
 
+Insgesamt läuft die Hauptimplementierung ca. 100x schneller als die naiven Implementation:
 ![laufzeit_pro_pixel.png](Benchmarking/laufzeit_pro_pixel.png)
 
 ## Benchmarking-Methodik (Zeitmessung)
 
-Es wurde die Funktion "performanceTest" implementiert, die für jede übergebene Implementierung und jeden 
-Testcase genau gleich, die Zeit zur Berechnung des Images misst. Da die reine Berechnungszeit gemessen werden soll, wird
-jegliche I/O sowie bspw. das Schreiben der Bitmap ignoriert. Es werden auch keine irrelevanten Setup Funktionen wie malloc() gemessen. 
-Weiter wird die tricorn Funktion so oft aufgerufen, bis die summierte Ausführungszeit mindestens eine Sekunde überschreitet. 
+Die `performanceTest` Funktion misst für jede übergebene Implementierung die Zeit zur Berechnung des Images der Testcase gleich.
+Da die reine Berechnungszeit gemessen werden soll werden jegliche I/O, wie das Schreiben der Bitmap ignoriert.
+Es werden auch keine irrelevanten Setup Funktionen wie malloc() gemessen. Weiter wird die tricorn Funktion so oft 
+aufgerufen, bis die summierte Ausführungszeit mindestens eine Sekunde überschreitet. 
 Leider zählt hierbei auch das Ausführen der For-Schleife in die Messung, das nach der Vorlesung allerdings passt. 
-Außerdem wird die beste Messung aus dreimal Wiederholungen verwendet, um eventuelle Störungen, die wir nicht mitmessen wollen, zu vermeiden.
+Außerdem wird die beste Messung aus drei Wiederholungen verwendet, um eventuelle Störungen, die wir nicht mitmessen wollen, zu vermeiden.
 
 Um die Performanz der verschiedenen Versionen besser vergleichen zu können, plotten wir die Performanz dieser, bei
 steigender Größe eines quadratischen Bildes (mit ebenfalls steigender Auflösung).
 
 ## Testumgebung
-- AMD Ryzen 9 5900X 12-Core Prozessor, 3.7GHz / 32 GB Arbeitsspeicher
-- Ubuntu 26.04, 64 Bit, Linux-Kernel 7.0.0-14-generic, kompiliert mit GCC 15.2 mit der Option -O2
-- quadratisches Bild mit Seitenlänge 50 bis 10.000 Pixeln (+50 je Durchgang)
-- Resolution = 4/Bildbreite
+- AMD Ryzen 9 5900X (12-Core, 3.7GHz) 32 GB Arbeitsspeicher
+- Ubuntu 26.04 (64 Bit), Linux-Kernel  7.0.0-14-generic, kompiliert mit GCC 15.2 mit Flag: -O2
+- quadratisches Bild mit Seitenlänge 50 bis 10.000 Pixeln (Schritteweite: 50)
+- Resolution = 4/Bildbreite 
 - n=256
 - s=-2,-2
 
 ## Test auf Korrektheit
 
-Zur Überprüfung der Korrektheit wurde eine Funktion (correctnessTest) implementiert, 
+Zur Überprüfung der Korrektheit wurde die Funktion `correctnessTest` implementiert, 
 die einen Testcase auf allen implementierten Tricorn Versionen ausführt und prüft, 
-ob alle Ergebnisse mit der naiven Implementierung übereinstimmen. Wird ein Fehler entdeckt, 
-können das erste abweichende Byte sowie die Version, die nicht mit der naiven Implementierung identisch ist, 
-ausgegeben werden.
+ob alle Ergebnisse mit der naiven Implementierung übereinstimmen. Wird ein Fehler entdeckt, wird das erste 
+abweichende Byte, sowie die Version die nicht mit der naiven Implementierung identisch ist ausgegeben werden.
 
 Zunächst wurden manuell sinnvolle Testcases erstellt, die die Basisfälle abdecken. 
-Darüber hinaus werden gezielt Grenzfälle getestet wie z.B. bei SIMD. Dort werden bei einer Iteration vier Pixel parallel
-verarbeitet. Hierbei testen wir bspw. ob bei Breiten, die nicht durch 4 teilbar sind, der Rest auch korrekt berechnet
-wird
+Darüber hinaus werden gezielt Grenzfälle getestet wie beispielsweise bei SIMD, wenn die Breite nicht durch 4 teilbar ist,
+um zu testen, ob die restlichen Pixel ebenso korrekt berechnet wurden.
 
 Zusätzlich werden randomisierte Tests ausgeführt, die Startwerte und Auflösung zufällig wählen.
 Um sehr viele dieser Tests durchführen zu können, wird hier die Zeit nicht gemessen.
