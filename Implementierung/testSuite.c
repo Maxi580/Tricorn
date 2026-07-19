@@ -146,10 +146,11 @@ bool individualTests(bool print_debug) {
     bool all_passed = true;
 
     TestCase test_cases[] = {
-        {-2.0 + 1.5f * I, 800, -600, 0.005f, 100, false, "topDown Grau"},
-        {-2.0 + 1.5f * I, 800, -600, 0.005f, 100, true, "topDown Bunt"},
-        {-2.0 - 1.5f * I, 800, +600, 0.005f, 100, false, "bottomUp Grau"},
-        {-2.0 - 2.0f * I, 800, +600, 0.005f, 100, true, "bottomUp Bunt"},
+        // Base Cases
+        {-2.0 + 2.0f * I, 800, -600, 0.005f, 256, false, "topDown Grau"},
+        {-2.0 + 2.0f * I, 800, -600, 0.005f, 256, true, "topDown Bunt"},
+        {-2.0 - 2.0f * I, 800, +600, 0.005f, 256, false, "bottomUp Grau"},
+        {-2.0 - 2.0f * I, 800, +600, 0.005f, 256, true, "bottomUp Bunt"},
 
         {-0.5 + 2.0f * I, 200, -200, 0.01f, 50, false, "randomGrayscale"},
         {-2.0 + 1.5f * I, 800, 600, 0.005f, 100, false, "OutOfScope"},
