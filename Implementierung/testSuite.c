@@ -143,6 +143,7 @@ bool correctnessTest(TestCase tc, bool print_debug) {
 
 bool individualTests(bool print_debug) {
     bool all_passed = true;
+    unsigned iterations = 256;
 
     TestCase test_cases[] = {
         // Base Cases
@@ -214,7 +215,13 @@ bool individualTests(bool print_debug) {
         bool correct = correctnessTest(test_cases[i], print_debug);
 
         if (correct) {
-            printf("BESTANDEN!\n");
+            double time = performanceTest(tricorn, test_cases[i], iterations);
+            double time_V1 = performanceTest(tricorn_V1, test_cases[i], iterations);
+            double time_V2 = performanceTest(tricorn_V2, test_cases[i], iterations);
+            double time_V3 = performanceTest(tricorn_V3, test_cases[i], iterations);
+            double time_V4 = performanceTest(tricorn_V4, test_cases[i], iterations);
+            printf("BESTANDEN: Zeiten (pro Iteration) - "
+                   "V0: %f V1: %f V2: %f V3: %f V4: %f\n\n", time, time_V1, time_V2, time_V3, time_V4);
             passed++;
         } else {
             printf("UNGÜLTIG: Image stimmt nicht mit Naiven Implementation überein\n\n");
