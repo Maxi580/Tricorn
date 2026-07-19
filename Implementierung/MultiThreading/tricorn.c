@@ -149,7 +149,7 @@ void tricorn(float complex start, size_t width, ssize_t height, float res, unsig
     // Multithreading wird nur bei ausreichend großen Bildern verwendet.
     // Der Grenzwert von 200.000 wurde experimentall bestimmt.
     // Ab dieser Größe überwiegt der Geschwindigkeitsgewinn den Thread-Overhead.
-    if(width * max_y > 200000){
+    if(width * max_y > 57600){
 
         // Ermittelt die Anzahl der verfügbaren Prozessorkerne
         int thread_amount = getCoreAmount();
