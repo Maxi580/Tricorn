@@ -5,7 +5,6 @@ Testumgebung:
 - Resolution = 4/Bildbreite
 - n=256
 - s=-2,-2
-(Ausführbar mit -graph Flag)
 
        width         iter          res        naive         simd          sym       circle      latency     multithr
           50            0     0.080000     0.000141     0.000050     0.000043     0.000047     0.000042     0.000042
