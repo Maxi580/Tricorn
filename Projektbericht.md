@@ -8,7 +8,7 @@ an `writeBmp` zur Erstellung der Bitmap weitergegeben wird.
 
 ## Optimierungen
 
-Mittels profiling der naiven Implementierung wurde festgestellt, dass 94% der Rechenzeit in `escapeTime` steckt, weswegen die Optimierungen
+Mittels profiling der naiven Implementierung wurde festgestellt, dass 94% der Rechenzeit in `escapeTime` stecken, weswegen die Optimierungen
 hauptsächlich diese Funktion verbessern.
 
 ### Naiv (`tricorn_V1`)
