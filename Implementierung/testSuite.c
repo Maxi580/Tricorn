@@ -244,13 +244,14 @@ bool randomizedTest(int trials, bool debug){
     float min = -2.0f;
 
     bool color = false;
+    srand(time(NULL));
     for (int iterations = 0; iterations < trials; iterations++) {
         if (debug && iterations % 100 == 0) {
             printf("%d/%d\n", iterations, trials);
         }
 
         size_t width = 1 + rand() % 2000;
-        size_t height = rand() % 2000;
+        size_t height = 1 + rand() % 2000;
         ssize_t height_signed = (rand() & 1) ? -height : height;
         unsigned n = 1 + rand() % 512;
         float start_real = min + (max - min) * ((float) rand()/ (float) RAND_MAX);
@@ -283,8 +284,7 @@ bool symmetryTest(size_t width, ssize_t height_signed, int trials, bool debug) {
 
     unsigned n = 100;
     bool color = false;
-
-    srand(3141592653);
+    srand(time(NULL));
     for (int i = 0; i < trials;  i++){
         if (debug && i % 100 == 0) {
             printf("%d/%d\n", i, trials);
