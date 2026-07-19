@@ -177,7 +177,7 @@ void tricorn(float complex start, size_t width, ssize_t height, float res, unsig
     } else {
 
         //Bei kleinen Bildern wird einfach die vorherige Implementation,
-        // also die 'Circle' Implementation (V4) genutzt.
+        // also die 'Latency' Implementation (V4) genutzt.
         tricorn_V4(start, width, height, res, n, color, img);
     }
 }
