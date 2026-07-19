@@ -234,13 +234,13 @@ bool randomizedTest(int trials, bool debug){
     float max = 2.0f;
     float min = -2.0f;
 
-    bool color = false;
     srand(time(NULL));
     for (int iterations = 0; iterations < trials; iterations++) {
         if (debug && iterations % 100 == 0) {
             printf("Randomisiert: %d/%d...\n", iterations, trials);
         }
 
+        bool color = rand() % 2 == 0;
         size_t width = 1 + rand() % 2000;
         size_t height = 1 + rand() % 2000;
         ssize_t height_signed = (rand() & 1) ? -height : height;
@@ -333,12 +333,7 @@ bool testSuite() {
     printf("Startkoordinate: %f %fI\n", crealf(start), cimag(start));
     printf("Startlänge: %zu (wird erhöht)\n", width);
     printf("Iterationen: %d\n", n);
-
-    if (color) {
-        printf("Bild ist farbig\n\n");
-    } else {
-        printf("Bild ist grau\n\n");
-    }
+    printf("Bild ist grau\n\n");
 
     size_t steps = 5;
     TestCase startTestCase = {start, width, width, 0.0f, n, color, "plot"};

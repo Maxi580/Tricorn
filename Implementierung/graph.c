@@ -28,8 +28,9 @@ timeMeasurement* plotTableGeneration(const size_t steps, const size_t step_lengt
         const float res = (tc.res == 0.0) ? (4.0f / (float) length) : tc.res;
 
         results[step].width = length;
-        results[step].iterations = step;
+        results[step].iterations = tc.n;
         results[step].res = res;
+        results[step].step = step;
 
         TestCase tc_step = {tc.start, length, (ssize_t) length, res, tc.n, tc.color, "plot"};
         results[step].naive = performanceTest(tricorn_V1, tc_step, 1);
@@ -49,10 +50,10 @@ void printTable(const timeMeasurement* r, size_t steps) {
     }
     printf("\n");
     printf("%12s %12s %12s %12s %12s %12s %12s %12s\n",
-           "iter", "width", "res", "naive", "simd", "circle", "latency", "multithr");
+           "step", "width", "res", "naive", "simd", "circle", "latency", "multithr");
     for (size_t i = 0; i < steps; i++) {
         printf("%12u %12zu %12f %12f %12f %12f %12f %12f\n",
-               r[i].iterations, r[i].width, r[i].res, r[i].naive, r[i].simd, r[i].circle, r[i].latency,
+               r[i].step, r[i].width, r[i].res, r[i].naive, r[i].simd, r[i].circle, r[i].latency,
                r[i].multithreading);
     }
     printf("\n");

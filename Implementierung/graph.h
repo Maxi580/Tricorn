@@ -16,6 +16,7 @@ typedef struct {
     size_t width;
     unsigned iterations;
     float res;
+    int step;
 } timeMeasurement;
 
 int generateCustomPlottableTable(size_t steps, TestCase startTestCase, size_t step_length);
