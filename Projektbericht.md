@@ -27,8 +27,8 @@ Dennoch zeigt der Speedup von 3,9x, dass die Berechnung nahezu mit der Breite de
 
 Trikorn-Fraktale sind an der x-Achse symmetrisch. Hierfür berechnen wir das Zentrum des Bildes, um y Koordinaten daran 
 spiegeln zu können. Dadurch haben wir die beiden potenziell gleichen Zeilen gefunden und können testen, ob deren Imaginärteile addiert 0 ergeben. Da die Imaginärteile 
-Floats sind, ist ein Vergleich nie exakt korrekt, sodass diese Optimierung in der finalen Version aus 
-Korrektheitsgründen weggelassen wurde.
+Floats sind, ist ein Vergleich nie exakt korrekt, sodass diese Optimierung in der finalen Version aus Korrektheitsgründen 
+weggelassen wurde.
 
 ### Kreis (`tricorn_V3`)
 
@@ -62,8 +62,7 @@ Insgesamt läuft die Hauptimplementierung ca. 100x schneller als die naive Imple
 
 Die `performanceTest` Funktion misst für jede übergebene Implementierung die Zeit zur Berechnung des Images der Testcase gleich.
 Da die reine Berechnungszeit gemessen werden soll werden jegliche I/O, wie das Schreiben der Bitmap ignoriert.
-Es werden auch keine irrelevanten Setup Funktionen wie malloc() gemessen. Weiter wird die tricorn Funktion so oft
-aufgerufen, bis die summierte Ausführungszeit mindestens eine Sekunde überschreitet.
+Weiter wird die tricorn Funktion so oft aufgerufen, bis die summierte Ausführungszeit mindestens eine Sekunde überschreitet.
 Außerdem wird die beste Messung aus drei Wiederholungen verwendet, um eventuelle Störungen, die wir nicht mitmessen wollen, zu vermeiden.
 
 Um die Performanz der verschiedenen Versionen besser vergleichen zu können, plotten wir die Performanz dieser, bei
@@ -92,13 +91,10 @@ Zusätzlich werden randomisierte Tests ausgeführt, die alle Konfigurationen zuf
 dabei mit der aktuellen Uhrzeit initialisiert, sodass bei jeder Testausführung neue Zufallswerte entstehen.
 
 Symmetrie wurde außerdem gesondert getestet. Im Test wird (v.a.) die Auflösung auf einen zufälligen, sehr kleinen Wert gesetzt.
-Dadurch haben die Imaginärteile der jeweiligen y Koordinaten sehr viele Nachkommastellen.
-So hatte beispielsweise eine Koordinate den Imaginärteil 20,293984 und die gespiegelte 20,29838.
-Optimierungen, die solche Werte gespiegelt haben, führten zu Fehlern.
+Dadurch haben die Imaginärteile der jeweiligen y Koordinaten sehr viele Nachkommastellen, was viele Fehler aufdeckte.
 
-Die Korrektheit der Bitmap wurde vor allem dadurch geprüft, ob Standardsoftware in der Lage ist, sie korrekt zu
-interpretieren. Ein direkter Vergleich mit extern erzeugten, garantiert korrekten Bitmaps war nicht möglich, da die
-spezielle Konfiguration wie Startwert und Auflösung dort nicht zugänglich gemacht wurde.
+Die Bitmap wurde geprüft, indem getestet wurde, ob Standardsoftware sie korrekt interpretieren konnte. 
+Ein Vergleich mit extern erzeugten Referenzbildern war wegen fehlender Konfigurationen nicht möglich.
 
 ## Arbeitsaufteilung
 
