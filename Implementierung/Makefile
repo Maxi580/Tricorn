@@ -9,8 +9,6 @@ SOURCES = main.c \
 		  NaiveImplementation/tricorn_V1.c \
 		  Simd/escapetime.c \
 		  Simd/tricorn_V2.c \
-		  LegacySym/tricorn_sym_legacy.c \
-		  LegacySym/escapetime.c \
 		  Circle/tricorn_V3.c \
 		  Circle/escapetime.c \
 		  LatencyThroughput/escapetime.c \
