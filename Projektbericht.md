@@ -40,12 +40,12 @@ dem Radius ist. Dadurch wurde ein Speedup von ca. 1,18x zur SIMD erreicht werden
 
 ### Latency Throughput (`tricorn_V4`)
 
-Laut den Intel-Intrinsics ist die Latencz von z.B. _mm_add_ps achtmal so hoch wie der Throughput.
-In `escapeTime` haben wir eine Dependency Chain, da fast jede Instruktion das Ergebnis der vorherigen benötigt,
-wodurch die CPU auf Register warten muss, obwohl sie schon weiterrechnen könnte. Deshalb berechnen wir zwei 4er-Lanes
-gleichzeitig, also insgesamt 8 Punkte. So können wir beispielsweise zwei add-Operationen hintereinander ausführen,
-ohne dass die zweite von dem Ergebnis der ersten abhängig ist und warten muss. Dadurch wurde ein Speedup von ca. 1,4x
-erreicht. Wir nutzen nur zwei 4er-Lanes, da die Anzahl der xmm-Register begrenzt ist.
+Laut den Intel-Intrinsics ist die Latency von z.B. _mm_add_ps achtmal so hoch wie der Throughput.
+In `escapeTime` benötigt fast jede Instruktion das Ergebnis der vorherigen. Dadurch
+muss die CPU warten bis Ergebnisse in Registern zur Verfügung stehen, obwohl sie eigentlich schon weiterrechnen könnte. 
+Deshalb berechnen wir zwei 4er-Lanes gleichzeitig, also insgesamt 8 Punkte. So können wir beispielsweise zwei add-Operationen (von zwei unterschiedlichen 4er-Lanes) 
+hintereinander ausführen, ohne, dass die zweite von dem Ergebnis der ersten abhängig ist. Dadurch wurden die Instructions
+per Cycle von 1,95 auf 2,94 erhöht und ein Speedup von ca. 1,4x erreicht. Wir nutzen nur zwei 4er-Lanes, da die Anzahl der xmm-Register begrenzt ist.
 
 ### MultiThreading (Hauptimplementierung)
 ![thread-overhead.png](Benchmarking/thread-overhead.png)
