@@ -173,10 +173,18 @@ bool individualTests(bool print_debug) {
         {-2.0 -2.0 * I, 300, 200, 0.000001f, 10, false, "zoomed in"},
         {-2.0 -2.0 * I, 300, 200, 1.0f, 10, false, "zoomed out"},
 
+           // Simd macht immer 4er Blöcke, wir testen ob der Rest auch korrekt behandelt wird
         {-2.0 -2.0 * I, 401, 200, 0.005f, 10, false, "Breite mod 4 = 1"},
         {-2.0 -2.0 * I, 402, 200, 0.005f, 10, false, "Breite mod 4 = 2"},
         {-2.0 -2.0 * I, 403, 200, 0.005f, 10, false, "Breite mod 4 = 3"},
 
+           // Latency Throughput macht 8er Blöcke, gleiche Idee wir vorhin, den Rest überprüfen.
+        {-2.0 -2.0 * I, 404, 200, 0.005f, 10, false, "Breite mod 8 = 4"},
+        {-2.0 -2.0 * I, 405, 200, 0.005f, 10, false, "Breite mod 8 = 5"},
+        {-2.0 -2.0 * I, 406, 200, 0.005f, 10, false, "Breite mod 8 = 6"},
+        {-2.0 -2.0 * I, 407, 200, 0.005f, 10, false, "Breite mod 8 = 7"},
+
+           // Bei Multithreading, gibt es eine grenze ab der Threading eingesetzt wird (Thread Overhead)
         {-2.0 + -2.0f * I, 239, 239, 0.005f, 100, false, "Multithreading Size < 57.600"},
         {-2.0 + -2.0f * I, 240, 240, 0.005f, 100, false, "Multithreading Size > 57.600"},
     };
