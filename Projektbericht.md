@@ -11,7 +11,7 @@ an `writeBmp` zur Erstellung der Bitmap weitergegeben wird.
 Mittels profiling wurde `escapeTime` als Flaschenhals festgestellt, weswegen die Optimierungen
 hauptsächlich diese Funktion verbessern.
 
-### Naive (`tricorn_V1`)
+### Naiv (`tricorn_V1`)
 
 Die erste Implementierung, mit Fokus auf Korrektheit.
 
@@ -23,15 +23,14 @@ Da für jeden Punkt dieselben Berechnungen stattfinden, nutzen wir SIMD um vier 
 Ein Nachteil ist, dass die Berechnung erst abbricht, wenn alle vier Punkte divergiert sind oder die maximale Anzahl an Iterationen erreichen.
 Dennoch zeigt der Speedup von 3,9x, dass die Berechnung nahezu mit der Breite des Vektorregisters (4 floats) skaliert.
 
-### Symmetry (Verworfener Ansatz)
+### Symmetrie (Verworfener Ansatz)
 
-Trikorn-Fraktale sind an der x-Achse symmetrisch, weswegen man nur die Hälfte des Bilds berechnen muss.
-Hierfür berechnen wir das Zentrum des Bildes, also die y-Koordinate an dem der Imaginärteil 0 ist um für jede zu
-zeichnende Zeile, die potenzielle Partner-Zeile zu finden (`y_gespiegelt = 2 * center - y`) und zu berechnen, ob der Imaginärteil
-exakt das Inverse ist. Da die Imaginärteile Floats sind, ist ein Vergleich nie exakt korrekt, sodass
-diese Optimierung in der finalen Version aus Korrektheitsgründen weggelassen wurde.
+Trikorn-Fraktale sind an der x-Achse symmetrisch. Hierfür berechnen wir das Zentrum des Bildes, um y Koordinaten daran 
+spiegeln zu können. Dadurch haben wir die beiden potenziell gleichen Zeilen gefunden und können testen, ob deren Imaginärteile addiert 0 ergeben. Da die Imaginärteile 
+Floats sind, ist ein Vergleich nie exakt korrekt, sodass diese Optimierung in der finalen Version aus 
+Korrektheitsgründen weggelassen wurde.
 
-### Circle (`tricorn_V3`)
+### Kreis (`tricorn_V3`)
 
 In das Trikorn-Fraktal kann man einen Kreis mit Radius 0,25 zeichnen, in dem garantiert kein Punkt divergiert
 (Skript: `Circle/findCircleRad.c`). Da die Punkte innerhalb dieses Kreises die maximalen Iterationen durchlaufen würden, 
@@ -47,11 +46,11 @@ Deshalb berechnen wir zwei 4er-Lanes gleichzeitig, also insgesamt 8 Punkte. So k
 hintereinander ausführen, ohne, dass die zweite von dem Ergebnis der ersten abhängig ist. Dadurch wurden die Instructions
 per Cycle von 1,95 auf 2,94 erhöht und ein Speedup von ca. 1,4x erreicht. Wir nutzen nur zwei 4er-Lanes, da die Anzahl der xmm-Register begrenzt ist.
 
-### MultiThreading (Hauptimplementierung)
+### Multi-Threading (Hauptimplementierung)
 ![thread-overhead.png](Benchmarking/thread-overhead.png)
 
 Wir multithreaden entlang der y-Achse mit so vielen Threads, wie das System logische Prozessoren bereitstellt.
-Das Multithreading lohnt sich, wie auf der Grafik oben zuerkennen ist, erst ab ca. 57600 Pixel, da sonst der
+Das Multithreading lohnt sich, wie auf der Grafik oben zu erkennen ist, erst ab ca. 57600 Pixel, da sonst der
 Thread-Overhead zu groß ist. Da die meiste Rechenlast in der Bildmitte liegt, werden die Threads gleichmäßig über das
 gesamte Bild aufgeteilt, sodass es gegenüber `LatencyThroughput` einen Speedup von 14x gibt. Interessant ist, dass die
 Testumgebung 24 logische Kerne hat, die Differenz ergibt sich vermutlich durch eine nicht perfekte Lastverteilung.
