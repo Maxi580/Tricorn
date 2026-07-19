@@ -174,8 +174,8 @@ bool individualTests(bool print_debug) {
         {-2.0 -2.0 * I, 402, 200, 0.005f, 10, false, "Breite mod 4 = 2"},
         {-2.0 -2.0 * I, 403, 200, 0.005f, 10, false, "Breite mod 4 = 3"},
 
-        {-2.0 + -2.0f * I, 447, 447, 0.005f, 100, false, "mt width * height < 200k"},
-        {-2.0 + -2.0f * I, 448, 448, 0.005f, 100, false, "mt width * height > 200k"},
+        {-2.0 + -2.0f * I, 239, 239, 0.005f, 100, false, "Multithreading Size < 57.600"},
+        {-2.0 + -2.0f * I, 240, 240, 0.005f, 100, false, "Multithreading Size > 57.600"},
     };
 
     size_t test_case_count = sizeof(test_cases) / sizeof(test_cases[0]);
