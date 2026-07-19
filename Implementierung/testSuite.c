@@ -141,7 +141,7 @@ bool correctnessTest(TestCase tc, bool print_debug) {
     return all_passed;
 }
 
-bool individualTests(bool print_debug) {
+bool individualTests(bool print_debug, bool measure_time) {
     unsigned iterations = 100;
     bool all_passed = true;
 
@@ -180,7 +180,6 @@ bool individualTests(bool print_debug) {
         {-2.0 + 2.0f * I, 800, -800, 0.005f, 3, true, "3 Iterations"},
         {-0.5 + 0.5 * I, 300, -200, 0.001f, 1500, false, "1500 Iterations"},
 
-
         // Stark rein und rausgezoomed
         {-2.0 -2.0 * I, 300, 200, 0.000001f, 10, false, "zoomed in"},
         {-2.0 -2.0 * I, 300, 200, 10.0f, 10, false, "zoomed out"},
@@ -216,13 +215,16 @@ bool individualTests(bool print_debug) {
         bool correct = correctnessTest(test_cases[i], print_debug);
 
         if (correct) {
-            double time = performanceTest(tricorn, test_cases[i], iterations);
-            double time_V1 = performanceTest(tricorn_V1, test_cases[i], iterations);
-            double time_V2 = performanceTest(tricorn_V2, test_cases[i], iterations);
-            double time_V3 = performanceTest(tricorn_V3, test_cases[i], iterations);
-            double time_V4 = performanceTest(tricorn_V4, test_cases[i], iterations);
-            printf("BESTANDEN: Zeiten (pro Iteration) - "
-                   "V0: %f V1: %f V2: %f V3: %f V4: %f\n\n", time, time_V1, time_V2, time_V3, time_V4);
+            printf("BESTANDEN!\n");
+            if (measure_time) {
+                double time = performanceTest(tricorn, test_cases[i], iterations);
+                double time_V1 = performanceTest(tricorn_V1, test_cases[i], iterations);
+                double time_V2 = performanceTest(tricorn_V2, test_cases[i], iterations);
+                double time_V3 = performanceTest(tricorn_V3, test_cases[i], iterations);
+                double time_V4 = performanceTest(tricorn_V4, test_cases[i], iterations);
+                printf("Zeiten (pro Iteration) - "
+                       "V0: %f V1: %f V2: %f V3: %f V4: %f\n\n", time, time_V1, time_V2, time_V3, time_V4);
+            }
             passed++;
         } else {
             printf("UNGÜLTIG: Image stimmt nicht mit Naiven Implementation überein\n\n");
@@ -316,9 +318,11 @@ bool symmetryTest(size_t width, ssize_t height_signed, int trials, bool debug) {
 
 bool testSuite() {
     printf("Starte Tests:\n");
-    individualTests(true);
-    randomizedTest(2000, true);
-    symmetryTest(200, 200, 100, true);
+    bool measure_time = false;
+    bool print_debug = true;
+    individualTests(print_debug, measure_time);
+    randomizedTest(2000, print_debug);
+    symmetryTest(200, 200, 250, print_debug);
     printf("Tests beendet\n");
     return true;
 }
