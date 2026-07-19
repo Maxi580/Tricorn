@@ -61,7 +61,7 @@ Insgesamt läuft die Hauptimplementierung ca. 100x schneller als die naive Imple
 ## Benchmarking-Methodik (Zeitmessung)
 
 Die `performanceTest` Funktion misst für jede übergebene Implementierung die Zeit zur Berechnung des Images der Testcase gleich.
-Da die reine Berechnungszeit gemessen werden soll werden jegliche I/O, wie das Schreiben der Bitmap ignoriert.
+Da die Berechnungszeit gemessen werden soll wird I/O, wie das Schreiben der Bitmap ignoriert.
 Weiter wird die tricorn Funktion so oft aufgerufen, bis die summierte Ausführungszeit mindestens eine Sekunde überschreitet.
 Außerdem wird die beste Messung aus drei Wiederholungen verwendet, um eventuelle Störungen, die wir nicht mitmessen wollen, zu vermeiden.
 
