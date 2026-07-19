@@ -131,9 +131,9 @@ int main(int argc, char *argv[]) {
             // Liest die gewünschte Implementierungsnummer ein.
             tempV = strtol(argv[i+1], &end, 10);
 
-            // Die Eingabe muss eine ganze Zahl zwischen 0 und 5 sein.
+            // Die Eingabe muss eine ganze Zahl zwischen 0 und 4 sein.
             if (*end != '\0'||argv[i+1]==end||errno!=0||tempV<0||tempV>5) {
-                fprintf(stderr, "Error: nach -V muss eine Zahl zwischen 0 und 5 sein\n");
+                fprintf(stderr, "Error: nach -V muss eine Zahl zwischen 0 und 4 sein\n");
                 return EXIT_FAILURE;
             }
 
@@ -399,35 +399,30 @@ int main(int argc, char *argv[]) {
     // Führt die ausgewählte Implementierung aus.
     // Im Benchmark-Modus wird die Berechnung mehrfach wiederholt.
     if (v == 1) {
-
         // Naive Implementierung
         for (ssize_t i=0; i < benchmark_iterations; i++) { // Ohne Benchmarking nur eine Iteration.
             tricorn_V1(start, width, height_signed, res, n, color, img);
         }
 
     } else if (v == 2) {
-
         // SIMD-optimierte Implementierung.
         for (ssize_t i=0; i < benchmark_iterations; i++) {
             tricorn_V2(start, width, height_signed, res, n, color, img);
         }
 
     } else if (v == 3) {
-
         // Implementierung mit zusätzlicher Kreisprüfung.
         for (ssize_t i=0; i < benchmark_iterations; i++) {
             tricorn_V3(start, width, height_signed, res, n, color, img);
         }
 
     } else if (v == 4) {
-
         // Implementierung mit LatencyThroughput.
         for (ssize_t i=0; i < benchmark_iterations; i++) {
             tricorn_V4(start, width, height_signed, res, n, color, img);
         }
 
     } else if (v == 0) {
-
         // Standardimplementierung.
         // Verwendet abhängig von der Bildgröße automatisch die Multi-Threading-Variante.
         for (ssize_t i=0; i < benchmark_iterations; i++) {
@@ -435,7 +430,6 @@ int main(int argc, char *argv[]) {
         }
 
     } else {
-
         // Ungültige Implementierung.
         fprintf(stderr, "Error: V muss in [0;4] sein\n");
         free(img);
