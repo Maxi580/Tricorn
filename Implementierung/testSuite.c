@@ -164,14 +164,14 @@ bool individualTests(bool print_debug) {
         {-2.0 + 2.0f * I, 5, -5, 0.1f, 10, false, "5x5 topDown"},
         {-2.0 - 2.0f * I, 10, 10, 0.00001f, 10, false, "10x10 bottomUp"},
         {-2.0 - 2.0f * I, 1, 1, 0.05f, 10, false, "1x1 bottomUp"},
-        {-2.0 + 2.0f * I, 7, 7, 0.001f, 10, false, "7x7 topDown"},
+        {-2.0 + 2.0f * I, 7, -7, 0.001f, 10, false, "7x7 topDown"},
         {-2.0 + 2.0f * I, 13, -13, 0.01f, 10, false, "3x3 topDown"},
 
         // Eine Dimension sehr klein
         {-2.0 + 2.0f * I, 3, -300, 0.01f, 10, false, "3x300 topDown"},
         {-2.0 - 2.0f * I, 3, 300, 0.01f, 10, false, "3x300 bottomUp"},
         {-2.0 + 2.0f * I, 300, -3, 0.01f, 10, false, "300x3 topDown"},
-        {-2.0 - 2.0f * I, 300, 3, 0.01f, 10, false, "3x300 topDown"},
+        {-2.0 - 2.0f * I, 300, 3, 0.01f, 10, false, "3x300 bottomUp"},
 
          // Iterations Sonderfälle
         {-2.0 + 2.0f * I, 800, -800, 0.005f, 0, true, "0 Iterations"},

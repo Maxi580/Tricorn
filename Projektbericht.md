@@ -94,6 +94,6 @@ spezielle Konfiguration wie Startwert und Auflösung dort nicht zugänglich gema
 
 ## Arbeitsaufteilung
 
-- Maximilian: Optimierungen, Testumgebung, Grapherstellung
-- Timon: Testumgebung, Help Funktion, Benchmarking
+- Maximilian: EscapeTime, Optimierungen, Testumgebung
+- Timon: Testumgebung, Help Funktion, Benchmarking, Grapherstellung
 - Hendrik: Bitmap, Makefile, Kommentare, Verarbeitung der Kommandozeilenargumente 
