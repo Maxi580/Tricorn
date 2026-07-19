@@ -148,22 +148,25 @@ bool individualTests(bool print_debug) {
     TestCase test_cases[] = {
         {-2.0 + 1.5f * I, 800, -600, 0.005f, 100, false, "topDown Grau"},
         {-2.0 + 1.5f * I, 800, -600, 0.005f, 100, true, "topDown Bunt"},
-        {-2.0 - 1.5f * I, 800, +600, 0.005f, 100, false, "BottomUp Grau"},
-        {-2.0 - 2.0f * I, 800, +600, 0.005f, 100, true, "BottomUp Bunt"},
+        {-2.0 - 1.5f * I, 800, +600, 0.005f, 100, false, "bottomUp Grau"},
+        {-2.0 - 2.0f * I, 800, +600, 0.005f, 100, true, "bottomUp Bunt"},
 
         {-0.5 + 2.0f * I, 200, -200, 0.01f, 50, false, "randomGrayscale"},
         {-2.0 + 1.5f * I, 800, 600, 0.005f, 100, false, "OutOfScope"},
 
-        {-2.0 + 1.5f * I, 1, 1, 0.005f, 100, false, "topDown Grau 1x1"},
+        {-2.0 + 1.5f * I, 1, 1, 0.005f, 100, false, "1x1 bottomUp"},
         {-2.0 + 2.0f * I, 1, -1, 0.01f, 10, false, "1x1 topDown"},
-        {-2.0 - 2.0f * I, 2, 2, 0.01f, 10, false, "2x2 BottomUp"},
-
+        {-2.0 - 2.0f * I, 2, 2, 0.01f, 10, false, "2x2 bottomUp"},
+        {-2.0 - 2.0f * I, 2, -2, 0.01f, 10, false, "2x2 topDown"},
+        {-2.0 + 2.0f * I, 3, 3, 0.01f, 10, false, "3x3 bottomUp"},
         {-2.0 + 2.0f * I, 3, -3, 0.01f, 10, false, "3x3 topDown"},
+
         {-2.0 + 2.0f * I, 3, -300, 0.01f, 10, false, "3x300 topDown"},
+        {-2.0 + 2.0f * I, 3, 300, 0.01f, 10, false, "3x300 bottomUp"},
 
         {-0.5 + 0.5 * I, 300, -200, 0.001f, 1500, false, "high iterations außerhalb Fraktal"},
         {0.0 +0.0 * I, 800, 800, 0.0001f, 1500 ,false, "high iterations im Fraktal Grau"},
-        {0.0 +0.0 * I, 800, 800, 0.0001f, 1500 ,true, "high iterations außerhalb Fraktal Bunt"},
+        {0.0 +0.0 * I, 800, 800, 0.0001f, 1500 ,true, "high iterations im Fraktal Bunt"},
         {0.0 +0.0 * I, 800, 800, 0.001f, 1500 ,false, "high iterations Kante Grau"},
         {0.0 +0.0 * I, 800, 800, 0.001f, 1500 ,true, "high iterations Kante Bunt"},
 
