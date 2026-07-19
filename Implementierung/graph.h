@@ -4,11 +4,12 @@
 #include <complex.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include "testSuite.h"
+
 
 typedef struct {
     double naive;
     double simd;
-    double sym;
     double circle;
     double latency;
     double multithreading;
@@ -17,6 +18,7 @@ typedef struct {
     float res;
 } timeMeasurement;
 
+int generateCustomPlottableTable(size_t steps, TestCase startTestCase, size_t step_length);
 int generatePlottableTable();
 
 #endif

@@ -13,6 +13,7 @@
 #include "MultiThreading/tricorn.h"
 #include "utils.h"
 #include "testSuite.h"
+#include "graph.h"
 
 
 double performanceTest(void (*fn)(float complex, size_t, ssize_t, float,  unsigned, bool, unsigned char *),
@@ -143,7 +144,6 @@ bool correctnessTest(TestCase tc, bool print_debug) {
 
 bool individualTests(bool print_debug) {
     bool all_passed = true;
-    unsigned iterations = 256;
 
     TestCase test_cases[] = {
         // Base Cases
@@ -215,13 +215,7 @@ bool individualTests(bool print_debug) {
         bool correct = correctnessTest(test_cases[i], print_debug);
 
         if (correct) {
-            double time = performanceTest(tricorn, test_cases[i], iterations);
-            double time_V1 = performanceTest(tricorn_V1, test_cases[i], iterations);
-            double time_V2 = performanceTest(tricorn_V2, test_cases[i], iterations);
-            double time_V3 = performanceTest(tricorn_V3, test_cases[i], iterations);
-            double time_V4 = performanceTest(tricorn_V4, test_cases[i], iterations);
-            printf("BESTANDEN: Zeiten (pro Iteration) - "
-                   "V0: %f V1: %f V2: %f V3: %f V4: %f\n\n", time, time_V1, time_V2, time_V3, time_V4);
+            printf("BESTANDEN: Zeiten \n\n");
             passed++;
         } else {
             printf("UNGÜLTIG: Image stimmt nicht mit Naiven Implementation überein\n\n");
@@ -234,7 +228,7 @@ bool individualTests(bool print_debug) {
 
 bool randomizedTest(int trials, bool debug){
     // Führt viele randomisierte tests aus, variiert startwerte und resolution
-    printf("Starte randomisierte Tests\n\n");
+    printf("Starte randomisierte Tests\n");
     bool all_passed = true;
     int passed = 0;
     float max = 2.0f;
@@ -244,7 +238,7 @@ bool randomizedTest(int trials, bool debug){
     srand(time(NULL));
     for (int iterations = 0; iterations < trials; iterations++) {
         if (debug && iterations % 100 == 0) {
-            printf("%d/%d\n", iterations, trials);
+            printf("Randomisiert: %d/%d...\n", iterations, trials);
         }
 
         size_t width = 1 + rand() % 2000;
@@ -263,7 +257,7 @@ bool randomizedTest(int trials, bool debug){
             all_passed = false;
         }
     }
-    printf("Randomisierte Tests sind fertig. Erfolg bei %d/%d\n", passed, trials);
+    printf("Randomisierte Tests sind fertig. Erfolg bei %d/%d\n\n", passed, trials);
     return all_passed;
 }
 
@@ -271,7 +265,7 @@ bool symmetryTest(size_t width, ssize_t height_signed, int trials, bool debug) {
     /* Führt viele randomisierte Tests aus, die gezielt das center auf einem geraden y setzen, da dann symmetrie
      * funktionieren muss. Dann wählen wir zufällig sehr kleine resolutions, da dabei unter Symmetrie immer
      * Probleme aufgetreten sind*/
-    printf("Starte Symmetrie Tests\n\n");
+    printf("Starte Symmetrie Tests\n");
     bool all_passed = true;
     int passed = 0;
 
@@ -284,7 +278,7 @@ bool symmetryTest(size_t width, ssize_t height_signed, int trials, bool debug) {
     srand(time(NULL));
     for (int i = 0; i < trials;  i++){
         if (debug && i % 100 == 0) {
-            printf("%d/%d\n", i, trials);
+            printf("Symmetrie: %d/%d...\n", i, trials);
         }
 
         int center = height / 2 + rand() % 10;
@@ -314,12 +308,27 @@ bool symmetryTest(size_t width, ssize_t height_signed, int trials, bool debug) {
 }
 
 bool testSuite() {
-    // testet nur die Korrektheit, da Zeitmessungen ewig dauern würden
-    printf("Starte Tests:\n");
+    // Prüft zuerst die Korrektheit und benchmarked dann die Versionen
+    printf("Starte Korrektheits Tests:\n\n");
     bool print_debug = true;
+    bool print_time_debug = true;
     bool result = individualTests(print_debug) ? true : false;
-    result = randomizedTest(2000, print_debug) ? result : false;
-    result = symmetryTest(200, 200, 250, print_debug) ? result : false;
-    printf("Tests beendet\n");
+    result = randomizedTest(500, print_time_debug) ? result : false;
+    result = symmetryTest(200, 200, 250, print_time_debug) ? result : false;
+    printf("Korrektheits Tests beendet\n");
+
+    printf("\n\n---------------------------------------\n\n");
+
+    printf("Starte Benchmarking:\n\n");
+    /* Wir starten bei dem TestCase tc und inkrementieren dann Stück für Stück die Breite/Höhe, sodas wir die
+     * Performance der Versionen bei größeren Rechenaufwand beobachten können.
+     */
+    size_t steps = 5;
+    TestCase startTestCase = {-2.0f + -2.0f * I, 100, 50, 0.0f, 256, false, "plot"};
+    size_t step_length = 200;
+
+    generateCustomPlottableTable(steps, startTestCase, step_length);
+    printf("Benchmarking beendet:\n\n");
+
     return result;
 }
