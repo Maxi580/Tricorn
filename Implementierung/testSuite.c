@@ -337,12 +337,12 @@ bool testSuite() {
     printf("Iterationen: %d\n", n);
     printf("Bild ist grau\n\n");
 
-    size_t steps = 5;
+    size_t steps = 1;
     TestCase startTestCase = {start, width, width, 0.0f, n, color, "plot"};
     size_t step_length = 200;
 
     generateCustomPlottableTable(steps, startTestCase, step_length);
-    printf("Benchmarking beendet:\n\n");
+    printf("Benchmarking beendet\n\n");
 
     return result;
 }

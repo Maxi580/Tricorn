@@ -45,14 +45,14 @@ timeMeasurement* plotTableGeneration(const size_t steps, const size_t step_lengt
 
 void printTable(const timeMeasurement* r, size_t steps) {
     if (r == NULL) {
-        printf("Passed Pointer was NULL");
+        printf("Passed Pointer was NULL\n");
         return;
     }
     printf("\n");
-    printf("%12s %12s %12s %12s %12s %12s %12s %12s\n",
-           "step", "width", "res", "naive", "simd", "circle", "latency", "multithr");
+    printf("%12s %12s %12s | %13s %13s %13s %13s %13s\n",
+           "step", "width", "res", "naive(s)", "simd(s)", "circle(s)", "latency(s)", "multithr(s)");
     for (size_t i = 0; i < steps; i++) {
-        printf("%12u %12zu %12f %12f %12f %12f %12f %12f\n",
+        printf("%12u %12zu %12f | %13f %13f %13f %13f %13f\n",
                r[i].step, r[i].width, r[i].res, r[i].naive, r[i].simd, r[i].circle, r[i].latency,
                r[i].multithreading);
     }
