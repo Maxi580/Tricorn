@@ -180,7 +180,6 @@ bool individualTests(bool print_debug) {
         {-2.0 + 2.0f * I, 800, -800, 0.005f, 3, true, "3 Iterations"},
         {-0.5 + 0.5 * I, 300, -200, 0.001f, 1500, false, "1500 Iterations"},
 
-
         // Stark rein und rausgezoomed
         {-2.0 -2.0 * I, 300, 200, 0.000001f, 10, false, "zoomed in"},
         {-2.0 -2.0 * I, 300, 200, 10.0f, 10, false, "zoomed out"},
@@ -216,13 +215,7 @@ bool individualTests(bool print_debug) {
         bool correct = correctnessTest(test_cases[i], print_debug);
 
         if (correct) {
-            double time = performanceTest(tricorn, test_cases[i], iterations);
-            double time_V1 = performanceTest(tricorn_V1, test_cases[i], iterations);
-            double time_V2 = performanceTest(tricorn_V2, test_cases[i], iterations);
-            double time_V3 = performanceTest(tricorn_V3, test_cases[i], iterations);
-            double time_V4 = performanceTest(tricorn_V4, test_cases[i], iterations);
-            printf("BESTANDEN: Zeiten (pro Iteration) - "
-                   "V0: %f V1: %f V2: %f V3: %f V4: %f\n\n", time, time_V1, time_V2, time_V3, time_V4);
+            printf("BESTANDEN!\n");
             passed++;
         } else {
             printf("UNGÜLTIG: Image stimmt nicht mit Naiven Implementation überein\n\n");
@@ -242,13 +235,14 @@ bool randomizedTest(int trials, bool debug){
     float min = -2.0f;
 
     bool color = false;
+    srand(time(NULL));
     for (int iterations = 0; iterations < trials; iterations++) {
         if (debug && iterations % 100 == 0) {
             printf("%d/%d\n", iterations, trials);
         }
 
         size_t width = 1 + rand() % 2000;
-        size_t height = rand() % 2000;
+        size_t height = 1 + rand() % 2000;
         ssize_t height_signed = (rand() & 1) ? -height : height;
         unsigned n = 1 + rand() % 512;
         float start_real = min + (max - min) * ((float) rand()/ (float) RAND_MAX);
@@ -281,8 +275,7 @@ bool symmetryTest(size_t width, ssize_t height_signed, int trials, bool debug) {
 
     unsigned n = 100;
     bool color = false;
-
-    srand(3141592653);
+    srand(time(NULL));
     for (int i = 0; i < trials;  i++){
         if (debug && i % 100 == 0) {
             printf("%d/%d\n", i, trials);
@@ -315,10 +308,12 @@ bool symmetryTest(size_t width, ssize_t height_signed, int trials, bool debug) {
 }
 
 bool testSuite() {
+    // testet nur die Korrektheit, da Zeitmessungen ewig dauern würden
     printf("Starte Tests:\n");
-    individualTests(true);
-    randomizedTest(2000, true);
-    symmetryTest(200, 200, 100, true);
+    bool print_debug = true;
+    bool result = individualTests(print_debug) ? true : false;
+    result = randomizedTest(2000, print_debug) ? result : false;
+    result = symmetryTest(200, 200, 250, print_debug) ? result : false;
     printf("Tests beendet\n");
-    return true;
+    return result;
 }
